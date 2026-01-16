@@ -1,6 +1,6 @@
 import { supabase } from "@/api/supabaseClient";
 
-const SESSION_KEY = "hrhub_analytics_session";
+const SESSION_KEY = "hrtera_analytics_session";
 
 const createSessionId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {

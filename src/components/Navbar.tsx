@@ -41,7 +41,7 @@ const Navbar = () => {
                 <div className="w-3 h-6 bg-primary rounded-full rotate-12" />
                 <div className="w-3 h-6 bg-primary rounded-full -rotate-12" />
               </div>
-              <span className="font-heading font-bold text-xl text-foreground">HRHub</span>
+              <span className="font-heading font-bold text-xl text-foreground">HRTera</span>
             </Link>
 
             {/* Desktop Nav - Centered */}

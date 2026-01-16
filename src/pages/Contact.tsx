@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const CONTACT_STORAGE_KEY = "hrhub_contact_messages";
+const CONTACT_STORAGE_KEY = "hrtera_contact_messages";
 
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 

@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Linkedin, Twitter, Instagram, Youtube } from "lucide-react";
 
-const NEWSLETTER_STORAGE_KEY = "hrhub_newsletter_subscribers";
+const NEWSLETTER_STORAGE_KEY = "hrtera_newsletter_subscribers";
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
 const Footer = () => {
@@ -53,7 +53,7 @@ const Footer = () => {
                 <div className="w-3 h-6 bg-primary rounded-full rotate-12" />
                 <div className="w-3 h-6 bg-primary rounded-full -rotate-12" />
               </div>
-              <span className="font-heading font-bold text-xl text-secondary-foreground">HRHub</span>
+              <span className="font-heading font-bold text-xl text-secondary-foreground">HRTera</span>
             </Link>
 
             <h3 className="font-heading font-bold text-lg text-secondary-foreground mb-2">
@@ -83,6 +83,7 @@ const Footer = () => {
               <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.blog")}</Link></li>
               <li><Link to="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.products")}</Link></li>
               <li><a href="/#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.pricing")}</a></li>
+              <li><Link to="/story" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.story")}</Link></li>
               <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.contact")}</Link></li>
             </ul>
           </div>
