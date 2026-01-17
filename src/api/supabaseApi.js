@@ -9,7 +9,7 @@ export const getProducts = async ({ n, page, productFilter = null, vendorFilter 
         category_filter: categoryFilter,
         tier_filter: tierFilter,
     });
-  
+
     if (error) throw error;
     return data ?? [];
 };
@@ -21,28 +21,28 @@ export const getProductCountFiltered = async ({ productFilter = null, vendorFilt
         category_filter: categoryFilter,
         tier_filter: tierFilter,
     });
-  
+
     if (error) throw error;
     return data ?? 0;
 };
 
 export const getProductDetails = async (productId) => {
     const { data, error } = await supabase.rpc("get_product_details", {
-      p_product_id: productId,
+        p_product_id: productId,
     });
-  
+
     if (error) throw error;
-  
+
     return data?.[0] ?? null;
 };
 
 export const getProductCount = async () => {
     const { data, error } = await supabase.rpc("get_product_count");
-  
+
     if (error) throw error;
     return data ?? 0;
 };
-  
+
 export const getVendorCount = async () => {
     const { data, error } = await supabase.rpc("get_vendor_count");
 
@@ -55,7 +55,7 @@ export const getSimilarProducts = async (productId, limit = 4) => {
         p_product_id: productId,
         p_limit: limit,
     });
-    
+
     if (error) throw error;
     return data ?? [];
 };
@@ -66,7 +66,7 @@ export const getVendors = async ({ n, page, searchQuery = null }) => {
         page,
         search_query: searchQuery,
     });
-  
+
     if (error) throw error;
     return data ?? [];
 };
@@ -158,10 +158,10 @@ export const updateMyVendorProfile = async ({
 
 export const getVendorProducts = async (vendorId) => {
     const { data, error } = await supabase.rpc("get_vendor_products", {
-      p_vendor_id: vendorId,
+        p_vendor_id: vendorId,
     });
-  
-    if (error) throw error;  
+
+    if (error) throw error;
     return data ?? [];
 };
 
@@ -212,22 +212,41 @@ export const updateMyVendor = async ({
     linkedinLink = null,
     foundedAt = null,      // "YYYY-MM-DD" string is fine, or a Date converted to that
     companySize = null,
-  }) => {
+}) => {
     const { data, error } = await supabase.rpc("update_my_vendor", {
-      p_company_name: companyName,
-      p_logo: logo,
-      p_website_link: websiteLink,
-      p_headquarters: headquarters,
-      p_company_motto: companyMotto,
-      p_instagram_link: instagramLink,
-      p_linkedin_link: linkedinLink,
-      p_founded_at: foundedAt,
-      p_company_size: companySize,
+        p_company_name: companyName,
+        p_logo: logo,
+        p_website_link: websiteLink,
+        p_headquarters: headquarters,
+        p_company_motto: companyMotto,
+        p_instagram_link: instagramLink,
+        p_linkedin_link: linkedinLink,
+        p_founded_at: foundedAt,
+        p_company_size: companySize,
     });
-  
+
     if (error) throw error;
-  
+
     // The SQL returns a single row (vendors), Supabase often returns it as an object
     // but depending on settings it can come back as [row]. This handles both.
     return Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
+};
+
+export const getAllProductsWithDetails = async () => {
+    // Call the new RPC that returns a flat structure with joined data
+    const { data, error } = await supabase.rpc('get_all_products_with_details');
+
+    if (error) throw error;
+
+    // Map to the structure expected by the frontend
+    // The RPC already returns flat fields, but we need to match the property names
+    // used in Products.tsx (which expects some fields like vendor_subscription mapped from subscription)
+    return (data ?? []).map(p => ({
+        ...p,
+        // RPC returns 'subscription', but frontend might expect 'vendor_subscription' based on previous map
+        vendor_subscription: p.subscription,
+        // Ensure arrays are not null
+        categories: p.categories || [p.main_category],
+        languages: p.languages || [],
+    }));
 };

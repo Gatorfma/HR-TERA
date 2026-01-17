@@ -1,12 +1,19 @@
 import { useState, useMemo, useEffect } from "react";
-import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight, Globe, MapPin, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
-import { getProducts, getProductCountFiltered } from "@/api/supabaseApi";
+import { getAllProductsWithDetails } from "@/api/supabaseApi";
 import type { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PRODUCT_CATEGORIES } from "@/lib/admin-types";
@@ -22,7 +29,31 @@ interface Product {
   description: string;
   vendorTier: Tier;
   isVerified?: boolean;
+  languages?: string[];
+  headquarters?: string;
+  companyName?: string;
 }
+
+const LANGUAGES = [
+  "Turkish",
+  "English",
+  "German",
+  "Spanish",
+  "French",
+  "Italian",
+  "Russian",
+  "Arabic"
+];
+
+const COUNTRIES = [
+  "Turkey",
+  "United States",
+  "United Kingdom",
+  "Germany",
+  "Netherlands",
+  "Remote",
+  "Global"
+];
 
 const Products = () => {
   const { t } = useLanguage();
@@ -44,13 +75,19 @@ const Products = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [allCategories, setAllCategories] = useState<string[]>([]);
 
+  const [allProductsData, setAllProductsData] = useState<Product[]>([]); // Store ALL fetched products
+
   // Get filters from URL
   const categoryFromUrl = searchParams.get("category");
   const tierFromUrl = searchParams.get("tier");
+  const languageFromUrl = searchParams.get("language");
+  const countryFromUrl = searchParams.get("country");
   const pageFromUrl = searchParams.get("page");
 
   const [selectedCategory, setSelectedCategory] = useState("All Solutions");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
+  const [selectedLanguage, setSelectedLanguage] = useState("all");
+  const [selectedCountry, setSelectedCountry] = useState("all");
 
   // Initialize categories from PRODUCT_CATEGORIES
   useEffect(() => {
@@ -98,49 +135,31 @@ const Products = () => {
     }
   }, [categoryFromUrl, tierFromUrl, pageFromUrl, allCategories]);
 
-  // Fetch products with pagination and filters
+  // 1. Fetch ALL data once
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchAllData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Prepare filters for database
-        const productFilter = debouncedSearchQuery.trim() || null;
-        const categoryFilter = selectedCategory !== "All Solutions" ? selectedCategory : null;
-        const tierFilter = selectedTier !== "all" ? selectedTier : null;
+        // Use our new API method that gets everything joined
+        const rawData = await getAllProductsWithDetails();
 
-        // Fetch products with pagination
-        const apiProducts = await getProducts({
-          n: PRODUCTS_PER_PAGE,
-          page: currentPage,
-          productFilter,
-          vendorFilter: null,
-          categoryFilter,
-          tierFilter,
-        });
-
-        // Fetch total count with same filters
-        const count = await getProductCountFiltered({
-          productFilter,
-          vendorFilter: null,
-          categoryFilter,
-          tierFilter,
-        });
-
-        // Map API products to component structure
-        const mappedProducts: Product[] = apiProducts.map((apiProduct: DashboardProduct) => ({
-          id: apiProduct.product_id,
-          image: apiProduct.logo,
-          category: apiProduct.main_category,
-          name: apiProduct.product_name,
-          description: apiProduct.short_desc,
-          vendorTier: (apiProduct.subscription?.toLowerCase() || "freemium") as Tier,
-          isVerified: apiProduct.is_verified,
+        // Map to internal format once
+        const mapped: Product[] = rawData.map((p: any) => ({
+          id: p.product_id,
+          image: p.logo,
+          category: p.main_category,
+          name: p.product_name,
+          description: p.short_desc,
+          vendorTier: (p.vendor_subscription?.toLowerCase() || "freemium") as Tier,
+          isVerified: p.is_verified,
+          languages: p.languages,
+          headquarters: p.headquarters,
+          companyName: p.company_name
         }));
 
-        setProducts(mappedProducts);
-        setTotalCount(count);
+        setAllProductsData(mapped);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load products");
         console.error("Error fetching products:", err);
@@ -148,9 +167,81 @@ const Products = () => {
         setLoading(false);
       }
     };
+    fetchAllData();
+  }, []);
 
-    fetchProducts();
-  }, [currentPage, debouncedSearchQuery, selectedCategory, selectedTier]);
+  // 2. Client-side filtering & pagination
+  useEffect(() => {
+    if (loading && allProductsData.length === 0) return;
+
+    let filtered = [...allProductsData];
+
+    // Search
+    if (debouncedSearchQuery.trim()) {
+      const q = debouncedSearchQuery.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.companyName?.toLowerCase().includes(q)
+      );
+    }
+
+    // Category
+    if (selectedCategory !== "All Solutions") {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
+    // Tier
+    if (selectedTier !== "all") {
+      filtered = filtered.filter(p => p.vendorTier === selectedTier);
+    }
+
+    // Language
+    if (selectedLanguage && selectedLanguage !== "all") {
+      filtered = filtered.filter(p =>
+        p.languages?.some(l => l.toLowerCase() === selectedLanguage.toLowerCase())
+      );
+    }
+
+    // Country
+    if (selectedCountry && selectedCountry !== "all") {
+      const codeMap: Record<string, string> = {
+        "Turkey": "TR",
+        "United States": "US",
+        "United Kingdom": "GB",
+        "Germany": "DE",
+        "Netherlands": "NL",
+        "Global": "Global",
+        "Remote": "Remote"
+      };
+      const targetCode = codeMap[selectedCountry] || selectedCountry;
+
+      filtered = filtered.filter(p => {
+        if (!p.headquarters) return false;
+        // Handle "City, CC" or just "CC"
+        const parts = p.headquarters.split(",");
+        const locationCode = parts[parts.length - 1].trim();
+        return locationCode.toLowerCase() === targetCode.toLowerCase();
+      });
+    }
+
+    setTotalCount(filtered.length);
+
+    // Pagination slice
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const end = start + PRODUCTS_PER_PAGE;
+    setProducts(filtered.slice(start, end));
+
+  }, [
+    allProductsData,
+    loading,
+    currentPage,
+    debouncedSearchQuery,
+    selectedCategory,
+    selectedTier,
+    selectedLanguage,
+    selectedCountry
+  ]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -160,56 +251,65 @@ const Products = () => {
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
 
-  // Handle category selection - update URL and reset to page 1
+  const updateURL = (
+    cat: string,
+    tier: string,
+    lang: string,
+    cntry: string,
+    search: string,
+    page: number
+  ) => {
+    const params: Record<string, string> = {};
+    if (cat !== "All Solutions") params.category = cat.toLowerCase();
+    if (tier !== "all") params.tier = tier;
+    if (lang !== "all") params.language = lang;
+    if (cntry !== "all") params.country = cntry;
+    if (search.trim()) params.search = search.trim();
+    if (page > 1) params.page = page.toString();
+    setSearchParams(params);
+  };
+
+  // Handle category selection
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
-    const params: Record<string, string> = {};
-    if (category !== "All Solutions") {
-      params.category = category.toLowerCase();
-    }
-    if (selectedTier !== "all") {
-      params.tier = selectedTier;
-    }
-    setSearchParams(params);
+    updateURL(category, selectedTier, selectedLanguage, selectedCountry, searchQuery, 1);
   };
 
-  // Handle tier selection - update URL and reset to page 1
+  // Handle tier selection
   const handleTierSelect = (tier: Tier | "all") => {
     setSelectedTier(tier);
     setCurrentPage(1);
-    const params: Record<string, string> = {};
-    if (selectedCategory !== "All Solutions") {
-      params.category = selectedCategory.toLowerCase();
-    }
-    if (tier !== "all") {
-      params.tier = tier;
-    }
-    setSearchParams(params);
+    updateURL(selectedCategory, tier, selectedLanguage, selectedCountry, searchQuery, 1);
   };
 
-  // Handle search - debounced and reset to page 1
+  // Handle language selection
+  const handleLanguageSelect = (lang: string) => {
+    setSelectedLanguage(lang);
+    setCurrentPage(1);
+    updateURL(selectedCategory, selectedTier, lang, selectedCountry, searchQuery, 1);
+  };
+
+  // Handle country selection
+  const handleCountrySelect = (cntry: string) => {
+    setSelectedCountry(cntry);
+    setCurrentPage(1);
+    updateURL(selectedCategory, selectedTier, selectedLanguage, cntry, searchQuery, 1);
+  };
+
+  // Handle search
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
+    // Note: we usually don't update URL on every keystroke, but debounce handles the logic
+    // We update URL when debounce effect triggers or we can just do it here if we want instant URL updates
   };
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      const params: Record<string, string> = {};
-      if (selectedCategory !== "All Solutions") {
-        params.category = selectedCategory.toLowerCase();
-      }
-      if (selectedTier !== "all") {
-        params.tier = selectedTier;
-      }
-      if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
-      }
-      params.page = newPage.toString();
-      setSearchParams(params);
+      updateURL(selectedCategory, selectedTier, selectedLanguage, selectedCountry, searchQuery, newPage);
       window.scrollTo(0, 0);
     }
   };
@@ -217,12 +317,14 @@ const Products = () => {
   const clearFilters = () => {
     setSelectedCategory("All Solutions");
     setSelectedTier("all");
+    setSelectedLanguage("all");
+    setSelectedCountry("all");
     setSearchQuery("");
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  const hasActiveFilters = selectedCategory !== "All Solutions" || selectedTier !== "all" || searchQuery !== "";
+  const hasActiveFilters = selectedCategory !== "All Solutions" || selectedTier !== "all" || searchQuery !== "" || selectedLanguage !== "all" || selectedCountry !== "all";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -247,12 +349,12 @@ const Products = () => {
                         key={tier.value}
                         onClick={() => handleTierSelect(tier.value)}
                         className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${selectedTier === tier.value
-                            ? tier.value === "gold"
-                              ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "silver"
-                                ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
-                                : "bg-primary text-primary-foreground shadow-sm"
-                            : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
+                          ? tier.value === "gold"
+                            ? "bg-[#ADFF00] text-[#111827] shadow-sm"
+                            : tier.value === "silver"
+                              ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
+                              : "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
                           }`}
                       >
                         {tier.icon}
@@ -265,20 +367,60 @@ const Products = () => {
                 {/* Category Filter */}
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">{t("products.category")}</h3>
-                  <div className="flex flex-wrap gap-2 max-h-96 p-2 overflow-y-auto">
-                    {allCategories.map((category) => (
-                      <button
-                        key={category}
-                        onClick={() => handleCategorySelect(category)}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${selectedCategory === category
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                          }`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
+                  <Select value={selectedCategory} onValueChange={handleCategorySelect}>
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder={t("products.category")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Language Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Language
+                  </h3>
+                  <Select value={selectedLanguage} onValueChange={handleLanguageSelect}>
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="All Languages" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Languages</SelectItem>
+                      {LANGUAGES.map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {lang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Country Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Country
+                  </h3>
+                  <Select value={selectedCountry} onValueChange={handleCountrySelect}>
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="All Countries" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Countries</SelectItem>
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Clear Filters */}
@@ -439,8 +581,8 @@ const Products = () => {
                               key={pageNum}
                               variant={currentPage === pageNum ? "default" : "outline"}
                               className={`rounded-full w-10 h-10 ${currentPage === pageNum
-                                  ? "bg-primary text-primary-foreground"
-                                  : "border-border text-foreground hover:bg-muted"
+                                ? "bg-primary text-primary-foreground"
+                                : "border-border text-foreground hover:bg-muted"
                                 }`}
                               onClick={() => handlePageChange(pageNum)}
                               disabled={loading}

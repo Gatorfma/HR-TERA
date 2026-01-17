@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
+// HomeFilterSection removed
 import ProductsSection from "@/components/ProductsSection";
 import BlogSection from "@/components/BlogSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
-import { getProducts } from "@/api/supabaseApi";
+import { getAllProductsWithDetails } from "@/api/supabaseApi";
 import { DashboardProduct } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -28,8 +29,8 @@ const Index = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await getProducts({n: 16, page: 1});
-        setDashboardProducts(products);
+        const products = await getAllProductsWithDetails();
+        setDashboardProducts(products as any); // Cast because DashboardProduct type might not match exactly with the joined result, but we'll fix types in ProductsSection
       } catch (error) {
         console.error("Error fetching dashboard products:", error);
       }
@@ -42,7 +43,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection products={dashboardProducts} />
-      <ProductsSection products={dashboardProducts.slice(0, 8)} />
+      {/* HomeFilterSection removed */}
+      <ProductsSection products={dashboardProducts} />
       <BlogSection />
       <PricingSection />
       <FAQSection />
