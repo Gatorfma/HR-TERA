@@ -26,14 +26,14 @@ interface Product {
 
 const Products = () => {
   const { t } = useLanguage();
-  
+
   const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
     { value: "all", label: t("products.allTiers") },
     { value: "gold", label: t("products.gold"), icon: <Crown className="w-3.5 h-3.5" /> },
     { value: "silver", label: t("products.silver"), icon: <Award className="w-3.5 h-3.5" /> },
     { value: "freemium", label: t("products.free") },
   ];
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -48,13 +48,13 @@ const Products = () => {
   const categoryFromUrl = searchParams.get("category");
   const tierFromUrl = searchParams.get("tier");
   const pageFromUrl = searchParams.get("page");
-  
-  const [selectedCategory, setSelectedCategory] = useState("All Products");
+
+  const [selectedCategory, setSelectedCategory] = useState("All Solutions");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
 
   // Initialize categories from PRODUCT_CATEGORIES
   useEffect(() => {
-    setAllCategories(["All Products", ...PRODUCT_CATEGORIES]);
+    setAllCategories(["All Solutions", ...PRODUCT_CATEGORIES]);
   }, []);
 
   // Debounce search query
@@ -76,12 +76,12 @@ const Products = () => {
       if (matched) {
         setSelectedCategory(matched);
       } else {
-        setSelectedCategory("All Products");
+        setSelectedCategory("All Solutions");
       }
     } else {
-      setSelectedCategory("All Products");
+      setSelectedCategory("All Solutions");
     }
-    
+
     if (tierFromUrl && ["gold", "silver", "freemium"].includes(tierFromUrl)) {
       setSelectedTier(tierFromUrl as Tier);
     } else {
@@ -107,7 +107,7 @@ const Products = () => {
 
         // Prepare filters for database
         const productFilter = debouncedSearchQuery.trim() || null;
-        const categoryFilter = selectedCategory !== "All Products" ? selectedCategory : null;
+        const categoryFilter = selectedCategory !== "All Solutions" ? selectedCategory : null;
         const tierFilter = selectedTier !== "all" ? selectedTier : null;
 
         // Fetch products with pagination
@@ -165,7 +165,7 @@ const Products = () => {
     setSelectedCategory(category);
     setCurrentPage(1);
     const params: Record<string, string> = {};
-    if (category !== "All Products") {
+    if (category !== "All Solutions") {
       params.category = category.toLowerCase();
     }
     if (selectedTier !== "all") {
@@ -179,7 +179,7 @@ const Products = () => {
     setSelectedTier(tier);
     setCurrentPage(1);
     const params: Record<string, string> = {};
-    if (selectedCategory !== "All Products") {
+    if (selectedCategory !== "All Solutions") {
       params.category = selectedCategory.toLowerCase();
     }
     if (tier !== "all") {
@@ -199,7 +199,7 @@ const Products = () => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
       const params: Record<string, string> = {};
-      if (selectedCategory !== "All Products") {
+      if (selectedCategory !== "All Solutions") {
         params.category = selectedCategory.toLowerCase();
       }
       if (selectedTier !== "all") {
@@ -215,14 +215,14 @@ const Products = () => {
   };
 
   const clearFilters = () => {
-    setSelectedCategory("All Products");
+    setSelectedCategory("All Solutions");
     setSelectedTier("all");
     setSearchQuery("");
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  const hasActiveFilters = selectedCategory !== "All Products" || selectedTier !== "all" || searchQuery !== "";
+  const hasActiveFilters = selectedCategory !== "All Solutions" || selectedTier !== "all" || searchQuery !== "";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -246,15 +246,14 @@ const Products = () => {
                       <button
                         key={tier.value}
                         onClick={() => handleTierSelect(tier.value)}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
-                          selectedTier === tier.value
+                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${selectedTier === tier.value
                             ? tier.value === "gold"
                               ? "bg-[#ADFF00] text-[#111827] shadow-sm"
                               : tier.value === "silver"
-                              ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
-                              : "bg-primary text-primary-foreground shadow-sm"
+                                ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
+                                : "bg-primary text-primary-foreground shadow-sm"
                             : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                        }`}
+                          }`}
                       >
                         {tier.icon}
                         {tier.label}
@@ -271,11 +270,10 @@ const Products = () => {
                       <button
                         key={category}
                         onClick={() => handleCategorySelect(category)}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                          selectedCategory === category
+                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${selectedCategory === category
                             ? "bg-primary text-primary-foreground shadow-sm"
                             : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                        }`}
+                          }`}
                       >
                         {category}
                       </button>
@@ -440,11 +438,10 @@ const Products = () => {
                             <Button
                               key={pageNum}
                               variant={currentPage === pageNum ? "default" : "outline"}
-                              className={`rounded-full w-10 h-10 ${
-                                currentPage === pageNum
+                              className={`rounded-full w-10 h-10 ${currentPage === pageNum
                                   ? "bg-primary text-primary-foreground"
                                   : "border-border text-foreground hover:bg-muted"
-                              }`}
+                                }`}
                               onClick={() => handlePageChange(pageNum)}
                               disabled={loading}
                             >

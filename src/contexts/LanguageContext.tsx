@@ -13,7 +13,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 // English translations
 const en: Record<string, string> = {
   // Navbar
-  "nav.products": "Products",
+  "nav.products": "Solutions",
   "nav.vendors": "Vendors",
   "nav.blog": "Blog",
   "nav.pricing": "Pricing",
@@ -23,10 +23,10 @@ const en: Record<string, string> = {
   // Hero Section
   "hero.badge": "Ultimate HR Solutions",
   "hero.title1": "Unlock Potential with",
-  "hero.title2": "50+ HR Products",
+  "hero.title2": "50+ HR Solutions",
   "hero.subtitle": "Explore a library of high-quality, customizable HR solutions to power your workforce.",
-  "hero.searchPlaceholder": "Search Products or Vendors",
-  "hero.stat1.title": "50+ Products",
+  "hero.searchPlaceholder": "Search Solutions or Vendors",
+  "hero.stat1.title": "50+ Solutions",
   "hero.stat1.desc": "Free & premium HR solutions for every need",
   "hero.stat2.title": "1,000+ Satisfied",
   "hero.stat2.desc": "HR professionals trust our marketplace",
@@ -34,15 +34,15 @@ const en: Record<string, string> = {
   "hero.stat3.desc": "Trusted HR service providers",
 
   // Products Section
-  "products.title": "Popular Products",
+  "products.title": "Popular Solutions",
   "products.subtitle": "Featured gold-tier solutions trusted by leading companies",
   "products.browseAll": "Browse all",
-  "products.searchPlaceholder": "Search Products",
+  "products.searchPlaceholder": "Search Solutions",
   "products.showing": "Showing",
   "products.of": " of",
-  "products.productsCount": "products",
-  "products.loading": "Loading products...",
-  "products.noProducts": "No products found.",
+  "products.productsCount": "solutions",
+  "products.loading": "Loading solutions...",
+  "products.noProducts": "No solutions found.",
   "products.clearFilters": "Clear filters",
   "products.retry": "Retry",
   "products.vendorTier": "Vendor Tier",
@@ -51,7 +51,7 @@ const en: Record<string, string> = {
   "products.gold": "Gold",
   "products.silver": "Silver",
   "products.free": "Free",
-  "products.allProducts": "All Products",
+  "products.allProducts": "All Solutions",
   "products.clearAllFilters": "Clear all filters",
 
   // Vendors Section
@@ -87,10 +87,10 @@ const en: Record<string, string> = {
 
   // Ownership Request
   "ownership.title": "Vendor",
-  "ownership.unclaimedBadge": "Unclaimed product",
-  "ownership.promptTitle": "Are you the supplier of this product?",
-  "ownership.promptDesc": "This product has no verified supplier. Submit your request and we'll review it.",
-  "ownership.loginRequired": "You must log in to apply as the supplier of this product.",
+  "ownership.unclaimedBadge": "Unclaimed solution",
+  "ownership.promptTitle": "Are you the supplier of this solution?",
+  "ownership.promptDesc": "This solution has no verified supplier. Submit your request and we'll review it.",
+  "ownership.loginRequired": "You must log in to apply as the supplier of this solution.",
   "ownership.loginCta": "Log in",
   "ownership.formTitle": "Supplier Application",
   "ownership.formDesc": "Confirm your details and submit your ownership request.",
@@ -165,7 +165,7 @@ const en: Record<string, string> = {
   "footer.newsletter.button": "Subscribe",
   "footer.company": "Company",
   "footer.blog": "Blog",
-  "footer.products": "Products",
+  "footer.products": "Solutions",
   "footer.vendors": "Vendors",
   "footer.pricing": "Pricing Plan",
   "footer.contact": "Contact us",
@@ -208,7 +208,7 @@ const en: Record<string, string> = {
   "auth.createAccount": "Create account",
 
   // Search Bar
-  "search.placeholder": "Search products & vendors...",
+  "search.placeholder": "Search solutions & vendors...",
 
   // Profile Dropdown
   "profile.profile": "Profile",
@@ -238,10 +238,10 @@ const en: Record<string, string> = {
   "contact.messageSaved": "Message saved.",
 
   // Product Detail Page
-  "productDetail.loading": "Loading product...",
-  "productDetail.notFound": "Product Not Found",
-  "productDetail.notFoundDesc": "The product you're looking for doesn't exist.",
-  "productDetail.browseAll": "Browse all products",
+  "productDetail.loading": "Loading solution...",
+  "productDetail.notFound": "Solution Not Found",
+  "productDetail.notFoundDesc": "The solution you're looking for doesn't exist.",
+  "productDetail.browseAll": "Browse all solutions",
   "productDetail.home": "Home",
   "productDetail.requestDemo": "Request Demo",
   "productDetail.visitWebsite": "Visit Website",
@@ -250,10 +250,10 @@ const en: Record<string, string> = {
   "productDetail.vendor": "Vendor",
   "productDetail.viewProfile": "View profile →",
   "productDetail.claimPrompt": "Are you part of this organization?",
-  "productDetail.claimProduct": "Claim This Product",
-  "productDetail.noProductId": "No product ID provided",
-  "productDetail.productNotFound": "Product not found",
-  "productDetail.loadFailed": "Failed to load product",
+  "productDetail.claimProduct": "Claim This Solution",
+  "productDetail.noProductId": "No solution ID provided",
+  "productDetail.productNotFound": "Solution not found",
+  "productDetail.loadFailed": "Failed to load solution",
   "productDetail.notAvailable": "N/A",
   "productDetail.contact": "Contact",
   "productDetail.viewScreenshot": "View screenshot",
@@ -268,7 +268,7 @@ const en: Record<string, string> = {
   "productTabs.whatDoesItSolve": "What does it solve?",
   "productTabs.keyFeatures": "Key Features",
   "productTabs.noReviews": "No reviews yet",
-  "productTabs.beFirstReview": "Be the first to review this product!",
+  "productTabs.beFirstReview": "Be the first to review this solution!",
   "productTabs.perMonth": "/month",
   "productTabs.enterprisePricing": "Contact us for custom enterprise pricing and volume discounts.",
   "productTabs.flexiblePricing": "Get started with our flexible pricing plans.",
@@ -339,20 +339,20 @@ const en: Record<string, string> = {
   "settings.billing.unlockGold1": "Case studies and featured content",
   "settings.billing.unlockGold2": "Product analytics and insights",
   "settings.billing.unlockGold3": "Team management and campaigns",
-  "settings.billing.products": "Products",
+  "settings.billing.products": "Solutions",
   "settings.billing.totalViews": "Total Views",
   "settings.billing.invoiceHistory": "View invoice history",
   "settings.billing.paymentMethod": "Payment Method",
   "settings.billing.updatePayment": "Update",
 
   "settings.team.title": "Team Management",
-  "settings.team.subtitle": "Add team members who can help manage your products.",
+  "settings.team.subtitle": "Add team members who can help manage your solutions.",
   "settings.team.admin": "Admin",
   "settings.team.invite": "Invite team member",
 
   "settings.campaigns.title": "Campaigns & Promotions",
-  "settings.campaigns.subtitle": "Create promotional campaigns for your products.",
-  "settings.campaigns.empty": "No active campaigns. Create one to boost your product visibility.",
+  "settings.campaigns.subtitle": "Create promotional campaigns for your solutions.",
+  "settings.campaigns.empty": "No active campaigns. Create one to boost your solution visibility.",
   "settings.campaigns.create": "Create campaign",
 
   "settings.password.dialogTitle": "Change Password",
@@ -379,7 +379,7 @@ const en: Record<string, string> = {
 // Turkish translations
 const tr: Record<string, string> = {
   // Navbar
-  "nav.products": "Ürünler",
+  "nav.products": "Çözümler",
   "nav.vendors": "Satıcılar",
   "nav.blog": "Blog",
   "nav.pricing": "Fiyatlandırma",
@@ -389,10 +389,10 @@ const tr: Record<string, string> = {
   // Hero Section
   "hero.badge": "Kapsamlı İK Çözümleri",
   "hero.title1": "Potansiyeli Açığa Çıkarın",
-  "hero.title2": "50+ İK Ürünü",
+  "hero.title2": "50+ İK Çözümü",
   "hero.subtitle": "İş gücünüzü güçlendirmek için yüksek kaliteli, özelleştirilebilir İK çözümlerini keşfedin.",
-  "hero.searchPlaceholder": "Ürün veya Satıcı Ara",
-  "hero.stat1.title": "50+ Ürün",
+  "hero.searchPlaceholder": "Çözüm veya Satıcı Ara",
+  "hero.stat1.title": "50+ Çözüm",
   "hero.stat1.desc": "Her ihtiyaç için ücretsiz ve premium İK çözümleri",
   "hero.stat2.title": "1.000+ Memnun Müşteri",
   "hero.stat2.desc": "İK profesyonelleri pazaryerimize güveniyor",
@@ -400,15 +400,15 @@ const tr: Record<string, string> = {
   "hero.stat3.desc": "Güvenilir İK hizmet sağlayıcıları",
 
   // Products Section
-  "products.title": "Popüler Ürünler",
+  "products.title": "Popüler Çözümler",
   "products.subtitle": "Lider şirketlerin güvendiği altın seviye çözümler",
   "products.browseAll": "Tümünü gör",
-  "products.searchPlaceholder": "Ürün Ara",
+  "products.searchPlaceholder": "Çözüm Ara",
   "products.showing": "Gösterilen",
   "products.of": ", toplam",
-  "products.productsCount": "ürün",
-  "products.loading": "Ürünler yükleniyor...",
-  "products.noProducts": "Ürün bulunamadı.",
+  "products.productsCount": "çözüm",
+  "products.loading": "Çözümler yükleniyor...",
+  "products.noProducts": "Çözüm bulunamadı.",
   "products.clearFilters": "Filtreleri temizle",
   "products.retry": "Tekrar dene",
   "products.vendorTier": "Satıcı Seviyesi",
@@ -417,7 +417,7 @@ const tr: Record<string, string> = {
   "products.gold": "Altın",
   "products.silver": "Gümüş",
   "products.free": "Ücretsiz",
-  "products.allProducts": "Tüm Ürünler",
+  "products.allProducts": "Tüm Çözümler",
   "products.clearAllFilters": "Tüm filtreleri temizle",
 
   // Vendors Section
@@ -453,11 +453,11 @@ const tr: Record<string, string> = {
 
   // Ownership Request
   "ownership.title": "Tedarikçi",
-  "ownership.unclaimedBadge": "Sahipsiz ürün",
-  "ownership.promptTitle": "Bu ürünün tedarikçisi siz misiniz?",
+  "ownership.unclaimedBadge": "Sahipsiz çözüm",
+  "ownership.promptTitle": "Bu çözümün tedarikçisi siz misiniz?",
   "ownership.promptDesc":
-    "Bu ürünün doğrulanmış bir tedarikçisi yok. Başvurunuzu gönderin, inceleme sonrası sahiplik size atanır.",
-  "ownership.loginRequired": "Bu ürünün tedarikçisi olarak başvurmak için giriş yapmalısınız.",
+    "Bu çözümün doğrulanmış bir tedarikçisi yok. Başvurunuzu gönderin, inceleme sonrası sahiplik size atanır.",
+  "ownership.loginRequired": "Bu çözümün tedarikçisi olarak başvurmak için giriş yapmalısınız.",
   "ownership.loginCta": "Giriş yap",
   "ownership.formTitle": "Tedarikçi Başvurusu",
   "ownership.formDesc": "Bilgilerinizi doğrulayın ve sahiplik başvurunuzu gönderin.",
@@ -511,10 +511,10 @@ const tr: Record<string, string> = {
     "Premium ürünler ve satıcılardan oluşan tüm kütüphanemize sınırsız erişim sunan bir üyelikle İK'nızın tam potansiyelini açığa çıkarın.",
   "faq.q1": "Ücretsiz plana neler dahil?",
   "faq.a1":
-    "Ücretsiz plan, başlamanıza yardımcı olmak için sınırlı bir ürün ve satıcı seçimine erişim sağlar. Ayrıca ücretsiz kütüphaneye temel güncellemeler de alacaksınız. Takım Planımız 5 kullanıcıya kadar tam kütüphaneye erişim, projelerde işbirliği ve kaynak paylaşımı imkanı sunar. Büyüyen İK ekipleri için mükemmeldir.",
+    "Ücretsiz plan, başlamanıza yardımcı olmak için sınırlı bir çözüm ve satıcı seçimine erişim sağlar. Ayrıca ücretsiz kütüphaneye temel güncellemeler de alacaksınız. Takım Planımız 5 kullanıcıya kadar tam kütüphaneye erişim, projelerde işbirliği ve kaynak paylaşımı imkanı sunar. Büyüyen İK ekipleri için mükemmeldir.",
   "faq.q2": "Pro Plan ile ne alırım?",
   "faq.a2":
-    "Pro Plan, tüm premium İK ürünlerine erişim, öncelikli satıcı eşleştirme, gelişmiş analitikler ve özel destek içerir. Ayrıca yeni ürün ve özelliklere erken erişim elde edersiniz.",
+    "Pro Plan, tüm premium İK çözümlerine erişim, öncelikli satıcı eşleştirme, gelişmiş analitikler ve özel destek içerir. Ayrıca yeni çözüm ve özelliklere erken erişim elde edersiniz.",
   "faq.q3": "Planımı istediğim zaman yükseltebilir veya düşürebilir miyim?",
   "faq.a3":
     "Evet! Planınızı istediğiniz zaman yükseltebilir veya düşürebilirsiniz. Değişiklikler bir sonraki fatura döngünüze yansıtılacaktır. Döngü ortasında yükseltme yaparsanız, orantılı bir tutar tahsil edilecektir.",
@@ -523,7 +523,7 @@ const tr: Record<string, string> = {
     "Kesinlikle! Kurumsal planımız her büyüklükteki ekip için tasarlanmıştır. Çoklu kullanıcı erişimi, takım yönetimi özellikleri, paylaşılan kaynaklar ve toplu indirimler içerir.",
   "faq.q5": "Ne sıklıkla yeni ürünler ekleniyor?",
   "faq.a5":
-    "Pazaryerimize haftalık olarak yeni ürünler ve satıcılar ekliyoruz. Premium üyeler tüm yeni eklemelere erken erişim elde eder ve yaklaşan özellikler için oy kullanabilir.",
+    "Pazaryerimize haftalık olarak yeni çözümler ve satıcılar ekliyoruz. Premium üyeler tüm yeni eklemelere erken erişim elde eder ve yaklaşan özellikler için oy kullanabilir.",
 
   // Footer
   "footer.newsletter.title": "Bültenimize Abone Olun",
@@ -532,7 +532,7 @@ const tr: Record<string, string> = {
   "footer.newsletter.button": "Abone Ol",
   "footer.company": "Şirket",
   "footer.blog": "Blog",
-  "footer.products": "Ürünler",
+  "footer.products": "Çözümler",
   "footer.vendors": "Satıcılar",
   "footer.pricing": "Fiyatlandırma",
   "footer.contact": "İletişim",
@@ -575,7 +575,7 @@ const tr: Record<string, string> = {
   "auth.createAccount": "Hesap Oluştur",
 
   // Search Bar
-  "search.placeholder": "Ürün ve satıcı ara...",
+  "search.placeholder": "Çözüm ve satıcı ara...",
 
   // Profile Dropdown
   "profile.profile": "Profil",
@@ -588,7 +588,7 @@ const tr: Record<string, string> = {
   // Contact Page
   "contact.title": "HRHub ile İletişime Geçin",
   "contact.description":
-    "Ürün listeleme, abonelik veya pazaryeri hakkında bir sorunuz mu var? Bize bir mesaj gönderin, doğru ekibe yönlendirelim.",
+    "Çözüm listeleme, abonelik veya pazaryeri hakkında bir sorunuz mu var? Bize bir mesaj gönderin, doğru ekibe yönlendirelim.",
   "contact.fullName": "Ad Soyad",
   "contact.fullNamePlaceholder": "Adınız",
   "contact.workEmail": "İş e-postası",
@@ -605,10 +605,10 @@ const tr: Record<string, string> = {
   "contact.messageSaved": "Mesaj kaydedildi.",
 
   // Product Detail Page
-  "productDetail.loading": "Ürün yükleniyor...",
-  "productDetail.notFound": "Ürün Bulunamadı",
-  "productDetail.notFoundDesc": "Aradığınız ürün mevcut değil.",
-  "productDetail.browseAll": "Tüm ürünleri görüntüle",
+  "productDetail.loading": "Çözüm yükleniyor...",
+  "productDetail.notFound": "Çözüm Bulunamadı",
+  "productDetail.notFoundDesc": "Aradığınız çözüm mevcut değil.",
+  "productDetail.browseAll": "Tüm çözümleri görüntüle",
   "productDetail.home": "Ana Sayfa",
   "productDetail.requestDemo": "Demo Talep Et",
   "productDetail.visitWebsite": "Web Sitesini Ziyaret Et",
@@ -618,16 +618,16 @@ const tr: Record<string, string> = {
   "productDetail.viewProfile": "Profili görüntüle →",
   "productDetail.claimPrompt": "Bu şirket size mi ait?",
   "productDetail.claimProduct": "Birlikte güncelleyelim →",
-  "productDetail.noProductId": "Ürün ID'si sağlanmadı",
-  "productDetail.productNotFound": "Ürün bulunamadı",
-  "productDetail.loadFailed": "Ürün yüklenemedi",
+  "productDetail.noProductId": "Çözüm ID'si sağlanmadı",
+  "productDetail.productNotFound": "Çözüm bulunamadı",
+  "productDetail.loadFailed": "Çözüm yüklenemedi",
   "productDetail.notAvailable": "Mevcut Değil",
   "productDetail.contact": "İletişim",
   "productDetail.viewScreenshot": "Ekran görüntüsünü görüntüle",
 
   // Product Tabs
   "productTabs.overview": "Genel Bakış",
-  "productTabs.features": "Ürün Özellikleri",
+  "productTabs.features": "Çözüm Özellikleri",
   "productTabs.media": "Medya",
   "productTabs.reviews": "Değerlendirmeler",
   "productTabs.pricing": "Fiyatlandırma",
@@ -635,7 +635,7 @@ const tr: Record<string, string> = {
   "productTabs.whatDoesItSolve": "Ne çözüyor?",
   "productTabs.keyFeatures": "Temel Özellikler",
   "productTabs.noReviews": "Henüz değerlendirme yok",
-  "productTabs.beFirstReview": "Bu ürünü ilk değerlendiren siz olun!",
+  "productTabs.beFirstReview": "Bu çözümü ilk değerlendiren siz olun!",
   "productTabs.perMonth": "/ay",
   "productTabs.enterprisePricing":
     "Özel kurumsal fiyatlandırma ve toplu indirimler için bizimle iletişime geçin.",
@@ -707,19 +707,19 @@ const tr: Record<string, string> = {
   "settings.billing.unlockGold1": "Vaka çalışmaları ve öne çıkan içerikler",
   "settings.billing.unlockGold2": "Ürün analitiği ve içgörüler",
   "settings.billing.unlockGold3": "Ekip yönetimi ve kampanyalar",
-  "settings.billing.products": "Ürünler",
+  "settings.billing.products": "Çözümler",
   "settings.billing.totalViews": "Toplam Görüntülenme",
   "settings.billing.invoiceHistory": "Fatura geçmişini görüntüle",
   "settings.billing.paymentMethod": "Ödeme Yöntemi",
   "settings.billing.updatePayment": "Güncelle",
 
   "settings.team.title": "Ekip Yönetimi",
-  "settings.team.subtitle": "Ürünlerinizi yönetmenize yardımcı olacak ekip üyeleri ekleyin.",
+  "settings.team.subtitle": "Çözümlerinizi yönetmenize yardımcı olacak ekip üyeleri ekleyin.",
   "settings.team.admin": "Yönetici",
   "settings.team.invite": "Ekip üyesi davet et",
 
   "settings.campaigns.title": "Kampanyalar & Promosyonlar",
-  "settings.campaigns.subtitle": "Ürünleriniz için promosyon kampanyaları oluşturun.",
+  "settings.campaigns.subtitle": "Çözümleriniz için promosyon kampanyaları oluşturun.",
   "settings.campaigns.empty": "Aktif kampanya yok. Görünürlüğü artırmak için bir kampanya oluşturun.",
   "settings.campaigns.create": "Kampanya oluştur",
 
