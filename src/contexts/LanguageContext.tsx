@@ -168,12 +168,13 @@ const en: Record<string, string> = {
   "footer.products": "Products",
   "footer.vendors": "Vendors",
   "footer.pricing": "Pricing Plan",
+  "footer.story": "Our Story",
   "footer.contact": "Contact us",
   "footer.support": "Support",
   "footer.terms": "Terms of Service",
   "footer.privacy": "Privacy Policy",
   "footer.followUs": "Follow us",
-  "footer.rights": "HRHub All Rights Reserved.",
+  "footer.rights": "HRTera All Rights Reserved.",
   "footer.legal": "© 2025 Legal",
   "footer.newsletter.invalidEmail": "Please enter a valid email address.",
   "footer.newsletter.alreadySubscribed": "You are already subscribed.",
@@ -181,7 +182,7 @@ const en: Record<string, string> = {
   "footer.newsletter.storageNote": "Your email is stored locally in this browser.",
 
   // Auth Modal
-  "auth.welcome": "Welcome to HRHub – your HR marketplace",
+  "auth.welcome": "Welcome to HRTera – your HR marketplace",
   "auth.login": "Log in",
   "auth.signup": "Sign up",
   "auth.email": "Email",
@@ -219,7 +220,7 @@ const en: Record<string, string> = {
   "common.loading": "Loading...",
 
   // Contact Page
-  "contact.title": "Contact HRHub",
+  "contact.title": "Contact HRTera",
   "contact.description":
     "Have a question about listings, partnerships, or the marketplace? Send us a message and we will route it to the right team.",
   "contact.fullName": "Full name",
@@ -535,12 +536,13 @@ const tr: Record<string, string> = {
   "footer.products": "Ürünler",
   "footer.vendors": "Satıcılar",
   "footer.pricing": "Fiyatlandırma",
+  "footer.story": "Hikayemiz",
   "footer.contact": "İletişim",
   "footer.support": "Destek",
   "footer.terms": "Hizmet Şartları",
   "footer.privacy": "Gizlilik Politikası",
   "footer.followUs": "Bizi Takip Edin",
-  "footer.rights": "HRHub Tüm Hakları Saklıdır.",
+  "footer.rights": "HRTera Tüm Hakları Saklıdır.",
   "footer.legal": "© 2025 Yasal",
   "footer.newsletter.invalidEmail": "Lütfen geçerli bir e-posta adresi girin.",
   "footer.newsletter.alreadySubscribed": "Zaten abone oldunuz.",
@@ -548,7 +550,7 @@ const tr: Record<string, string> = {
   "footer.newsletter.storageNote": "E-postanız bu tarayıcıda yerel olarak saklanmaktadır.",
 
   // Auth Modal
-  "auth.welcome": "HRHub'a hoş geldiniz – İK pazaryeriniz",
+  "auth.welcome": "HRTera'a hoş geldiniz – İK pazaryeriniz",
   "auth.login": "Giriş Yap",
   "auth.signup": "Kayıt Ol",
   "auth.email": "E-posta",
@@ -586,7 +588,7 @@ const tr: Record<string, string> = {
   "common.loading": "Yükleniyor...",
 
   // Contact Page
-  "contact.title": "HRHub ile İletişime Geçin",
+  "contact.title": "HRTera ile İletişime Geçin",
   "contact.description":
     "Ürün listeleme, abonelik veya pazaryeri hakkında bir sorunuz mu var? Bize bir mesaj gönderin, doğru ekibe yönlendirelim.",
   "contact.fullName": "Ad Soyad",
