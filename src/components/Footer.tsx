@@ -49,11 +49,12 @@ const Footer = () => {
           {/* Logo & Newsletter */}
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-6">
-              <div className="flex gap-0.5">
-                <div className="w-3 h-6 bg-primary rounded-full rotate-12" />
-                <div className="w-3 h-6 bg-primary rounded-full -rotate-12" />
-              </div>
-              <span className="font-heading font-bold text-xl text-secondary-foreground">HRTera</span>
+              <img
+                src="/hrtera-icon.png"
+                alt="HRTera logo"
+                className="w-6 h-6 object-contain"
+              />
+              <span className="font-heading font-bold text-xl text-secondary-foreground">HRTera.co</span>
             </Link>
 
             <h3 className="font-heading font-bold text-lg text-secondary-foreground mb-2">

@@ -36,11 +36,11 @@ const Navbar = () => {
         <div className="bg-card/95 backdrop-blur-md rounded-full px-6 py-3 shadow-card border border-border">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-4 flex-shrink-0">
+            <Link to="/" className="flex items-center gap-2 flex-shrink-0">
               <img
                 src="/hrtera-icon.png"
                 alt="HRTera logo"
-                className="w-8 h-8 object-contain"
+                className="w-6 h-6 object-contain"
               />
               <span className="font-heading font-bold text-xl text-foreground">HRTera</span>
             </Link>
