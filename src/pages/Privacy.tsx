@@ -7,7 +7,7 @@ const Privacy = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="pt-24 pb-16">
+      <main className="pt-28 pb-16">
         <div className="container max-w-4xl">
           <header className="mb-10">
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
@@ -18,7 +18,7 @@ const Privacy = () => {
 
           <section className="space-y-6 text-muted-foreground">
             <p>
-              This Privacy Policy describes how HRHub handles information in the Service.
+              This Privacy Policy describes how HRTera handles information in the Service.
               We aim to collect the minimum necessary data and to be transparent about
               how information is used.
             </p>
@@ -50,7 +50,7 @@ const Privacy = () => {
                 Product Catalog Data
               </h2>
               <p>
-                HRHub retrieves product listings from its database provider to display content.
+                HRTera retrieves product listings from its database provider to display content.
                 These requests are limited to catalog data and do not include personal data.
               </p>
             </div>

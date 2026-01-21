@@ -37,11 +37,12 @@ const Navbar = () => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-              <div className="flex gap-0.5">
-                <div className="w-3 h-6 bg-primary rounded-full rotate-12" />
-                <div className="w-3 h-6 bg-primary rounded-full -rotate-12" />
-              </div>
-              <span className="font-heading font-bold text-xl text-foreground">HRHub</span>
+              <img
+                src="/hrtera-icon.png"
+                alt="HRTera logo"
+                className="w-6 h-6 object-contain"
+              />
+              <span className="font-heading font-bold text-xl text-foreground">HRTera</span>
             </Link>
 
             {/* Desktop Nav - Centered */}

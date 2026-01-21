@@ -177,7 +177,7 @@ export const vendors: Vendor[] = [
       { title: "Building Diverse Teams with AI", description: "How AI reduces bias in hiring", url: "#", type: "webinar" }
     ],
     campaigns: [
-      { title: "HRHub Exclusive: 20% Off First Quarter", description: "Special discount for HRHub members on any package", validUntil: "March 31, 2025" }
+      { title: "HRTera Exclusive: 20% Off First Quarter", description: "Special discount for HRTera members on any package", validUntil: "March 31, 2025" }
     ]
   },
   {

@@ -31,6 +31,7 @@ import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Story from "./pages/Story";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -64,13 +65,13 @@ const App = () => (
                 <Route path="/admin/products/requests" element={<ProductRequestsPage />} />
                 <Route path="/admin/products/tiers" element={<ProductTiersPage />} />
                 <Route path="/admin/products/analytics" element={<ProductAnalyticsPage />} />
-                <Route path="/admin/products/analytics" element={<ProductAnalyticsPage />} />
                 <Route path="/admin/products/bulk-upload" element={<ProductBulkUploadPage />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/products/new" element={<AddProduct />} />
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/story" element={<Story />} />
                 <Route path="/contact" element={<Contact />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

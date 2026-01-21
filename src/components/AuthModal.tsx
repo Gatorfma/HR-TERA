@@ -130,7 +130,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           {/* Visually hidden title for screen readers */}
           <VisuallyHidden>
             <DialogTitle>
-              {activeTab === "login" ? "Login to HRHub" : "Sign up for HRHub"}
+              {activeTab === "login" ? "Login to HRTera" : "Sign up for HRTera"}
             </DialogTitle>
           </VisuallyHidden>
           
@@ -148,7 +148,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 <div className="w-3 h-6 bg-primary rounded-full rotate-12" />
                 <div className="w-3 h-6 bg-primary rounded-full -rotate-12" />
               </div>
-              <span className="font-heading font-bold text-2xl text-foreground">HRHub</span>
+              <span className="font-heading font-bold text-2xl text-foreground">HRTera</span>
             </div>
 
             {/* Welcome text */}
