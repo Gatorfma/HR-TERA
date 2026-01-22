@@ -53,7 +53,7 @@ const Navbar = () => {
               <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
                 {t("nav.blog")}
               </Link>
-              <a href="/#pricing" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
                 {t("nav.pricing")}
               </a>
             </div>
@@ -122,13 +122,10 @@ const Navbar = () => {
                 <Link to="/products" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
                   {t("nav.products")}
                 </Link>
-                <Link to="/vendors" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
-                  {t("nav.vendors")}
-                </Link>
                 <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
                   {t("nav.blog")}
                 </Link>
-                <a href="/#pricing" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
+                <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
                   {t("nav.pricing")}
                 </a>
                 {isLoading ? (

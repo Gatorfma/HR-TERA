@@ -179,7 +179,7 @@ const MyProductsTab = () => {
           <p className="text-sm text-muted-foreground">
             You're on the <span className="font-medium text-foreground">Freemium plan</span>. 
             Upgrade to Silver or Gold to unlock galleries, case studies, and more visibility.
-            <Link to="/#pricing" className="text-primary hover:underline ml-1">
+            <Link to={`${import.meta.env.BASE_URL}#pricing`} className="text-primary hover:underline ml-1">
               View plans →
             </Link>
           </p>

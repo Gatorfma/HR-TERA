@@ -17,7 +17,7 @@ const ProfileHero = () => {
 
   const getPlanLink = () => {
     if (user.vendorTier === "freemium") {
-      return { text: "View plans / upgrade", href: "/#pricing" };
+      return { text: "View plans / upgrade", href: `${import.meta.env.BASE_URL}#pricing` };
     }
     return { text: "Manage plan", href: "/profile?tab=settings" };
   };

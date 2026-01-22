@@ -83,7 +83,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.blog")}</Link></li>
               <li><Link to="/products" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.products")}</Link></li>
-              <li><a href="/#pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.pricing")}</a></li>
+              <li><a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.pricing")}</a></li>
               <li><Link to="/story" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.story")}</Link></li>
               <li><Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.contact")}</Link></li>
             </ul>
