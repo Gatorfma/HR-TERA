@@ -1,6 +1,6 @@
 import { supabase } from "@/api/supabaseClient";
 
-export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null }) => {
+export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null, languageFilter = null, countryFilter = null }) => {
     const { data, error } = await supabase.rpc('get_product_cards', {
         n,
         page,
@@ -8,18 +8,22 @@ export const getProducts = async ({ n, page, productFilter = null, vendorFilter 
         vendor_filter: vendorFilter,
         category_filter: categoryFilter,
         tier_filter: tierFilter,
+        language_filter: languageFilter,
+        country_filter: countryFilter,
     });
 
     if (error) throw error;
     return data ?? [];
 };
 
-export const getProductCountFiltered = async ({ productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null }) => {
+export const getProductCountFiltered = async ({ productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null, languageFilter = null, countryFilter = null }) => {
     const { data, error } = await supabase.rpc('get_product_count_filtered', {
         product_filter: productFilter,
         vendor_filter: vendorFilter,
         category_filter: categoryFilter,
         tier_filter: tierFilter,
+        language_filter: languageFilter,
+        country_filter: countryFilter,
     });
 
     if (error) throw error;
@@ -232,21 +236,4 @@ export const updateMyVendor = async ({
     return Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
 };
 
-export const getAllProductsWithDetails = async () => {
-    // Call the new RPC that returns a flat structure with joined data
-    const { data, error } = await supabase.rpc('get_all_products_with_details');
 
-    if (error) throw error;
-
-    // Map to the structure expected by the frontend
-    // The RPC already returns flat fields, but we need to match the property names
-    // used in Products.tsx (which expects some fields like vendor_subscription mapped from subscription)
-    return (data ?? []).map(p => ({
-        ...p,
-        // RPC returns 'subscription', but frontend might expect 'vendor_subscription' based on previous map
-        vendor_subscription: p.subscription,
-        // Ensure arrays are not null
-        categories: p.categories || [p.main_category],
-        languages: p.languages || [],
-    }));
-};

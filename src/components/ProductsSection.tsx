@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ArrowUpRight, Search, LayoutGrid, Globe, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getProducts } from "@/api/supabaseApi";
 
 interface ProductsSectionProps {
   products?: any[]; // Using any to accommodate the joined result with extra fields
@@ -48,57 +49,68 @@ const ProductsSection = ({ products = [] }: ProductsSectionProps) => {
   const [selectedLanguage, setSelectedLanguage] = useState("all");
   const [selectedCountry, setSelectedCountry] = useState("all");
 
-  // Map API products to ProductCard format and Filter in real-time
-  const filteredProducts = useMemo(() => {
-    let result = products;
+  const [displayProducts, setDisplayProducts] = useState<any[]>(products);
+  const [loading, setLoading] = useState(false);
 
+  // Update displayProducts when initial props change (if no filters are active)
+  useEffect(() => {
     const hasActiveFilters = selectedCategory !== "all" || selectedLanguage !== "all" || selectedCountry !== "all";
+    if (!hasActiveFilters && products.length > 0) {
+      setDisplayProducts(products);
+    }
+  }, [products]);
 
-    if (!hasActiveFilters) {
-      // DEFAULT VIEW: Show only Gold products when no filters are active
-      result = result.filter(p => {
-        const tier = (p.subscription || p.vendor_subscription || "freemium").toLowerCase();
-        return tier === "gold";
-      });
-    } else {
-      // FILTERED VIEW: Search across ALL products (Gold, Silver, Free)
+  // Server-side filtering
+  useEffect(() => {
+    const fetchFilteredProducts = async () => {
+      const hasActiveFilters = selectedCategory !== "all" || selectedLanguage !== "all" || selectedCountry !== "all";
 
-      // Filter by Category
-      if (selectedCategory && selectedCategory !== "all") {
-        result = result.filter(p => p.main_category === selectedCategory);
+      if (!hasActiveFilters) {
+        // If no filters, revert to the initial popular products passed via props
+        if (products.length > 0) {
+          setDisplayProducts(products);
+        }
+        return;
       }
 
-      // Filter by Language
-      if (selectedLanguage && selectedLanguage !== "all") {
-        result = result.filter(p =>
-          p.languages?.some((l: string) => l.toLowerCase() === selectedLanguage.toLowerCase())
-        );
-      }
-
-      // Filter by Country
-      if (selectedCountry && selectedCountry !== "all") {
+      setLoading(true);
+      try {
+        const categoryFilter = selectedCategory !== "all" ? selectedCategory : null;
+        const languageFilter = selectedLanguage !== "all" ? selectedLanguage : null;
         const codeMap: Record<string, string> = {
           "Turkey": "TR",
           "United States": "US",
-          "United Kingdom": "GB",
+          "United Kingdom": "UK",
           "Germany": "DE",
           "Netherlands": "NL",
           "Global": "Global",
           "Remote": "Remote"
         };
-        const targetCode = codeMap[selectedCountry] || selectedCountry;
+        const countryFilter = selectedCountry !== "all" ? (codeMap[selectedCountry] || selectedCountry) : null;
 
-        result = result.filter(p => {
-          if (!p.headquarters) return false;
-          // Handle "City, CC" or just "CC"
-          const parts = p.headquarters.split(",");
-          const locationCode = parts[parts.length - 1].trim();
-          return locationCode.toLowerCase() === targetCode.toLowerCase();
+        // Fetch top 12 matches for the landing page using the new RPC
+        const data = await getProducts({
+          n: 12,
+          page: 1,
+          categoryFilter,
+          languageFilter,
+          countryFilter
         });
-      }
-    }
 
-    return result.map((product) => ({
+        setDisplayProducts(data);
+      } catch (err) {
+        console.error("Error filtering products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFilteredProducts();
+  }, [selectedCategory, selectedLanguage, selectedCountry, products]);
+
+  // Format products for display
+  const mappedProducts = useMemo(() => {
+    return displayProducts.map((product) => ({
       product_id: product.product_id,
       image: product.logo,
       category: product.main_category,
@@ -107,11 +119,8 @@ const ProductsSection = ({ products = [] }: ProductsSectionProps) => {
       tier: (product.subscription || product.vendor_subscription || "freemium").toLowerCase() as Tier,
       isVerified: product.is_verified,
     }));
-  }, [products, selectedCategory, selectedLanguage, selectedCountry]);
+  }, [displayProducts]);
 
-  // Limit initially shown products if no filter is active to keep it "Popular", 
-  // but if filtering, show all matches (or up to a reasonable limit like 12)
-  const displayProducts = filteredProducts.slice(0, 12);
   const hasActiveFilters = selectedCategory !== "all" || selectedLanguage !== "all" || selectedCountry !== "all";
 
   const clearFilters = () => {
@@ -230,8 +239,8 @@ const ProductsSection = ({ products = [] }: ProductsSectionProps) => {
             layout
             className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {displayProducts.length > 0 ? (
-              displayProducts.map((product, index) => (
+            {mappedProducts.length > 0 ? (
+              mappedProducts.map((product, index) => (
                 <motion.div
                   key={product.product_id}
                   layout

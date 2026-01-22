@@ -8,7 +8,7 @@ import BlogSection from "@/components/BlogSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
-import { getAllProductsWithDetails } from "@/api/supabaseApi";
+import { getProducts } from "@/api/supabaseApi";
 import { DashboardProduct } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -29,8 +29,9 @@ const Index = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await getAllProductsWithDetails();
-        setDashboardProducts(products as any); // Cast because DashboardProduct type might not match exactly with the joined result, but we'll fix types in ProductsSection
+        // Fetch top 8 products for the landing page (simulating "popular" via default sort in RPC)
+        const products = await getProducts({ n: 8, page: 1 });
+        setDashboardProducts(products as any);
       } catch (error) {
         console.error("Error fetching dashboard products:", error);
       }

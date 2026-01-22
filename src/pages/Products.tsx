@@ -13,7 +13,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
-import { getAllProductsWithDetails } from "@/api/supabaseApi";
+import { getProducts, getProductCountFiltered } from "@/api/supabaseApi";
 import type { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PRODUCT_CATEGORIES } from "@/lib/admin-types";
@@ -75,7 +75,7 @@ const Products = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [allCategories, setAllCategories] = useState<string[]>([]);
 
-  const [allProductsData, setAllProductsData] = useState<Product[]>([]); // Store ALL fetched products
+
 
   // Get filters from URL
   const categoryFromUrl = searchParams.get("category");
@@ -135,31 +135,65 @@ const Products = () => {
     }
   }, [categoryFromUrl, tierFromUrl, pageFromUrl, allCategories]);
 
-  // 1. Fetch ALL data once
+  // Fetch products with server-side filtering
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Use our new API method that gets everything joined
-        const rawData = await getAllProductsWithDetails();
+        const categoryFilter = selectedCategory !== "All Solutions" ? selectedCategory : null;
+        const tierFilter = selectedTier !== "all" ? selectedTier : null;
+        // Search query acts as product filter in this context, or we could split specific filters if needed. 
+        // The implementation plan says "Search: Type a known product name".
+        const productFilter = debouncedSearchQuery.trim() || null;
+        const languageFilter = selectedLanguage !== "all" ? selectedLanguage : null;
+        const codeMap: Record<string, string> = {
+          "Turkey": "TR",
+          "United States": "US",
+          "United Kingdom": "UK",
+          "Germany": "DE",
+          "Netherlands": "NL",
+          "Global": "Global",
+          "Remote": "Remote"
+        };
+        const countryFilter = selectedCountry !== "all" ? (codeMap[selectedCountry] || selectedCountry) : null;
 
-        // Map to internal format once
-        const mapped: Product[] = rawData.map((p: any) => ({
+        // Run in parallel
+        const [productsData, count] = await Promise.all([
+          getProducts({
+            n: PRODUCTS_PER_PAGE,
+            page: currentPage,
+            productFilter,
+            categoryFilter,
+            tierFilter,
+            languageFilter,
+            countryFilter
+          }),
+          getProductCountFiltered({
+            productFilter,
+            categoryFilter,
+            tierFilter,
+            languageFilter,
+            countryFilter
+          })
+        ]);
+
+        const mapped: Product[] = productsData.map((p: any) => ({
           id: p.product_id,
           image: p.logo,
           category: p.main_category,
           name: p.product_name,
           description: p.short_desc,
-          vendorTier: (p.vendor_subscription?.toLowerCase() || "freemium") as Tier,
+          vendorTier: (p.subscription?.toLowerCase() || p.vendor_subscription?.toLowerCase() || "freemium") as Tier,
           isVerified: p.is_verified,
           languages: p.languages,
           headquarters: p.headquarters,
           companyName: p.company_name
         }));
 
-        setAllProductsData(mapped);
+        setProducts(mapped);
+        setTotalCount(count);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load products");
         console.error("Error fetching products:", err);
@@ -167,74 +201,9 @@ const Products = () => {
         setLoading(false);
       }
     };
-    fetchAllData();
-  }, []);
 
-  // 2. Client-side filtering & pagination
-  useEffect(() => {
-    if (loading && allProductsData.length === 0) return;
-
-    let filtered = [...allProductsData];
-
-    // Search
-    if (debouncedSearchQuery.trim()) {
-      const q = debouncedSearchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.companyName?.toLowerCase().includes(q)
-      );
-    }
-
-    // Category
-    if (selectedCategory !== "All Solutions") {
-      filtered = filtered.filter(p => p.category === selectedCategory);
-    }
-
-    // Tier
-    if (selectedTier !== "all") {
-      filtered = filtered.filter(p => p.vendorTier === selectedTier);
-    }
-
-    // Language
-    if (selectedLanguage && selectedLanguage !== "all") {
-      filtered = filtered.filter(p =>
-        p.languages?.some(l => l.toLowerCase() === selectedLanguage.toLowerCase())
-      );
-    }
-
-    // Country
-    if (selectedCountry && selectedCountry !== "all") {
-      const codeMap: Record<string, string> = {
-        "Turkey": "TR",
-        "United States": "US",
-        "United Kingdom": "GB",
-        "Germany": "DE",
-        "Netherlands": "NL",
-        "Global": "Global",
-        "Remote": "Remote"
-      };
-      const targetCode = codeMap[selectedCountry] || selectedCountry;
-
-      filtered = filtered.filter(p => {
-        if (!p.headquarters) return false;
-        // Handle "City, CC" or just "CC"
-        const parts = p.headquarters.split(",");
-        const locationCode = parts[parts.length - 1].trim();
-        return locationCode.toLowerCase() === targetCode.toLowerCase();
-      });
-    }
-
-    setTotalCount(filtered.length);
-
-    // Pagination slice
-    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
-    const end = start + PRODUCTS_PER_PAGE;
-    setProducts(filtered.slice(start, end));
-
+    fetchProducts();
   }, [
-    allProductsData,
-    loading,
     currentPage,
     debouncedSearchQuery,
     selectedCategory,
