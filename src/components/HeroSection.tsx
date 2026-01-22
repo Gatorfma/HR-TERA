@@ -243,7 +243,7 @@ const HeroSection = ({ products = [] }: HeroSectionProps) => {
       </div>
 
       {/* Product Carousels - Overlapping into both zones */}
-      <div className="relative -mt-16 z-10">
+      <div className="relative -mt-12 z-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
