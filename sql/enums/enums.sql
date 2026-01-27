@@ -1,45 +1,45 @@
-CREATE TYPE public.product_category AS ENUM ( 
-  'Applicant Tracking System (ATS)',
+CREATE TYPE public.product_category AS ENUM (
+  'ATS',
   'Smart Hiring Platforms',
-  'Human Resources Information System (HRIS)',
+  'Core HR (HRIS)',
   'Payroll',
-  'Consulting & Implementation Services',
-  'Learning Management Systems',
-  'Employee Engagement',
+  'Consulting & Implementation Services - Oracle HCM',
+  'Consulting & Implementation Services - SAP HR',
+  'LMS & L&D',
+  'Employee Engagement & Success & Experience',
   'Wellbeing',
   'Performance Management & OKR',
   'Assessment & Psychometrics',
-  'Workforce Management',
-  'Time & Attendance',
+  'Workforce Management / Time & Attendance',
   'Benefits & Perks Platforms',
-  'People Analytics',
+  'HR & People Analytics',
   'Talent Management',
   'Job Analysis & Compensation',
-  'Freelance & Gig Economy Platforms',
-  'Environment, Health & Safety (EHS)',
-  'Remote Working & Employee Monitoring Tools',
+  'Freelance and Gig Economy Platforms',
+  'EHS',
+  'Remote Working Tools / Employee Monitoring',
   'Feedback',
   'Recognition & Appreciation & Reward',
   'Internal Communication',
   'Employer Branding',
-  'Mobile Application',
+  'Applications (App Store, Google Play etc.)',
   'Youth HR',
   'Unified Communications',
   'Employee Background Check & Screening Solutions',
   'Employee Productivity Tools',
-  'AI Automation',
+  'HR with Automation + AI + RPA',
   'Fringe Benefits',
-  'Organizational Development (OD)',
+  'OD',
   'Continuous Improvement & Lean Management',
-  'Corporate Social Responsibility (CSR)',
+  'Corporate Social Responsibility - CSR',
   'Coaching',
   'Onboarding & Orientation'
 );
 
 CREATE TYPE public.tier AS ENUM (
   'freemium',
-  'silver',
-  'gold'
+  'plus',
+  'premium'
 );
 
 CREATE TYPE public.listing_status AS ENUM (

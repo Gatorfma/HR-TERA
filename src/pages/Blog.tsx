@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -15,14 +15,14 @@ const Blog = () => {
 
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = [...new Set(blogPosts.map(post => post.category))];
+    const cats = [...new Set(blogPosts.map((post) => post.category))];
     return cats.sort();
   }, []);
 
   // Filter posts by category
   const filteredPosts = useMemo(() => {
     if (!selectedCategory) return blogPosts;
-    return blogPosts.filter(post => post.category === selectedCategory);
+    return blogPosts.filter((post) => post.category === selectedCategory);
   }, [selectedCategory]);
 
   // Pagination
@@ -41,7 +41,7 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       {/* Hero Section */}
       <section className="pt-32 pb-16 bg-gradient-to-b from-muted/50 to-background">
         <div className="container">
@@ -67,21 +67,22 @@ const Blog = () => {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               className={`rounded-full ${
-                selectedCategory === null 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                selectedCategory === null
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "border-border text-foreground hover:bg-muted"
               }`}
               onClick={() => handleCategoryChange(null)}
             >
               All Posts
             </Button>
-            {categories.map(category => (
+
+            {categories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 className={`rounded-full ${
-                  selectedCategory === category 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                  selectedCategory === category
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "border-border text-foreground hover:bg-muted"
                 }`}
                 onClick={() => handleCategoryChange(category)}
@@ -119,27 +120,27 @@ const Blog = () => {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         </div>
+
                         <div className="p-6 flex flex-col flex-1">
                           <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3 w-fit">
                             {post.category}
                           </span>
+
                           <h3 className="font-heading font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
                             {post.title}
                           </h3>
-                          <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-1">
-                            {post.excerpt}
-                          </p>
+
+                          {/* Author (no avatar, icon instead) + publish date */}
                           <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
                             <div className="flex items-center gap-2">
-                              <img
-                                src={post.author.avatar}
-                                alt={post.author.name}
-                                className="w-7 h-7 rounded-full object-cover"
-                              />
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground">
+                                <User className="w-4 h-4" />
+                              </span>
                               <span className="text-sm text-foreground font-medium">
                                 {post.author.name}
                               </span>
                             </div>
+
                             <div className="flex items-center gap-1 text-muted-foreground text-xs">
                               <Calendar className="w-3 h-3" />
                               {post.publishDate}
@@ -159,19 +160,19 @@ const Blog = () => {
                     variant="outline"
                     size="icon"
                     className="rounded-full"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <Button
                       key={page}
                       variant={currentPage === page ? "default" : "outline"}
                       className={`rounded-full w-10 h-10 ${
-                        currentPage === page 
-                          ? "bg-primary text-primary-foreground" 
+                        currentPage === page
+                          ? "bg-primary text-primary-foreground"
                           : "border-border text-foreground hover:bg-muted"
                       }`}
                       onClick={() => setCurrentPage(page)}
@@ -179,12 +180,12 @@ const Blog = () => {
                       {page}
                     </Button>
                   ))}
-                  
+
                   <Button
                     variant="outline"
                     size="icon"
                     className="rounded-full"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                   >
                     <ChevronRight className="w-4 h-4" />

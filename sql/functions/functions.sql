@@ -25,11 +25,8 @@ grant execute on function public.is_admin() to service_role;
 
 -- ============================================================
 -- RPC: get_product_cards
--- - Read an overview of the products
--- - Pagination and filtering support
--- - Ranking: Gold first, then Silver, then Freemium
--- - Ranking within each tier: higher rating first
--- - Callable by anyone
+-- Purpose: Paginated fetch of products with server-side filtering
+-- (Search, Vendor, Category, Language, Country)
 -- ============================================================
 create or replace function public.get_product_cards(
   n integer,
@@ -37,6 +34,8 @@ create or replace function public.get_product_cards(
   product_filter  text default null,
   vendor_filter   text default null,
   category_filter public.product_category default null,
+  language_filter text default null,
+  country_filter  text default null,
   tier_filter     public.tier default null
 )
 returns table (
@@ -51,7 +50,9 @@ returns table (
   vendor_id        uuid,
   is_verified      boolean,
   company_name     text,
-  subscription     public.tier
+  subscription     public.tier,
+  languages        text[],
+  headquarters     text
 )
 language sql
 stable
@@ -70,7 +71,9 @@ as $$
     p.vendor_id,
     v.is_verified,
     v.company_name,
-    v.subscription
+    v.subscription,
+    p.languages,
+    v.headquarters
   from public.products p
   join public.vendors v
     on v.vendor_id = p.vendor_id
@@ -90,13 +93,21 @@ as $$
       or category_filter = any (p.categories)
     )
     and (
+      language_filter is null
+      or language_filter = any (p.languages)
+    )
+    and (
+      country_filter is null
+      or trim(substring(v.headquarters from '([^,]+)$')) ilike country_filter
+    )
+    and (
       tier_filter is null
       or v.subscription = tier_filter
     )
   order by
     case v.subscription
-      when 'gold' then 1
-      when 'silver' then 2
+      when 'premium' then 1
+      when 'plus' then 2
       else 3
     end,
     p.rating desc nulls last,
@@ -111,6 +122,8 @@ grant execute on function public.get_product_cards(
   text,
   text,
   public.product_category,
+  text,
+  text,
   public.tier
 ) to anon, authenticated, service_role;
 
@@ -342,8 +355,8 @@ as $$
   order by
     case t.tier
       when 'freemium' then 1
-      when 'silver' then 2
-      else 3
+      when 'plus' then 2
+      when 'premium' then 3
     end;
 $$;
 
@@ -2829,3 +2842,62 @@ grant execute on function public.update_my_vendor(
 grant execute on function public.update_my_vendor(
   text, text, text, text, text, text, text, date, text
 ) to service_role;
+
+
+-- ============================================================
+-- RPC: get_all_products_with_details
+-- Purpose: Fetch all approved products with extended details 
+-- (languages, headquarters) for client-side filtering.
+-- ============================================================
+create or replace function public.get_all_products_with_details()
+returns table (
+  product_id       uuid,
+  product_name     text,
+  main_category    public.product_category,
+  categories       public.product_category[],
+  short_desc       text,
+  logo             text,
+  pricing          text,
+  rating           double precision,
+  vendor_id        uuid,
+  is_verified      boolean,
+  company_name     text,
+  subscription     public.tier,
+  languages        text[],
+  headquarters     text
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    p.product_id,
+    p.product_name,
+    p.main_category,
+    p.categories,
+    p.short_desc,
+    p.logo,
+    p.pricing,
+    p.rating,
+    p.vendor_id,
+    v.is_verified,
+    v.company_name,
+    v.subscription,
+    p.languages,
+    v.headquarters
+  from public.products p
+  join public.vendors v
+    on v.vendor_id = p.vendor_id
+  where p.listing_status = 'approved'
+  order by
+    case v.subscription
+      when 'premium' then 1
+      when 'plus' then 2
+      else 3
+    end,
+    p.rating desc nulls last,
+    p.created_at desc;
+$$;
+
+grant execute on function public.get_all_products_with_details() to anon, authenticated, service_role;

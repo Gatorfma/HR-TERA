@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, Clock, ArrowLeft, Tag } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, Tag, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,10 @@ const BlogPost = () => {
     return content.split("\n\n").map((paragraph, index) => {
       if (paragraph.startsWith("## ")) {
         return (
-          <h2 key={index} className="text-2xl font-heading font-bold text-foreground mt-8 mb-4">
+          <h2
+            key={index}
+            className="text-2xl font-heading font-bold text-foreground mt-8 mb-4"
+          >
             {paragraph.replace("## ", "")}
           </h2>
         );
@@ -55,7 +58,11 @@ const BlogPost = () => {
 
       {/* Back Button */}
       <div className="container pt-24 pb-4">
-        <Button variant="ghost" className="text-muted-foreground hover:text-foreground" asChild>
+        <Button
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground"
+          asChild
+        >
           <Link to="/blog">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Blog
@@ -73,9 +80,11 @@ const BlogPost = () => {
           <span className="inline-block bg-primary/10 text-primary text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             {post.category}
           </span>
+
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-foreground mb-6 leading-tight">
             {post.title}
           </h1>
+
           <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -102,7 +111,7 @@ const BlogPost = () => {
           />
         </motion.div>
 
-        {/* Author Card */}
+        {/* Author Card (no avatar; icon instead) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -110,11 +119,10 @@ const BlogPost = () => {
           className="bg-card border border-border rounded-2xl p-6 mb-10"
         >
           <div className="flex items-start gap-4">
-            <img
-              src={post.author.avatar}
-              alt={post.author.name}
-              className="w-16 h-16 rounded-full object-cover"
-            />
+            <span className="inline-flex items-center justify-center w-16 h-16 rounded-full text-muted-foreground">
+              <User className="w-7 h-7" />
+            </span>
+
             <div>
               <h3 className="font-heading font-bold text-foreground text-lg">
                 {post.author.name}
@@ -122,9 +130,7 @@ const BlogPost = () => {
               <p className="text-primary text-sm font-medium mb-2">
                 {post.author.role}
               </p>
-              <p className="text-muted-foreground text-sm">
-                {post.author.bio}
-              </p>
+              <p className="text-muted-foreground text-sm">{post.author.bio}</p>
             </div>
           </div>
         </motion.div>
@@ -148,7 +154,7 @@ const BlogPost = () => {
         >
           <div className="flex items-center gap-2 flex-wrap">
             <Tag className="w-4 h-4 text-muted-foreground" />
-            {post.tags.map(tag => (
+            {post.tags.map((tag: string) => (
               <span
                 key={tag}
                 className="bg-muted text-muted-foreground text-sm px-3 py-1 rounded-full"
@@ -167,6 +173,7 @@ const BlogPost = () => {
             <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-8">
               Related Articles
             </h2>
+
             <div className="grid md:grid-cols-3 gap-6">
               {relatedPosts.map((relatedPost, index) => (
                 <motion.div
@@ -185,13 +192,16 @@ const BlogPost = () => {
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>
+
                       <div className="p-5">
                         <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full mb-2">
                           {relatedPost.category}
                         </span>
+
                         <h3 className="font-heading font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
                           {relatedPost.title}
                         </h3>
+
                         <div className="flex items-center gap-1 text-muted-foreground text-xs">
                           <Calendar className="w-3 h-3" />
                           {relatedPost.publishDate}

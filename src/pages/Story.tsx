@@ -67,7 +67,7 @@ const Story = () => {
 							<em>
 								1991 yılında, hazırlık sınıfında tanıştığım, fikirsel desteğini hiç
 								esirgemeyen İTÜ Endüstri’den sınıf arkadaşım{" "}
-								<strong><em>Dr. Doğan Mersin</em></strong>’e buradan tekrar teşekkür ederim.
+								<strong><em>Doğan</em></strong>’a buradan tekrar teşekkür ederim.
 							</em>
 						</p>
 

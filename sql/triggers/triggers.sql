@@ -3,18 +3,18 @@
 --
 -- Rules:
 -- 1) Categories:
---    - gold/silver: up to 5 items in products.categories
+--    - premium/plus: up to 5 items in products.categories
 --    - freemium: products.categories MUST be NULL
 --
 -- 2) Features:
---    - gold/silver: up to 10 items in products.features
+--    - premium/plus: up to 10 items in products.features
 --    - freemium: up to 3 items in products.features
 --
 -- 3) Video URL:
---    - Only gold/silver vendors can a have video_url (freemium must be NULL)
+--    - Only premium/plus vendors can a have video_url (freemium must be NULL)
 --
 -- 4) Demo Link:
---    - Only gold vendors can have a demo_link (silver/freemium must be NULL)
+--    - Only premium vendors can have a demo_link (plus/freemium must be NULL)
 -- ====================================================================
 create or replace function public.enforce_product_subscription_constraints()
 returns trigger
@@ -50,7 +50,7 @@ begin
     end if;
   else
     if cat_count > 5 then
-      raise exception 'gold/silver products can have at most 5 categories (got %).', cat_count
+      raise exception 'premium/plus products can have at most 5 categories (got %).', cat_count
         using errcode = '23514';
     end if;
   end if;
@@ -65,7 +65,7 @@ begin
     end if;
   else
     if feat_count > 10 then
-      raise exception 'gold/silver products can have at most 10 features (got %).', feat_count
+      raise exception 'premium/plus products can have at most 10 features (got %).', feat_count
         using errcode = '23514';
     end if;
   end if;
@@ -74,15 +74,15 @@ begin
   -- video_url constraints
   -- ----------------------------
   if v_tier = 'freemium' and new.video_url is not null then
-    raise exception 'Only gold/silver products can have video_url.'
+    raise exception 'Only premium/plus products can have video_url.'
       using errcode = '23514';
   end if;
 
   -- ----------------------------
   -- demo_link constraints (meeting_link renamed to demo_link)
   -- ----------------------------
-  if v_tier <> 'gold' and new.demo_link is not null then
-    raise exception 'Only gold products can have demo_link.'
+  if v_tier <> 'premium' and new.demo_link is not null then
+    raise exception 'Only premium products can have demo_link.'
       using errcode = '23514';
   end if;
 

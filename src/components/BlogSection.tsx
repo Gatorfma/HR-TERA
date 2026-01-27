@@ -1,4 +1,4 @@
-import { ArrowUpRight, Calendar } from "lucide-react";
+import { ArrowUpRight, Calendar, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -70,11 +70,9 @@ const BlogSection = () => {
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={post.author.avatar}
-                          alt={post.author.name}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
+                        <span className="inline-flex items-center justify-center w-16 h-16 rounded-full text-muted-foreground">
+                          <User className="w-8 h-8" />
+                        </span>
                         <span className="text-sm text-foreground font-medium">
                           {post.author.name}
                         </span>
