@@ -262,6 +262,8 @@ create or replace function public.get_product_count_filtered(
   product_filter  text default null,
   vendor_filter   text default null,
   category_filter public.product_category default null,
+  language_filter text default null,
+  country_filter  text default null,
   tier_filter     public.tier default null
 )
 returns integer
@@ -290,14 +292,22 @@ as $$
       or category_filter = any (p.categories)
     )
     and (
+      language_filter is null
+      or language_filter = any (p.languages)
+    )
+    and (
+      country_filter is null
+      or v.headquarters ilike '%' || country_filter
+    )
+    and (
       tier_filter is null
       or v.subscription = tier_filter
     );
 $$;
 
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, public.tier) to anon;
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, public.tier) to authenticated;
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, public.tier) to service_role;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to anon;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to authenticated;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to service_role;
 
 
 -- ============================================================
@@ -2921,3 +2931,60 @@ as $$
 $$;
 
 grant execute on function public.get_all_categories() to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_all_countries
+-- Purpose: Fetch all distinct countries from vendor headquarters
+-- Returns: Array of all unique country values sorted alphabetically
+-- Note: Extracts country from headquarters field (assumes format: "City, Country")
+-- ============================================================
+create or replace function public.get_all_countries()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select array_agg(distinct country order by country)
+  from (
+    select trim(substring(v.headquarters from '([^,]+)$')) as country
+    from public.vendors v
+    where v.headquarters is not null
+      and v.headquarters != ''
+      and exists (
+        select 1 from public.products p
+        where p.vendor_id = v.vendor_id
+          and p.listing_status = 'approved'
+      )
+  ) as countries
+  where country is not null and country != '';
+$$;
+
+grant execute on function public.get_all_countries() to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_all_languages
+-- Purpose: Fetch all distinct languages from products
+-- Returns: Array of all unique language values sorted alphabetically
+-- ============================================================
+create or replace function public.get_all_languages()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select array_agg(distinct lang order by lang)
+  from (
+    select unnest(p.languages) as lang
+    from public.products p
+    where p.listing_status = 'approved'
+      and p.languages is not null
+      and array_length(p.languages, 1) > 0
+  ) as languages
+  where lang is not null and lang != '';
+$$;
+
+grant execute on function public.get_all_languages() to anon, authenticated, service_role;

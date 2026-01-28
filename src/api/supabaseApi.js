@@ -1,12 +1,14 @@
 import { supabase } from "@/api/supabaseClient";
 
-export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null }) => {
+export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, languageFilter = null, countryFilter = null, tierFilter = null }) => {
     const { data, error } = await supabase.rpc('get_product_cards', {
         n,
         page,
         product_filter: productFilter,
         vendor_filter: vendorFilter,
         category_filter: categoryFilter,
+        language_filter: languageFilter,
+        country_filter: countryFilter,
         tier_filter: tierFilter,
     });
   
@@ -14,11 +16,13 @@ export const getProducts = async ({ n, page, productFilter = null, vendorFilter 
     return data ?? [];
 };
 
-export const getProductCountFiltered = async ({ productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null }) => {
+export const getProductCountFiltered = async ({ productFilter = null, vendorFilter = null, categoryFilter = null, languageFilter = null, countryFilter = null, tierFilter = null }) => {
     const { data, error } = await supabase.rpc('get_product_count_filtered', {
         product_filter: productFilter,
         vendor_filter: vendorFilter,
         category_filter: categoryFilter,
+        language_filter: languageFilter,
+        country_filter: countryFilter,
         tier_filter: tierFilter,
     });
   
@@ -248,6 +252,22 @@ export const updateMyVendor = async ({
 
 export const getAllCategories = async () => {
     const { data, error } = await supabase.rpc("get_all_categories");
+
+    if (error) throw error;
+    return data ?? [];
+};
+
+export const getAllCountries = async () => {
+    const { data, error } = await supabase.rpc("get_all_countries");
+    console.log("getAllCountries response:", { data, error });
+
+    if (error) throw error;
+    return data ?? [];
+};
+
+export const getAllLanguages = async () => {
+    const { data, error } = await supabase.rpc("get_all_languages");
+    console.log("getAllLanguages response:", { data, error });
 
     if (error) throw error;
     return data ?? [];

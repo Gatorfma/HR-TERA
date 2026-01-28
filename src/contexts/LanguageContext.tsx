@@ -35,7 +35,6 @@ const en: Record<string, string> = {
 
   // Products Section
   "products.title": "Popular Products",
-  "products.subtitle": "Featured premium-tier solutions trusted by leading companies",
   "products.browseAll": "Browse all",
   "products.searchPlaceholder": "Search Products",
   "products.showing": "Showing",
@@ -53,6 +52,10 @@ const en: Record<string, string> = {
   "products.free": "Free",
   "products.allProducts": "All Products",
   "products.clearAllFilters": "Clear all filters",
+  "products.filterCountry": "Country",
+  "products.filterLanguage": "Language",
+  "products.allCountries": "All Countries",
+  "products.allLanguages": "All Languages",
 
   // Vendors Section
   "vendors.title": "Vendors",
@@ -402,7 +405,6 @@ const tr: Record<string, string> = {
 
   // Products Section
   "products.title": "Popüler Ürünler",
-  "products.subtitle": "Lider şirketlerin güvendiği premium seviye çözümler",
   "products.browseAll": "Tümünü gör",
   "products.searchPlaceholder": "Ürün Ara",
   "products.showing": "Gösterilen",
@@ -420,6 +422,10 @@ const tr: Record<string, string> = {
   "products.free": "Ücretsiz",
   "products.allProducts": "Tüm Ürünler",
   "products.clearAllFilters": "Tüm filtreleri temizle",
+  "products.filterCountry": "Ülke",
+  "products.filterLanguage": "Dil",
+  "products.allCountries": "Tüm Ülkeler",
+  "products.allLanguages": "Tüm Diller",
 
   // Vendors Section
   "vendors.title": "Satıcılar",
