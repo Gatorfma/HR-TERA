@@ -1,15 +1,15 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
-import { getProducts, getProductCountFiltered } from "@/api/supabaseApi";
+import { getProducts, getProductCountFiltered, getAllCategories } from "@/api/supabaseApi";
 import type { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PRODUCT_CATEGORIES } from "@/lib/admin-types";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -29,8 +29,8 @@ const Products = () => {
   
   const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
     { value: "all", label: t("products.allTiers") },
-    { value: "gold", label: t("products.gold"), icon: <Crown className="w-3.5 h-3.5" /> },
-    { value: "silver", label: t("products.silver"), icon: <Award className="w-3.5 h-3.5" /> },
+    { value: "premium", label: t("products.premium"), icon: <Crown className="w-3.5 h-3.5" /> },
+    { value: "plus", label: t("products.plus"), icon: <Award className="w-3.5 h-3.5" /> },
     { value: "freemium", label: t("products.free") },
   ];
   
@@ -52,9 +52,19 @@ const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
 
-  // Initialize categories from PRODUCT_CATEGORIES
+  // Fetch categories from database
   useEffect(() => {
-    setAllCategories(["All Products", ...PRODUCT_CATEGORIES]);
+    const fetchCategories = async () => {
+      try {
+        const categories = await getAllCategories();
+        setAllCategories(["All Products", ...categories]);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+        // Fallback to empty categories on error
+        setAllCategories(["All Products"]);
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Debounce search query
@@ -82,7 +92,7 @@ const Products = () => {
       setSelectedCategory("All Products");
     }
     
-    if (tierFromUrl && ["gold", "silver", "freemium"].includes(tierFromUrl)) {
+    if (tierFromUrl && ["premium", "plus", "freemium"].includes(tierFromUrl)) {
       setSelectedTier(tierFromUrl as Tier);
     } else {
       setSelectedTier("all");
@@ -248,9 +258,9 @@ const Products = () => {
                         onClick={() => handleTierSelect(tier.value)}
                         className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
                           selectedTier === tier.value
-                            ? tier.value === "gold"
+                            ? tier.value === "premium"
                               ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "silver"
+                              : tier.value === "plus"
                               ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
                               : "bg-primary text-primary-foreground shadow-sm"
                             : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
@@ -266,21 +276,21 @@ const Products = () => {
                 {/* Category Filter */}
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">{t("products.category")}</h3>
-                  <div className="flex flex-wrap gap-2 max-h-96 p-2 overflow-y-auto">
-                    {allCategories.map((category) => (
-                      <button
-                        key={category}
-                        onClick={() => handleCategorySelect(category)}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                          selectedCategory === category
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                        }`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={(value) => handleCategorySelect(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("products.category")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Clear Filters */}

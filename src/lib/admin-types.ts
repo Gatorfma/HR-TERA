@@ -125,85 +125,10 @@ export type AdminErrorCode = typeof AdminErrorCodes[keyof typeof AdminErrorCodes
 // ============================================================
 
 /**
- * Product category enum matching database
+ * Product category - now dynamic from database enum
+ * Use getAllCategories() from supabaseApi to fetch available values
  */
-export type ProductCategory =
-  | 'Applicant Tracking System (ATS)'
-  | 'Smart Hiring Platforms'
-  | 'Human Resources Information System (HRIS)'
-  | 'Payroll'
-  | 'Consulting & Implementation Services'
-  | 'Learning Management Systems'
-  | 'Employee Engagement'
-  | 'Wellbeing'
-  | 'Performance Management & OKR'
-  | 'Assessment & Psychometrics'
-  | 'Workforce Management'
-  | 'Time & Attendance'
-  | 'Benefits & Perks Platforms'
-  | 'People Analytics'
-  | 'Talent Management'
-  | 'Job Analysis & Compensation'
-  | 'Freelance & Gig Economy Platforms'
-  | 'Environment, Health & Safety (EHS)'
-  | 'Remote Working & Employee Monitoring Tools'
-  | 'Feedback'
-  | 'Recognition & Appreciation & Reward'
-  | 'Internal Communication'
-  | 'Employer Branding'
-  | 'Mobile Application'
-  | 'Youth HR'
-  | 'Unified Communications'
-  | 'Employee Background Check & Screening Solutions'
-  | 'Employee Productivity Tools'
-  | 'AI Automation'
-  | 'Fringe Benefits'
-  | 'Organizational Development (OD)'
-  | 'Continuous Improvement & Lean Management'
-  | 'Corporate Social Responsibility (CSR)'
-  | 'Coaching'
-  | 'Onboarding & Orientation';
-
-/**
- * All available product categories
- */
-export const PRODUCT_CATEGORIES: ProductCategory[] = [
-  'Applicant Tracking System (ATS)',
-  'Smart Hiring Platforms',
-  'Human Resources Information System (HRIS)',
-  'Payroll',
-  'Consulting & Implementation Services',
-  'Learning Management Systems',
-  'Employee Engagement',
-  'Wellbeing',
-  'Performance Management & OKR',
-  'Assessment & Psychometrics',
-  'Workforce Management',
-  'Time & Attendance',
-  'Benefits & Perks Platforms',
-  'People Analytics',
-  'Talent Management',
-  'Job Analysis & Compensation',
-  'Freelance & Gig Economy Platforms',
-  'Environment, Health & Safety (EHS)',
-  'Remote Working & Employee Monitoring Tools',
-  'Feedback',
-  'Recognition & Appreciation & Reward',
-  'Internal Communication',
-  'Employer Branding',
-  'Mobile Application',
-  'Youth HR',
-  'Unified Communications',
-  'Employee Background Check & Screening Solutions',
-  'Employee Productivity Tools',
-  'AI Automation',
-  'Fringe Benefits',
-  'Organizational Development (OD)',
-  'Continuous Improvement & Lean Management',
-  'Corporate Social Responsibility (CSR)',
-  'Coaching',
-  'Onboarding & Orientation',
-];
+export type ProductCategory = string;
 
 /**
  * Admin product view - returned from admin_get_products RPC

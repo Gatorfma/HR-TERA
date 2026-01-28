@@ -2901,3 +2901,23 @@ as $$
 $$;
 
 grant execute on function public.get_all_products_with_details() to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_all_categories
+-- Purpose: Fetch all product categories from the enum type
+-- Returns: Array of all category values sorted alphabetically
+-- ============================================================
+create or replace function public.get_all_categories()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select array_agg(enumlabel::text order by enumlabel)
+  from pg_enum
+  where enumtypid = 'public.product_category'::regtype;
+$$;
+
+grant execute on function public.get_all_categories() to anon, authenticated, service_role;

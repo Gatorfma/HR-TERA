@@ -11,7 +11,8 @@ import { ArrowLeft, User, Link as LinkIcon, Tag, Sparkles, Save, AlertTriangle, 
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminCreateProduct, adminLookupVendor } from "@/api/adminProductsApi";
-import { PRODUCT_CATEGORIES, ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
+import { getAllCategories } from "@/api/supabaseApi";
+import { ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 
 interface FormData {
@@ -54,9 +55,20 @@ const ProductCreatePage = () => {
   const [categorySearch, setCategorySearch] = useState("");
   const [featureInput, setFeatureInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<ProductCategory[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Fetch categories from database
+    const fetchCategories = async () => {
+      try {
+        const categories = await getAllCategories();
+        setAvailableCategories(categories);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Determine effective tier
@@ -211,7 +223,7 @@ const ProductCreatePage = () => {
     }
   };
 
-  const filteredCategories = PRODUCT_CATEGORIES.filter(c =>
+  const filteredCategories = availableCategories.filter(c =>
     c.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
@@ -379,7 +391,7 @@ const ProductCreatePage = () => {
                       <SelectValue placeholder="Kategori seçin" />
                     </SelectTrigger>
                     <SelectContent>
-                      {PRODUCT_CATEGORIES.map((category) => (
+                      {availableCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>

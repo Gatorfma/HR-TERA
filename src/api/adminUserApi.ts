@@ -19,7 +19,7 @@ import { Tier } from '@/lib/types';
 // Validation helpers
 // ============================================================
 
-const VALID_TIERS: Tier[] = ['freemium', 'silver', 'gold'];
+const VALID_TIERS: Tier[] = ['freemium', 'plus', 'premium'];
 
 function isValidTier(tier: string): tier is Tier {
   return VALID_TIERS.includes(tier as Tier);

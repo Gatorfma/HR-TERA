@@ -118,21 +118,21 @@ const SettingsTab = () => {
 
   if (!user) return null;
 
-  const tierOrder = { freemium: 0, silver: 1, gold: 2 };
-  const isGold = user.vendorTier === "gold";
-  const isPaid = tierOrder[user.vendorTier] >= tierOrder.silver;
+  const tierOrder = { freemium: 0, plus: 1, premium: 2 };
+  const isPremium = user.vendorTier === "premium";
+  const isPaid = tierOrder[user.vendorTier] >= tierOrder.plus;
 
-  const sections: { id: SettingsSection; label: string; icon: React.ReactNode; minTier?: "silver" | "gold" }[] =
+  const sections: { id: SettingsSection; label: string; icon: React.ReactNode; minTier?: "plus" | "premium" }[] =
     [
       { id: "account", label: t("settings.nav.account"), icon: <User className="w-4 h-4" /> },
       { id: "vendor", label: t("settings.nav.vendor"), icon: <Building2 className="w-4 h-4" /> },
       { id: "billing", label: t("settings.nav.billing"), icon: <CreditCard className="w-4 h-4" /> },
-      { id: "team", label: t("settings.nav.team"), icon: <Users className="w-4 h-4" />, minTier: "gold" },
+      { id: "team", label: t("settings.nav.team"), icon: <Users className="w-4 h-4" />, minTier: "premium" },
       {
         id: "campaigns",
         label: t("settings.nav.campaigns"),
         icon: <Megaphone className="w-4 h-4" />,
-        minTier: "gold",
+        minTier: "premium",
       },
     ];
 
@@ -491,8 +491,8 @@ const SettingsTab = () => {
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                {user.vendorTier === "gold" && <Crown className="w-5 h-5 text-primary" />}
-                {user.vendorTier === "silver" && <Award className="w-5 h-5 text-muted-foreground" />}
+                {user.vendorTier === "premium" && <Crown className="w-5 h-5 text-primary" />}
+                {user.vendorTier === "plus" && <Award className="w-5 h-5 text-muted-foreground" />}
                 <span className="text-lg font-semibold text-foreground capitalize">
                   {user.vendorTier}
                 </span>
@@ -501,7 +501,7 @@ const SettingsTab = () => {
                 <p className="text-sm text-muted-foreground">{t("settings.billing.nextBilling")}: January 15, 2025</p>
               )}
             </div>
-            {user.vendorTier !== "gold" && (
+            {user.vendorTier !== "premium" && (
               <Button className="rounded-full gap-2">
                 <Crown className="w-4 h-4" />
                 {t("settings.billing.upgrade")}
@@ -514,20 +514,20 @@ const SettingsTab = () => {
               <p className="text-sm text-muted-foreground">{t("settings.billing.freemiumNote")}</p>
 
               <div className="bg-muted/50 rounded-lg p-4">
-                <p className="text-sm font-medium text-foreground mb-2">{t("settings.billing.unlockSilverTitle")}</p>
+                <p className="text-sm font-medium text-foreground mb-2">{t("settings.billing.unlockPlusTitle")}</p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• {t("settings.billing.unlockSilver1")}</li>
-                  <li>• {t("settings.billing.unlockSilver2")}</li>
-                  <li>• {t("settings.billing.unlockSilver3")}</li>
+                  <li>• {t("settings.billing.unlockPlus1")}</li>
+                  <li>• {t("settings.billing.unlockPlus2")}</li>
+                  <li>• {t("settings.billing.unlockPlus3")}</li>
                 </ul>
               </div>
 
               <div className="bg-muted/50 rounded-lg p-4">
-                <p className="text-sm font-medium text-foreground mb-2">{t("settings.billing.unlockGoldTitle")}</p>
+                <p className="text-sm font-medium text-foreground mb-2">{t("settings.billing.unlockPremiumTitle")}</p>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• {t("settings.billing.unlockGold1")}</li>
-                  <li>• {t("settings.billing.unlockGold2")}</li>
-                  <li>• {t("settings.billing.unlockGold3")}</li>
+                  <li>• {t("settings.billing.unlockPremium1")}</li>
+                  <li>• {t("settings.billing.unlockPremium2")}</li>
+                  <li>• {t("settings.billing.unlockPremium3")}</li>
                 </ul>
               </div>
             </div>
@@ -545,7 +545,7 @@ const SettingsTab = () => {
                   <p className="text-2xl font-bold text-foreground">2,847</p>
                 </div>
               </div>
-              {isGold && (
+              {isPremium && (
                 <div className="pt-4 border-t border-border">
                   <Button variant="outline" className="rounded-xl">
                     {t("settings.billing.invoiceHistory")}

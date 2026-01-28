@@ -338,8 +338,8 @@ const ProductDetail = () => {
   // For unclaimed products, force freemium tier behavior
   const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
   const tier = effectiveTier;
-  const isSilverOrGold = tier === "silver" || tier === "gold";
-  const isGold = tier === "gold";
+  const isPlusOrPremium = tier === "plus" || tier === "premium";
+  const isPremium = tier === "premium";
   const categories = product.categories || [product.category];
 
   const vendorLogo = vendorDetails?.logo || product.vendor?.logo;
@@ -356,10 +356,10 @@ const ProductDetail = () => {
         {/* Hero Section */}
         <div
           className={`relative overflow-hidden ${
-            isGold ? "bg-gradient-to-br from-primary/5 via-background to-primary/10" : ""
+            isPremium ? "bg-gradient-to-br from-primary/5 via-background to-primary/10" : ""
           }`}
         >
-          {isGold && (
+          {isPremium && (
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.1),transparent_50%)]" />
           )}
 
@@ -404,7 +404,7 @@ const ProductDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={`mb-6 ${
-                isGold
+                isPremium
                   ? "p-6 rounded-2xl border border-primary/20 bg-background/50 backdrop-blur-sm shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
                   : ""
               }`}
@@ -426,7 +426,7 @@ const ProductDetail = () => {
                     )}
 
                     <div className="flex-1 min-w-0">
-                      {!isUnclaimed && <TierBadge tier={tier} showFeatured={isGold} />}
+                      {!isUnclaimed && <TierBadge tier={tier} showFeatured={isPremium} />}
 
                       <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2 break-words">
                         {product.name}
@@ -451,7 +451,7 @@ const ProductDetail = () => {
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
-                    {isUnclaimed ? null : isGold ? (
+                    {isUnclaimed ? null : isPremium ? (
                       <>
                         <Button
                           className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -483,7 +483,7 @@ const ProductDetail = () => {
                           {t("productDetail.downloadBrochure")}
                         </Button>
                       </>
-                    ) : isSilverOrGold ? (
+                    ) : isPlusOrPremium ? (
                       <>
                         <Button className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg" asChild>
                           <a
@@ -518,8 +518,8 @@ const ProductDetail = () => {
                   </div>
                 </div>
 
-                {/* Hero Image (Silver/Gold only) */}
-                {isSilverOrGold && product.screenshots && product.screenshots.length > 0 && (
+                {/* Hero Image (Plus/Premium only) */}
+                {isPlusOrPremium && product.screenshots && product.screenshots.length > 0 && (
                   <div className="lg:w-[45%] min-w-0">
                     <div className="rounded-xl overflow-hidden border border-border">
                       <img

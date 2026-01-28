@@ -21,24 +21,24 @@ const TierBadge = ({ tier, size = "md" }: TierBadgeProps) => {
     lg: "w-5 h-5"
   };
 
-  if (tier === "gold") {
+  if (tier === "premium") {
     return (
       <span 
         className={`inline-flex items-center rounded-full font-semibold bg-primary text-[#111827] ${sizeClasses[size]}`}
       >
         <Crown className={iconSizes[size]} />
-        Gold Partner
+        Premium Partner
       </span>
     );
   }
 
-  if (tier === "silver") {
+  if (tier === "plus") {
     return (
       <span 
         className={`inline-flex items-center rounded-full font-semibold bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] ${sizeClasses[size]}`}
       >
         <Award className={iconSizes[size]} />
-        Silver Vendor
+        Plus Vendor
       </span>
     );
   }

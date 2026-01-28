@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileSpreadsheet, Upload, CheckCircle, AlertCircle, X, RefreshCw, ArrowRight, Check, Loader2, ArrowLeft } from "lucide-react";
+import { FileSpreadsheet, Upload, CheckCircle, AlertCircle, X, RefreshCw, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
 import * as XLSX from "xlsx";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { PRODUCT_CATEGORIES, ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
+import { ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
 import { adminLookupVendor, adminBulkCreateProducts } from "@/api/adminProductsApi";
+import { getAllCategories } from "@/api/supabaseApi";
 
 interface ParsedProduct {
   id: string;
@@ -48,9 +49,20 @@ const ProductBulkUploadPage = () => {
     failed: number;
     errors: { name: string; message: string }[];
   } | null>(null);
+  const [availableCategories, setAvailableCategories] = useState<ProductCategory[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Fetch categories from database
+    const fetchCategories = async () => {
+      try {
+        const categories = await getAllCategories();
+        setAvailableCategories(categories);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Handle Vendor ID blur - lookup vendor
@@ -89,13 +101,13 @@ const ProductBulkUploadPage = () => {
     const normalized = rawCategory.toLowerCase().trim();
     
     // Exact match (case-insensitive)
-    const exactMatch = PRODUCT_CATEGORIES.find(
+    const exactMatch = availableCategories.find(
       (cat) => cat.toLowerCase() === normalized
     );
     if (exactMatch) return exactMatch;
     
     // Partial match
-    const partialMatch = PRODUCT_CATEGORIES.find(
+    const partialMatch = availableCategories.find(
       (cat) =>
         cat.toLowerCase().includes(normalized) ||
         normalized.includes(cat.toLowerCase())
@@ -103,7 +115,7 @@ const ProductBulkUploadPage = () => {
     if (partialMatch) return partialMatch;
     
     return null;
-  }, []);
+  }, [availableCategories]);
 
   const validateWebsite = (url: string): boolean => {
     if (!url || url.trim() === "") return true; // Website is optional
@@ -459,11 +471,11 @@ const ProductBulkUploadPage = () => {
                 <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
                   <CardHeader>
                     <CardTitle className="text-lg">Geçerli Kategoriler</CardTitle>
-                    <CardDescription>Veritabanındaki mevcut kategoriler ({PRODUCT_CATEGORIES.length})</CardDescription>
+                    <CardDescription>Veritabanındaki mevcut kategoriler ({availableCategories.length})</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 max-h-[400px] overflow-y-auto">
-                      {PRODUCT_CATEGORIES.map((category) => (
+                      {availableCategories.map((category) => (
                         <Badge
                           key={category}
                           variant="secondary"
@@ -537,7 +549,7 @@ const ProductBulkUploadPage = () => {
                         <ProductRow
                           key={product.id}
                           product={product}
-                          categories={PRODUCT_CATEGORIES}
+                          categories={availableCategories}
                           onMap={handleMapCategory}
                           onReject={handleRejectProduct}
                         />

@@ -146,9 +146,9 @@ const UserSettingsTab = () => {
   // Tier badge color
   const getTierBadgeColor = (tier: string | null) => {
     switch (tier) {
-      case "gold":
+      case "premium":
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "silver":
+      case "plus":
         return "bg-gray-100 text-gray-800 border-gray-300";
       default:
         return "bg-green-100 text-green-800 border-green-300";
@@ -415,7 +415,7 @@ const UserSettingsTab = () => {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Tier & Abonelik</CardTitle>
-                <CardDescription>Freemium/Silver/Gold erişimlerini yönetin</CardDescription>
+                <CardDescription>Freemium/Plus/Premium erişimlerini yönetin</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -429,8 +429,8 @@ const UserSettingsTab = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="freemium">Freemium</SelectItem>
-                      <SelectItem value="silver">Silver</SelectItem>
-                      <SelectItem value="gold">Gold</SelectItem>
+                      <SelectItem value="plus">Plus</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">

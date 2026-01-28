@@ -231,3 +231,10 @@ export const updateMyVendor = async ({
     // but depending on settings it can come back as [row]. This handles both.
     return Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
 };
+
+export const getAllCategories = async () => {
+    const { data, error } = await supabase.rpc("get_all_categories");
+
+    if (error) throw error;
+    return data ?? [];
+};
