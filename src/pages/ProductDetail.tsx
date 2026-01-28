@@ -184,7 +184,9 @@ const ProductDetail = () => {
 
       try {
         if (isUUID(slug)) {
+          console.log("Fetching product details for UUID:", slug);
           const apiProduct = await getProductDetails(slug);
+          console.log("API response:", apiProduct);
           if (apiProduct) {
             const mappedProduct = mapApiToProduct(apiProduct, t);
             setProduct(mappedProduct);

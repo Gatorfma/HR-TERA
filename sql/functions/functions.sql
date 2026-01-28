@@ -1021,12 +1021,12 @@ grant execute on function public.admin_get_vendors_count(text) to service_role;
 -- ============================================================
 -- RPC: admin_update_vendor_tier
 -- ============================================================
--- Purpose: Update a vendor's subscription tier (freemium/silver/gold)
+-- Purpose: Update a vendor's subscription tier (freemium/plus/premium)
 -- This controls the vendor's access level and listing priority
 --
 -- Parameters:
 --   p_vendor_id : UUID of the vendor to update
---   p_new_tier  : New tier value (freemium, silver, or gold)
+--   p_new_tier  : New tier value (freemium, plus, or premium)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1335,8 +1335,8 @@ begin
     instagram_link = coalesce(nullif(v_claimer.instagram_link, ''), v_claimed.instagram_link),
     is_verified = v_claimer.is_verified or v_claimed.is_verified,
     subscription = case
-      when v_claimer.subscription = 'gold' or v_claimed.subscription = 'gold' then 'gold'::public.tier
-      when v_claimer.subscription = 'silver' or v_claimed.subscription = 'silver' then 'silver'::public.tier
+      when v_claimer.subscription = 'premium' or v_claimed.subscription = 'premium' then 'premium'::public.tier
+      when v_claimer.subscription = 'plus' or v_claimed.subscription = 'plus' then 'plus'::public.tier
       else 'freemium'::public.tier
     end,
     updated_at = now()
@@ -2054,7 +2054,7 @@ begin
     end if;
   end if;
 
-  if v_tier <> 'gold' then
+  if v_tier <> 'premium' then
     p_demo_link := null;
   end if;
 
@@ -2234,8 +2234,8 @@ begin
       raise exception 'Invalid demo link format. Must start with http:// or https://'
         using errcode = 'P0400';
     end if;
-    -- Only gold tier can have demo_link
-    if v_tier <> 'gold' then
+    -- Only premium tier can have demo_link
+    if v_tier <> 'premium' then
       p_demo_link := null;
     end if;
   end if;
@@ -2386,8 +2386,8 @@ begin
     ) desc,
     -- Then by tier
     case v.subscription
-      when 'gold' then 1
-      when 'silver' then 2
+      when 'premium' then 1
+      when 'plus' then 2
       else 3
     end,
     -- Then by rating

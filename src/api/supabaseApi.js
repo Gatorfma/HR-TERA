@@ -27,13 +27,27 @@ export const getProductCountFiltered = async ({ productFilter = null, vendorFilt
 };
 
 export const getProductDetails = async (productId) => {
+    console.log("Calling get_product_details RPC with:", productId);
+    
     const { data, error } = await supabase.rpc("get_product_details", {
       p_product_id: productId,
     });
   
-    if (error) throw error;
+    console.log("RPC response - data:", data, "error:", error);
   
-    return data?.[0] ?? null;
+    if (error) {
+      console.error("Error fetching product details:", error);
+      throw error;
+    }
+  
+    // Handle case where function returns empty array
+    if (!data || data.length === 0) {
+      console.warn("Product not found or not approved:", productId);
+      return null;
+    }
+  
+    console.log("Returning product:", data[0]);
+    return data[0];
 };
 
 export const getProductCount = async () => {
