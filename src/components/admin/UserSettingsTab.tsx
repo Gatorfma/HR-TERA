@@ -132,7 +132,7 @@ const UserSettingsTab = () => {
     if (result.success) {
       toast({
         title: "Kullanıcı atandı",
-        description: "Kullanıcı başarıyla vendor'a bağlandı.",
+        description: "Kullanıcı başarıyla şirket'e bağlandı.",
       });
       setUserSearchInput("");
       setUserSearchResults([]);
@@ -143,6 +143,7 @@ const UserSettingsTab = () => {
         variant: "destructive",
       });
     }
+    setSearchInput("");
   };
 
   // Handle removing user from vendor
@@ -154,7 +155,7 @@ const UserSettingsTab = () => {
     if (result.success) {
       toast({
         title: "Kullanıcı kaldırıldı",
-        description: "Kullanıcı vendor'dan başarıyla kaldırıldı.",
+        description: "Kullanıcı şirket'ten başarıyla kaldırıldı.",
       });
     } else {
       toast({
@@ -341,11 +342,11 @@ const UserSettingsTab = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left Side - Vendor List */}
-      <Card className="lg:col-span-1">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Vendorlar</CardTitle>
+      <Card className="lg:col-span-1 flex flex-col max-h-[72vh]">
+        <CardHeader className="pb-3 flex-shrink-0">
+          <CardTitle className="text-lg">Şirketler</CardTitle>
           <CardDescription>
-            Sistemdeki vendorları yönetin ({totalCount} vendor)
+            Sistemdeki şirketleri yönetin ({totalCount} şirket)
           </CardDescription>
           <div className="relative mt-2">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -357,13 +358,13 @@ const UserSettingsTab = () => {
             />
           </div>
         </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-[500px]">
+        <CardContent className="p-0 flex-1 min-h-0 flex flex-col">
+          <ScrollArea className="flex-1">
             {isLoading ? (
               <UserListSkeleton />
             ) : vendors.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                <p>Vendor bulunamadı.</p>
+                <p>Şirket bulunamadı.</p>
               </div>
             ) : (
               <div className="space-y-1 p-2">
@@ -401,7 +402,7 @@ const UserSettingsTab = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between p-3 border-t">
+            <div className="flex items-center justify-between p-3 border-t flex-shrink-0">
               <Button
                 variant="outline"
                 size="sm"
@@ -435,41 +436,41 @@ const UserSettingsTab = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">Vendor Bilgileri</CardTitle>
+                  <CardTitle className="text-lg">Kullanıcı Bilgileri</CardTitle>
                 </div>
-                <CardDescription>Vendor detayları (salt okunur)</CardDescription>
+                <CardDescription>Kullanıcı detayları</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Label className="flex items-center gap-2 text-muted-foreground h-5">
                       <Mail className="h-4 w-4" />
                       Bağlı E-posta
                     </Label>
-                    <Input value={selectedVendor.user_email ?? "Bağlı değil"} disabled className="bg-muted" />
+                    <Input value={selectedVendor.user_email ?? "Bağlı değil"} disabled className="bg-muted h-10" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Doğrulama Durumu</Label>
-                    <div className="flex items-center gap-3">
+                    <Label className="h-5">Onaylanma Durumu</Label>
+                    <div className="flex items-center gap-3 h-8">
                       <Select
                         value={selectedVendor.is_verified ? "verified" : "unverified"}
                         onValueChange={(value) => handleUpdateVerification(value === "verified")}
                         disabled={isUpdatingVerification}
                       >
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px] h-10">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="verified">
                             <span className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                              Doğrulanmış
+                              Onaylı
                             </span>
                           </SelectItem>
                           <SelectItem value="unverified">
                             <span className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                              Doğrulanmamış
+                              Onaylı Değil
                             </span>
                           </SelectItem>
                         </SelectContent>
@@ -478,18 +479,18 @@ const UserSettingsTab = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Label className="flex items-center gap-2 text-muted-foreground h-5">
                       <Calendar className="h-4 w-4" />
                       Kayıt Tarihi
                     </Label>
-                    <Input value={formatDate(selectedVendor.created_at)} disabled className="bg-muted" />
+                    <Input value={formatDate(selectedVendor.created_at)} disabled className="bg-muted h-10" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-muted-foreground">
+                    <Label className="flex items-center gap-2 text-muted-foreground h-5">
                       <Clock className="h-4 w-4" />
                       Son Güncelleme
                     </Label>
-                    <Input value={formatDate(selectedVendor.updated_at)} disabled className="bg-muted" />
+                    <Input value={formatDate(selectedVendor.updated_at)} disabled className="bg-muted h-10" />
                   </div>
                 </div>
               </CardContent>
@@ -500,10 +501,10 @@ const UserSettingsTab = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">Şirket Bilgisi</CardTitle>
+                  <CardTitle className="text-lg">Şirket Bilgileri</CardTitle>
                 </div>
                 <CardDescription>
-                  vendors tablosundaki ilgili kaydı günceller.
+                  İlgili kayıtları günceller
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -526,7 +527,7 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="companySize">Şirket Büyüklüğü</Label>
+                    <Label htmlFor="companySize">Çalışan Sayısı</Label>
                     <Input
                       id="companySize"
                       value={editedCompanySize}
@@ -535,7 +536,7 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="headquarters">Merkez</Label>
+                    <Label htmlFor="headquarters">Ülke</Label>
                     <Input
                       id="headquarters"
                       value={editedHeadquarters}
@@ -562,7 +563,7 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="logo">Logo URL</Label>
+                    <Label htmlFor="logo">Logo (URL veya Base64)</Label>
                     <Input
                       id="logo"
                       value={editedLogo}
@@ -580,7 +581,7 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="companyDesc">Şirket Açıklaması</Label>
+                    <Label htmlFor="companyDesc">Şirket Hakkında</Label>
                     <textarea
                       id="companyDesc"
                       value={editedCompanyDesc}
@@ -591,7 +592,7 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="foundedAt">Kuruluş Tarihi</Label>
+                    <Label htmlFor="foundedAt">Kuruluş Yılı</Label>
                     <Input
                       id="foundedAt"
                       type="date"
@@ -614,12 +615,12 @@ const UserSettingsTab = () => {
             {/* Tier & Abonelik */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Tier & Abonelik</CardTitle>
-                <CardDescription>Freemium/Plus/Premium erişimlerini yönetin</CardDescription>
+                <CardTitle className="text-lg">Abonelik</CardTitle>
+                <CardDescription>Freemium/Plus/Premium abonelikleri yönetin</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="tier">Tier</Label>
+                  <Label htmlFor="tier">Üyelik</Label>
                   <Select
                     value={editedTier}
                     onValueChange={(value: Tier) => setEditedTier(value)}
@@ -633,9 +634,6 @@ const UserSettingsTab = () => {
                       <SelectItem value="premium">Premium</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Bu işlem vendors tablosundaki subscription alanını günceller.
-                  </p>
                 </div>
                 <Button
                   onClick={handleUpdateTier}
@@ -643,7 +641,7 @@ const UserSettingsTab = () => {
                   className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   {isUpdatingTier && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Güncelle
+                  Kaydet
                 </Button>
               </CardContent>
             </Card>
@@ -653,9 +651,9 @@ const UserSettingsTab = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <UserPlus className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-lg">Kullanıcı Atama</CardTitle>
+                  <CardTitle className="text-lg">Kullanıcı Bağlama</CardTitle>
                 </div>
-                <CardDescription>Vendor'a bir kullanıcı hesabı bağlayın</CardDescription>
+                <CardDescription>Şirket'e bir kullanıcı hesabı bağlayın</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Current assigned user */}
@@ -749,9 +747,9 @@ const UserSettingsTab = () => {
                           {isAssigningUser ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : user.assigned_vendor_id ? (
-                            "Atanmış"
+                            "Bağlanmış"
                           ) : (
-                            "Ata"
+                            "Bağla"
                           )}
                         </Button>
                       </div>
