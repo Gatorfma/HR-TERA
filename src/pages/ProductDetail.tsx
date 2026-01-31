@@ -342,7 +342,7 @@ const ProductDetail = () => {
   const tier = effectiveTier;
   const isPlusOrPremium = tier === "plus" || tier === "premium";
   const isPremium = tier === "premium";
-  const categories = product.categories || [product.category];
+  const categories = [product.category, ...product.categories];
 
   const vendorLogo = vendorDetails?.logo || product.vendor?.logo;
   const vendorHQ = vendorDetails?.headquarters || product.vendor?.location;
@@ -415,9 +415,9 @@ const ProductDetail = () => {
                 {/* Logo & Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-4 mb-4 min-w-0">
-                    {vendorLogo ? (
+                    {product.image ? (
                       <img
-                        src={vendorLogo}
+                        src={product.image}
                         alt={product.name}
                         className="w-16 h-16 rounded-xl object-cover border border-border shrink-0"
                       />
@@ -440,10 +440,10 @@ const ProductDetail = () => {
 
                   {/* Category Pills */}
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {categories.slice(0, tier === "freemium" ? 1 : 3).map((cat, i) => (
+                    {categories.map((cat, i) => (
                       <Link
                         key={i}
-                        to={`/products?category=${cat.toLowerCase()}`}
+                        to={`/products?category=${encodeURIComponent(cat)}`}
                         className="px-3 py-1 bg-primary/10 text-slate-700 rounded-full text-sm font-medium hover:bg-primary/20 transition-colors"
                       >
                         {cat}
