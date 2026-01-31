@@ -38,6 +38,7 @@ const UserSettingsTab = () => {
   const [editedCompanyName, setEditedCompanyName] = useState("");
   const [editedCompanyWebsite, setEditedCompanyWebsite] = useState("");
   const [editedCompanySize, setEditedCompanySize] = useState("");
+  const [editedHeadquarters, setEditedHeadquarters] = useState("");
   const [editedTier, setEditedTier] = useState<Tier>("freemium");
 
   // Hook for admin vendor management
@@ -54,8 +55,10 @@ const UserSettingsTab = () => {
     setSelectedVendor,
     updateTier,
     updateProfile,
+    updateVerification,
     isUpdatingTier,
     isUpdatingProfile,
+    isUpdatingVerification,
   } = useAdminVendors();
 
   // Sync debounced search to hook
@@ -69,6 +72,7 @@ const UserSettingsTab = () => {
       setEditedCompanyName(selectedVendor.company_name ?? "");
       setEditedCompanyWebsite(selectedVendor.website_link ?? "");
       setEditedCompanySize(selectedVendor.company_size ?? "");
+      setEditedHeadquarters(selectedVendor.headquarters ?? "");
       setEditedTier(selectedVendor.subscription ?? "freemium");
     }
   }, [selectedVendor]);
@@ -97,6 +101,7 @@ const UserSettingsTab = () => {
       companyName: editedCompanyName || undefined,
       companyWebsite: editedCompanyWebsite || undefined,
       companySize: editedCompanySize || undefined,
+      headquarters: editedHeadquarters || undefined,
     });
 
     if (result.success) {
@@ -133,6 +138,36 @@ const UserSettingsTab = () => {
       toast({
         title: "Tier güncellendi",
         description: `${selectedVendor.company_name || selectedVendor.user_email} için tier ${editedTier} olarak ayarlandı.`,
+      });
+    } else {
+      toast({
+        title: "Hata",
+        description: result.error?.message || "Güncelleme başarısız.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Update verification status
+  const handleUpdateVerification = async (newStatus: boolean) => {
+    console.log('[handleUpdateVerification] selectedVendor:', selectedVendor);
+    console.log('[handleUpdateVerification] newStatus:', newStatus);
+    
+    if (!selectedVendor?.vendor_id) {
+      toast({
+        title: "Hata",
+        description: `Vendor seçilmedi.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const result = await updateVerification(selectedVendor.vendor_id, newStatus);
+
+    if (result.success) {
+      toast({
+        title: "Doğrulama durumu güncellendi",
+        description: `${selectedVendor.company_name || selectedVendor.user_email} ${newStatus ? "doğrulandı" : "doğrulanmamış olarak işaretlendi"}.`,
       });
     } else {
       toast({
@@ -326,16 +361,31 @@ const UserSettingsTab = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Doğrulama Durumu</Label>
-                    <div>
-                      {selectedVendor.is_verified ? (
-                        <Badge className="bg-green-100 text-green-800 border-green-300">
-                          Doğrulanmış
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-amber-100 text-amber-800 border-amber-300">
-                          Doğrulanmamış
-                        </Badge>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <Select
+                        value={selectedVendor.is_verified ? "verified" : "unverified"}
+                        onValueChange={(value) => handleUpdateVerification(value === "verified")}
+                        disabled={isUpdatingVerification}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="verified">
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                              Doğrulanmış
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="unverified">
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                              Doğrulanmamış
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isUpdatingVerification && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -396,8 +446,13 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Merkez</Label>
-                    <Input value={selectedVendor.headquarters ?? "—"} disabled className="bg-muted" />
+                    <Label htmlFor="headquarters">Merkez</Label>
+                    <Input
+                      id="headquarters"
+                      value={editedHeadquarters}
+                      onChange={(e) => setEditedHeadquarters(e.target.value)}
+                      placeholder="ör: İstanbul, Türkiye"
+                    />
                   </div>
                 </div>
                 <Button

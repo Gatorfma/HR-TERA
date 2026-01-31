@@ -86,6 +86,15 @@ export interface UpdateVendorProfileInput {
   companyName?: string | null;
   companyWebsite?: string | null;
   companySize?: string | null;
+  headquarters?: string | null;
+}
+
+/**
+ * Input for updating vendor verification status
+ */
+export interface UpdateVendorVerificationInput {
+  vendorId: string;
+  isVerified: boolean;
 }
 
 /**

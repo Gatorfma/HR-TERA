@@ -1087,16 +1087,73 @@ grant execute on function public.admin_update_vendor_tier(uuid, public.tier) to 
 
 
 -- ============================================================
+-- RPC: admin_update_vendor_verification
+-- ============================================================
+-- Purpose: Update a vendor's verification status
+-- This controls whether the vendor is displayed as verified
+--
+-- Parameters:
+--   p_vendor_id   : UUID of the vendor to update
+--   p_is_verified : Boolean verification status
+--
+-- Returns: Boolean (true if update succeeded)
+-- Errors:
+--   P0403 if caller is not admin
+--   P0404 if vendor not found
+-- Side Effects: Updates vendors.is_verified and vendors.updated_at
+-- ============================================================
+create or replace function public.admin_update_vendor_verification(
+  p_vendor_id uuid,
+  p_is_verified boolean
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  rows_affected integer;
+begin
+  -- Check admin
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Update vendor verification status
+  update public.vendors
+  set
+    is_verified = p_is_verified,
+    updated_at = now()
+  where vendor_id = p_vendor_id;
+
+  get diagnostics rows_affected = row_count;
+
+  if rows_affected = 0 then
+    raise exception 'Vendor not found: %', p_vendor_id
+      using errcode = 'P0404';
+  end if;
+  
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_update_vendor_verification(uuid, boolean) to authenticated;
+grant execute on function public.admin_update_vendor_verification(uuid, boolean) to service_role;
+
+
+-- ============================================================
 -- RPC: admin_update_vendor_profile
 -- ============================================================
 -- Purpose: Update vendor profile fields (company info)
--- Allows admin to modify company_name, website, and size
+-- Allows admin to modify company_name, website, size, and headquarters
 --
 -- Parameters:
 --   p_vendor_id       : UUID of the vendor to update
 --   p_company_name    : New company name (null = no change)
 --   p_company_website : New website URL (null = no change)
 --   p_company_size    : New size range like "1-10" (null = no change)
+--   p_headquarters    : New headquarters location (null = no change)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1109,7 +1166,8 @@ create or replace function public.admin_update_vendor_profile(
   p_vendor_id uuid,
   p_company_name text default null,
   p_company_website text default null,
-  p_company_size text default null
+  p_company_size text default null,
+  p_headquarters text default null
 )
 returns boolean
 language plpgsql
@@ -1161,6 +1219,10 @@ begin
       when p_company_size is not null then nullif(p_company_size, '')
       else company_size 
     end,
+    headquarters = case 
+      when p_headquarters is not null then nullif(p_headquarters, '')
+      else headquarters 
+    end,
     updated_at = now()
   where vendor_id = p_vendor_id;
 
@@ -1170,8 +1232,8 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text) to authenticated;
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text) to service_role;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text) to authenticated;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text) to service_role;
 
 
 -- ############################################################

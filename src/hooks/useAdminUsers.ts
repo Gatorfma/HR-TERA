@@ -8,6 +8,7 @@ import {
   adminGetVendors,
   adminUpdateVendorTier,
   adminUpdateVendorProfile,
+  adminUpdateVendorVerification,
 } from '@/api/adminUserApi';
 import {
   AdminVendorView,
@@ -40,6 +41,7 @@ interface UseAdminVendorsReturn extends UseAdminVendorsState {
   updateProfile: (
     input: Omit<UpdateVendorProfileInput, 'vendorId'> & { vendorId: string }
   ) => Promise<{ success: boolean; error?: ApiError }>;
+  updateVerification: (vendorId: string, isVerified: boolean) => Promise<{ success: boolean; error?: ApiError }>;
 
   // Selected vendor
   selectedVendor: AdminVendorView | null;
@@ -48,6 +50,7 @@ interface UseAdminVendorsReturn extends UseAdminVendorsState {
   // Mutation states
   isUpdatingTier: boolean;
   isUpdatingProfile: boolean;
+  isUpdatingVerification: boolean;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -65,6 +68,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingTier, setIsUpdatingTier] = useState(false);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingVerification, setIsUpdatingVerification] = useState(false);
 
   // Error state
   const [error, setError] = useState<ApiError | null>(null);
@@ -184,6 +188,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                   company_name: input.companyName ?? v.company_name,
                   website_link: input.companyWebsite ?? v.website_link,
                   company_size: input.companySize ?? v.company_size,
+                  headquarters: input.headquarters ?? v.headquarters,
                 }
               : v
           )
@@ -195,12 +200,41 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                 company_name: input.companyName ?? prev.company_name,
                 website_link: input.companyWebsite ?? prev.website_link,
                 company_size: input.companySize ?? prev.company_size,
+                headquarters: input.headquarters ?? prev.headquarters,
               }
             : prev
         );
       }
 
       setIsUpdatingProfile(false);
+      return { success: result.success, error: result.error };
+    },
+    []
+  );
+
+  // Update vendor verification status
+  const updateVerification = useCallback(
+    async (
+      vendorId: string,
+      isVerified: boolean
+    ): Promise<{ success: boolean; error?: ApiError }> => {
+      setIsUpdatingVerification(true);
+
+      const result = await adminUpdateVendorVerification({ vendorId, isVerified });
+
+      if (result.success) {
+        // Optimistic update: update local state
+        setVendors((prev) =>
+          prev.map((v) =>
+            v.vendor_id === vendorId ? { ...v, is_verified: isVerified } : v
+          )
+        );
+        setSelectedVendor((prev) => 
+          prev?.vendor_id === vendorId ? { ...prev, is_verified: isVerified } : prev
+        );
+      }
+
+      setIsUpdatingVerification(false);
       return { success: result.success, error: result.error };
     },
     []
@@ -227,6 +261,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     // Mutations
     updateTier,
     updateProfile,
+    updateVerification,
 
     // Selected vendor
     selectedVendor,
@@ -235,6 +270,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     // Mutation states
     isUpdatingTier,
     isUpdatingProfile,
+    isUpdatingVerification,
   };
 }
 

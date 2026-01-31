@@ -10,6 +10,7 @@ import {
   AdminVendorsResponse,
   UpdateVendorTierInput,
   UpdateVendorProfileInput,
+  UpdateVendorVerificationInput,
   ApiResponse,
   AdminErrorCodes,
 } from '@/lib/admin-types';
@@ -221,9 +222,9 @@ export async function adminUpdateVendorTier(
 export async function adminUpdateVendorProfile(
   input: UpdateVendorProfileInput
 ): Promise<ApiResponse<boolean>> {
-  const { vendorId, companyName, companyWebsite, companySize } = input;
+  const { vendorId, companyName, companyWebsite, companySize, headquarters } = input;
 
-  console.log('[adminUpdateVendorProfile] Input:', { vendorId, companyName, companyWebsite, companySize });
+  console.log('[adminUpdateVendorProfile] Input:', { vendorId, companyName, companyWebsite, companySize, headquarters });
 
   // Client-side validation
   if (!vendorId) {
@@ -273,6 +274,7 @@ export async function adminUpdateVendorProfile(
       p_company_name: companyName ?? null,
       p_company_website: companyWebsite ?? null,
       p_company_size: companySize ?? null,
+      p_headquarters: headquarters ?? null,
     });
     
     const { data, error } = await supabase.rpc('admin_update_vendor_profile', {
@@ -280,6 +282,7 @@ export async function adminUpdateVendorProfile(
       p_company_name: companyName ?? null,
       p_company_website: companyWebsite ?? null,
       p_company_size: companySize ?? null,
+      p_headquarters: headquarters ?? null,
     });
 
     if (error) {
@@ -292,6 +295,78 @@ export async function adminUpdateVendorProfile(
 
     return { success: true, data: data ?? false };
   } catch (err) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.DATABASE_ERROR,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+/**
+ * Update vendor verification status
+ * @requires Admin role
+ */
+export async function adminUpdateVendorVerification(
+  input: UpdateVendorVerificationInput
+): Promise<ApiResponse<boolean>> {
+  const { vendorId, isVerified } = input;
+
+  console.log('[adminUpdateVendorVerification] Input:', { vendorId, isVerified });
+
+  // Client-side validation
+  if (!vendorId) {
+    console.error('[adminUpdateVendorVerification] vendorId is empty or undefined:', vendorId);
+    return {
+      success: false,
+      error: { 
+        code: AdminErrorCodes.VALIDATION_ERROR, 
+        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}` 
+      },
+    };
+  }
+  
+  if (!isValidUUID(vendorId)) {
+    console.error('[adminUpdateVendorVerification] vendorId is not a valid UUID:', vendorId);
+    return {
+      success: false,
+      error: { 
+        code: AdminErrorCodes.VALIDATION_ERROR, 
+        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"` 
+      },
+    };
+  }
+
+  if (typeof isVerified !== 'boolean') {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'isVerified must be a boolean value',
+      },
+    };
+  }
+
+  try {
+    console.log('[adminUpdateVendorVerification] Calling RPC with:', { p_vendor_id: vendorId, p_is_verified: isVerified });
+    
+    const { data, error } = await supabase.rpc('admin_update_vendor_verification', {
+      p_vendor_id: vendorId,
+      p_is_verified: isVerified,
+    });
+
+    if (error) {
+      console.error('[adminUpdateVendorVerification] RPC error:', error);
+      const parsed = parseSupabaseError(error);
+      return { success: false, error: parsed };
+    }
+
+    console.log('[adminUpdateVendorVerification] Success:', data);
+    return { success: true, data: data ?? false };
+  } catch (err) {
+    console.error('[adminUpdateVendorVerification] Exception:', err);
     return {
       success: false,
       error: {
