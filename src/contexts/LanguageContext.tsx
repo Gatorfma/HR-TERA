@@ -251,7 +251,7 @@ const en: Record<string, string> = {
   "productDetail.visitWebsite": "Visit Website",
   "productDetail.downloadBrochure": "Download Brochure",
   "productDetail.contactVendor": "Contact Vendor",
-  "productDetail.vendor": "Vendor",
+  "productDetail.vendor": "Vendor Information",
   "productDetail.viewProfile": "View profile →",
   "productDetail.claimPrompt": "Are you part of this organization?",
   "productDetail.claimProduct": "Claim This Product",
@@ -261,6 +261,8 @@ const en: Record<string, string> = {
   "productDetail.notAvailable": "N/A",
   "productDetail.contact": "Contact",
   "productDetail.viewScreenshot": "View screenshot",
+  "productDetail.headquarters": "Headquarters",
+  "productDetail.companySize": "Company size",
 
   // Product Tabs
   "productTabs.overview": "Overview",
@@ -632,6 +634,8 @@ const tr: Record<string, string> = {
   "productDetail.notAvailable": "Mevcut Değil",
   "productDetail.contact": "İletişim",
   "productDetail.viewScreenshot": "Ekran görüntüsünü görüntüle",
+  "productDetail.headquarters": "Ülke",
+  "productDetail.companySize": "Çalışan sayısı",
 
   // Product Tabs
   "productTabs.overview": "Genel Bakış",
