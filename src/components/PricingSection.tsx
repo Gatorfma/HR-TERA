@@ -37,14 +37,14 @@ type PricingPlan = {
 
 const TIER_NAMES: Record<string, string> = {
   freemium: "Freemium",
-  silver: "Silver",
-  gold: "Gold",
+  plus: "Plus",
+  premium: "Premium",
 };
 
 const TIER_BADGES: Record<string, PricingPlan["badgeTone"]> = {
   freemium: "lime",
-  silver: "green",
-  gold: "coral",
+  plus: "green",
+  premium: "coral",
 };
 
 const FALLBACK_PLANS: PricingPlan[] = [
@@ -64,7 +64,7 @@ const FALLBACK_PLANS: PricingPlan[] = [
     ],
   },
   {
-    tier: "silver",
+    tier: "plus",
     name: "Standard",
     badgeTone: "green",
     priceMonthly: "$29",
@@ -81,7 +81,7 @@ const FALLBACK_PLANS: PricingPlan[] = [
     popular: true,
   },
   {
-    tier: "gold",
+    tier: "premium",
     name: "Enterprise",
     badgeTone: "coral",
     priceMonthly: "$49",
@@ -174,7 +174,7 @@ const PricingSection = () => {
           discount,
           description: row.tagline ?? row.headline ?? "",
           features: features.length > 0 ? features : [t("pricing.comingSoon")],
-          popular: row.tier === "silver" || Boolean(highlightLabel),
+          popular: row.tier === "plus" || Boolean(highlightLabel),
         } satisfies PricingPlan;
       });
 

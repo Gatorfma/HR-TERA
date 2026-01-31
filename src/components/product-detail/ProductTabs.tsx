@@ -34,12 +34,12 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
   // Force freemium tier for unclaimed products
   const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
   const tier = effectiveTier;
-  const isSilverOrGold = tier === "silver" || tier === "gold";
-  const isGold = tier === "gold";
+  const isPlusOrPremium = tier === "plus" || tier === "premium";
+  const isPremium = tier === "premium";
 
   // Determine which tabs should be visible
-  const hasMedia = isSilverOrGold && product.screenshots && product.screenshots.length > 0;
-  const hasReviews = isSilverOrGold && product.reviews;
+  const hasMedia = isPlusOrPremium && product.screenshots && product.screenshots.length > 0;
+  const hasReviews = isPlusOrPremium && product.reviews;
   const hasPricing = product.price && product.price !== "Contact";
   const hasVendor = !isUnclaimed && !!product.vendor;
 
@@ -98,7 +98,7 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                 animate={{ opacity: 1, y: 0 }}
               >
                 <h2 className="text-2xl font-heading font-bold text-foreground mb-4">{t("productTabs.overview")}</h2>
-                {isSilverOrGold && product.detailedOverview ? (
+                {isPlusOrPremium && product.detailedOverview ? (
                   <div className="space-y-4">
                     <p className="text-muted-foreground leading-relaxed">{product.fullDescription}</p>
                     {product.detailedOverview.whoIsItFor && (
@@ -119,8 +119,8 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                 )}
               </motion.div>
 
-              {/* High-level stats for Gold */}
-              {isGold && product.impactMetrics && (
+              {/* High-level stats for Premium */}
+              {isPremium && product.impactMetrics && (
                 <div className="grid sm:grid-cols-3 gap-4">
                   {product.impactMetrics.slice(0, 3).map((metric, i) => (
                     <div key={i} className="bg-primary/10 rounded-xl p-4 text-center">
@@ -152,20 +152,20 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                 </ul>
               </motion.div>
 
-              {/* Use Cases (Gold only) */}
-              {isGold && product.useCases && <UseCasesSection useCases={product.useCases} />}
+              {/* Use Cases (Premium only) */}
+              {isPremium && product.useCases && <UseCasesSection useCases={product.useCases} />}
 
-              {/* Integrations (Silver+) */}
-              {isSilverOrGold && product.integrations && <IntegrationsSection integrations={product.integrations} />}
+              {/* Integrations (Plus+) */}
+              {isPlusOrPremium && product.integrations && <IntegrationsSection integrations={product.integrations} />}
 
-              {/* Availability (Silver+) */}
-              {isSilverOrGold && <AvailabilitySection countries={product.availableCountries} languages={product.languages} />}
+              {/* Availability (Plus+) */}
+              {isPlusOrPremium && <AvailabilitySection countries={product.availableCountries} languages={product.languages} />}
 
-              {/* Compliance (Silver+) */}
-              {isSilverOrGold && product.compliance && <ComplianceSection compliance={product.compliance} />}
+              {/* Compliance (Plus+) */}
+              {isPlusOrPremium && product.compliance && <ComplianceSection compliance={product.compliance} />}
 
-              {/* Implementation (Gold only) */}
-              {isGold && product.implementationSteps && <ImplementationSection steps={product.implementationSteps} />}
+              {/* Implementation (Premium only) */}
+              {isPremium && product.implementationSteps && <ImplementationSection steps={product.implementationSteps} />}
             </TabsContent>
 
             {/* Media Tab */}
@@ -174,7 +174,7 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                 <ProductGallery 
                   screenshots={product.screenshots} 
                   productName={product.name}
-                  videoUrl={isGold ? product.videoUrl : undefined}
+                  videoUrl={isPremium ? product.videoUrl : undefined}
                 />
               )}
             </TabsContent>
@@ -208,7 +208,7 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                       <span className="text-muted-foreground">{t("productTabs.perMonth")}</span>
                     </div>
                     <p className="text-muted-foreground mb-6">
-                      {isGold 
+                      {isPremium 
                         ? t("productTabs.enterprisePricing")
                         : t("productTabs.flexiblePricing")}
                     </p>
@@ -225,11 +225,11 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                   </div>
                 )}
 
-                {/* Campaigns (Gold only) */}
-                {isGold && product.campaigns && <CampaignsSection campaigns={product.campaigns} />}
+                {/* Campaigns (Premium only) */}
+                {isPremium && product.campaigns && <CampaignsSection campaigns={product.campaigns} />}
 
-                {/* Featured Content (Gold only) */}
-                {isGold && product.featuredContent && <FeaturedContentSection content={product.featuredContent} />}
+                {/* Featured Content (Premium only) */}
+                {isPremium && product.featuredContent && <FeaturedContentSection content={product.featuredContent} />}
               </motion.div>
             </TabsContent>
           </div>

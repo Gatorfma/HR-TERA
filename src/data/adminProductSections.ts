@@ -31,7 +31,7 @@ export const adminProductSections: AdminProductSection[] = [
   {
     id: "tier-pricing",
     title: "Tier Fiyatları",
-    description: "Freemium/Silver/Gold fiyatlarını güncelleyin.",
+    description: "Freemium/Plus/Premium fiyatlarını güncelleyin.",
     path: "/admin/products/tiers",
     icon: "layers",
   },

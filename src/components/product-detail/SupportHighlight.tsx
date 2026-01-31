@@ -8,9 +8,9 @@ interface SupportHighlightProps {
 const SupportHighlight = ({ tier }: SupportHighlightProps) => {
   if (tier === "freemium") return null;
 
-  const text = tier === "gold" 
-    ? "Gold listings receive premium support with dedicated account management."
-    : "Silver listings receive priority marketplace support.";
+  const text = tier === "premium"
+    ? "Premium listings receive premium support with dedicated account management."
+    : "Plus listings receive priority marketplace support.";
 
   return (
     <div className="bg-muted/50 rounded-xl border border-border p-4 flex items-center gap-3">
@@ -19,7 +19,7 @@ const SupportHighlight = ({ tier }: SupportHighlightProps) => {
       </div>
       <p className="text-sm text-muted-foreground">
         <span className="font-medium text-foreground">
-          {tier === "gold" ? "Premium Support" : "Priority Support"}:
+          {tier === "premium" ? "Premium Support" : "Priority Support"}:
         </span>{" "}
         {text}
       </p>

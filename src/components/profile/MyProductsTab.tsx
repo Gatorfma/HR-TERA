@@ -65,7 +65,7 @@ interface LockedFeatureProps {
 }
 
 const LockedFeature = ({ children, requiredTier, currentTier, featureName }: LockedFeatureProps) => {
-  const tierOrder = { freemium: 0, silver: 1, gold: 2 };
+  const tierOrder = { freemium: 0, plus: 1, premium: 2 };
   const isLocked = tierOrder[currentTier] < tierOrder[requiredTier];
 
   if (!isLocked) {
@@ -154,9 +154,9 @@ const MyProductsTab = () => {
     return p.status === filter;
   });
 
-  const tierOrder = { freemium: 0, silver: 1, gold: 2 };
-  const isSilverPlus = tierOrder[user.vendorTier] >= 1;
-  const isGold = user.vendorTier === "gold";
+  const tierOrder = { freemium: 0, plus: 1, premium: 2 };
+  const isPlusOrAbove = tierOrder[user.vendorTier] >= 1;
+  const isPremium = user.vendorTier === "premium";
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -178,7 +178,7 @@ const MyProductsTab = () => {
         <div className="bg-muted/50 rounded-xl p-4 border border-border">
           <p className="text-sm text-muted-foreground">
             You're on the <span className="font-medium text-foreground">Freemium plan</span>. 
-            Upgrade to Silver or Gold to unlock galleries, case studies, and more visibility.
+            Upgrade to Plus or Premium to unlock galleries, case studies, and more visibility.
             <Link to={`${import.meta.env.BASE_URL}#pricing`} className="text-primary hover:underline ml-1">
               View plans →
             </Link>
@@ -288,8 +288,8 @@ const MyProductsTab = () => {
                   <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
                   <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
 
-                  {/* Feature counts for Silver+ */}
-                  {isSilverPlus && (
+                  {/* Feature counts for Plus+ */}
+                  {isPlusOrAbove && (
                     <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Image className="w-3.5 h-3.5" />
@@ -299,7 +299,7 @@ const MyProductsTab = () => {
                         <MessageSquare className="w-3.5 h-3.5" />
                         {product.reviewCount} yorum
                       </span>
-                      {isGold && (
+                      {isPremium && (
                         <>
                           <span className="flex items-center gap-1">
                             <FileText className="w-3.5 h-3.5" />
@@ -315,8 +315,8 @@ const MyProductsTab = () => {
                   )}
                 </div>
 
-                {/* Stats for Gold */}
-                {isGold && (
+                {/* Stats for Premium */}
+                {isPremium && (
                   <div className="flex md:flex-col items-center md:items-end gap-4 md:gap-2 text-sm shrink-0">
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Eye className="w-4 h-4" />
@@ -354,7 +354,7 @@ const MyProductsTab = () => {
                   </Button>
                   <LockedFeature
                     currentTier={user.vendorTier}
-                    requiredTier="silver"
+                    requiredTier="plus"
                     featureName="gallery management"
                   >
                     <Button variant="outline" size="sm" className="gap-1.5 rounded-lg w-full">
@@ -369,22 +369,22 @@ const MyProductsTab = () => {
               {user.vendorTier === "freemium" && (
                 <div className="mt-4 pt-4 border-t border-border">
                   <div className="flex flex-wrap gap-3 text-xs">
-                    <LockedFeature currentTier="freemium" requiredTier="silver" featureName="integrations">
+                    <LockedFeature currentTier="freemium" requiredTier="plus" featureName="integrations">
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Lock className="w-3 h-3" /> Entegrasyonlar
                       </span>
                     </LockedFeature>
-                    <LockedFeature currentTier="freemium" requiredTier="silver" featureName="compliance tags">
+                    <LockedFeature currentTier="freemium" requiredTier="plus" featureName="compliance tags">
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Lock className="w-3 h-3" /> Uyumluluk
                       </span>
                     </LockedFeature>
-                    <LockedFeature currentTier="freemium" requiredTier="gold" featureName="case studies">
+                    <LockedFeature currentTier="freemium" requiredTier="premium" featureName="case studies">
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Lock className="w-3 h-3" /> Case Study
                       </span>
                     </LockedFeature>
-                    <LockedFeature currentTier="freemium" requiredTier="gold" featureName="analytics">
+                    <LockedFeature currentTier="freemium" requiredTier="premium" featureName="analytics">
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Lock className="w-3 h-3" /> Analitik
                       </span>

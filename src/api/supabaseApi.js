@@ -1,12 +1,14 @@
 import { supabase } from "@/api/supabaseClient";
 
-export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null }) => {
+export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, languageFilter = null, countryFilter = null, tierFilter = null }) => {
     const { data, error } = await supabase.rpc('get_product_cards', {
         n,
         page,
         product_filter: productFilter,
         vendor_filter: vendorFilter,
         category_filter: categoryFilter,
+        language_filter: languageFilter,
+        country_filter: countryFilter,
         tier_filter: tierFilter,
     });
   
@@ -14,11 +16,13 @@ export const getProducts = async ({ n, page, productFilter = null, vendorFilter 
     return data ?? [];
 };
 
-export const getProductCountFiltered = async ({ productFilter = null, vendorFilter = null, categoryFilter = null, tierFilter = null }) => {
+export const getProductCountFiltered = async ({ productFilter = null, vendorFilter = null, categoryFilter = null, languageFilter = null, countryFilter = null, tierFilter = null }) => {
     const { data, error } = await supabase.rpc('get_product_count_filtered', {
         product_filter: productFilter,
         vendor_filter: vendorFilter,
         category_filter: categoryFilter,
+        language_filter: languageFilter,
+        country_filter: countryFilter,
         tier_filter: tierFilter,
     });
   
@@ -27,13 +31,27 @@ export const getProductCountFiltered = async ({ productFilter = null, vendorFilt
 };
 
 export const getProductDetails = async (productId) => {
+    console.log("Calling get_product_details RPC with:", productId);
+    
     const { data, error } = await supabase.rpc("get_product_details", {
       p_product_id: productId,
     });
   
-    if (error) throw error;
+    console.log("RPC response - data:", data, "error:", error);
   
-    return data?.[0] ?? null;
+    if (error) {
+      console.error("Error fetching product details:", error);
+      throw error;
+    }
+  
+    // Handle case where function returns empty array
+    if (!data || data.length === 0) {
+      console.warn("Product not found or not approved:", productId);
+      return null;
+    }
+  
+    console.log("Returning product:", data[0]);
+    return data[0];
 };
 
 export const getProductCount = async () => {
@@ -230,4 +248,27 @@ export const updateMyVendor = async ({
     // The SQL returns a single row (vendors), Supabase often returns it as an object
     // but depending on settings it can come back as [row]. This handles both.
     return Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
+};
+
+export const getAllCategories = async () => {
+    const { data, error } = await supabase.rpc("get_all_categories");
+
+    if (error) throw error;
+    return data ?? [];
+};
+
+export const getAllCountries = async () => {
+    const { data, error } = await supabase.rpc("get_all_countries");
+    console.log("getAllCountries response:", { data, error });
+
+    if (error) throw error;
+    return data ?? [];
+};
+
+export const getAllLanguages = async () => {
+    const { data, error } = await supabase.rpc("get_all_languages");
+    console.log("getAllLanguages response:", { data, error });
+
+    if (error) throw error;
+    return data ?? [];
 };

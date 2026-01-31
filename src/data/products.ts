@@ -29,7 +29,7 @@ export interface Product {
   slug: string;
   image: string;
   category: string;
-  categories?: string[]; // For silver/gold: up to 3 categories
+  categories?: string[]; // For plus/premium: up to 3 categories
   name: string;
   price: string;
   description: string;
@@ -55,13 +55,13 @@ export interface Product {
   releaseDate: string;
   lastUpdated: string;
   modules: string[];
-  // Silver+ fields
+  // Plus+ fields
   integrations?: string[];
   availableCountries?: string[];
   languages?: string[];
   compliance?: string[];
   reviews?: ProductReview[];
-  // Gold+ fields
+  // Premium+ fields
   useCases?: UseCase[];
   implementationSteps?: string[];
   impactMetrics?: { label: string; value: string }[];
@@ -108,7 +108,7 @@ export const products: Product[] = [
       website: "https://talentworks.example.com",
       location: "San Francisco, USA"
     },
-    vendorTier: "gold",
+    vendorTier: "premium",
     releaseDate: "Sep 25, 2024",
     lastUpdated: "Dec 15, 2024",
     modules: [
@@ -246,7 +246,7 @@ export const products: Product[] = [
       website: "https://workflowhq.example.com",
       location: "Austin, USA"
     },
-    vendorTier: "silver",
+    vendorTier: "plus",
     releaseDate: "Aug 10, 2024",
     lastUpdated: "Dec 20, 2024",
     modules: [
@@ -397,7 +397,7 @@ export const products: Product[] = [
       website: "https://edutech.example.com",
       location: "London, UK"
     },
-    vendorTier: "gold",
+    vendorTier: "premium",
     releaseDate: "May 5, 2024",
     lastUpdated: "Dec 12, 2024",
     modules: [
@@ -518,7 +518,7 @@ export const products: Product[] = [
       website: "https://datadrivenhr.example.com",
       location: "New York, USA"
     },
-    vendorTier: "silver",
+    vendorTier: "plus",
     releaseDate: "Apr 18, 2024",
     lastUpdated: "Dec 22, 2024",
     modules: [

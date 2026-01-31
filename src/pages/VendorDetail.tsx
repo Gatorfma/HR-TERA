@@ -79,8 +79,8 @@ const VendorDetail = () => {
   }
 
   const tier: Tier = vendor.subscription || "freemium";
-  const isSilverOrAbove = tier === "silver" || tier === "gold";
-  const isGold = tier === "gold";
+  const isPlusOrAbove = tier === "plus" || tier === "premium";
+  const isPremium = tier === "premium";
 
   const handleVendorCtaClick = (ctaType: string) => {
     if (!vendorId) return;
@@ -134,11 +134,11 @@ const VendorDetail = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className={`bg-card rounded-2xl border overflow-hidden mb-6 ${
-              isGold ? "border-primary/30 shadow-[0_0_30px_hsl(var(--primary)/0.15)]" : "border-border"
+              isPremium ? "border-primary/30 shadow-[0_0_30px_hsl(var(--primary)/0.15)]" : "border-border"
             }`}
           >
-            {/* Cover Image for Silver+ */}
-            {isSilverOrAbove && (
+            {/* Cover Image for Plus+ */}
+            {isPlusOrAbove && (
               <div className="aspect-[3/1] overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                 <span className="text-9xl font-bold text-primary/20">
                   {(vendor.company_name || "V").charAt(0)}

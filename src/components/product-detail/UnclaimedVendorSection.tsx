@@ -70,18 +70,18 @@ const UnclaimedVendorSection = ({ claimedVendorId }: UnclaimedVendorSectionProps
       description: t("ownership.tierFreemiumDesc"),
     },
     {
-      id: "silver" as const,
-      name: t("ownership.tierSilverLabel"),
-      subtitle: t("ownership.tierSilverSubtitle"),
-      price: t("ownership.tierSilverPrice"),
-      description: t("ownership.tierSilverDesc"),
+      id: "plus" as const,
+      name: t("ownership.tierPlusLabel"),
+      subtitle: t("ownership.tierPlusSubtitle"),
+      price: t("ownership.tierPlusPrice"),
+      description: t("ownership.tierPlusDesc"),
     },
     {
-      id: "gold" as const,
-      name: t("ownership.tierGoldLabel"),
-      subtitle: t("ownership.tierGoldSubtitle"),
-      price: t("ownership.tierGoldPrice"),
-      description: t("ownership.tierGoldDesc"),
+      id: "premium" as const,
+      name: t("ownership.tierPremiumLabel"),
+      subtitle: t("ownership.tierPremiumSubtitle"),
+      price: t("ownership.tierPremiumPrice"),
+      description: t("ownership.tierPremiumDesc"),
     },
   ];
 

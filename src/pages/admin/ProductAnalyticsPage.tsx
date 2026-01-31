@@ -202,10 +202,10 @@ const ProductAnalyticsPage = () => {
 
   const getTierBadge = (tier: string) => {
     switch (tier) {
-      case "gold":
-        return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30">Gold</Badge>;
-      case "silver":
-        return <Badge className="bg-slate-500/10 text-slate-600 border-slate-500/30">Silver</Badge>;
+      case "premium":
+        return <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30">Premium</Badge>;
+      case "plus":
+        return <Badge className="bg-slate-500/10 text-slate-600 border-slate-500/30">Plus</Badge>;
       default:
         return <Badge variant="outline">Freemium</Badge>;
     }
@@ -339,8 +339,8 @@ const ProductAnalyticsPage = () => {
                   {[
                     { value: "all", label: "Tümü" },
                     { value: "freemium", label: "Freemium" },
-                    { value: "silver", label: "Silver" },
-                    { value: "gold", label: "Gold" },
+                    { value: "plus", label: "Plus" },
+                    { value: "premium", label: "Premium" },
                   ].map((tier) => (
                     <Button
                       key={tier.value}

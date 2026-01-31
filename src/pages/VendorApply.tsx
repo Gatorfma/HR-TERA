@@ -94,8 +94,8 @@ const VendorApply = () => {
       color: "bg-cyan-500",
     },
     {
-      id: "silver" as const,
-      name: "Silver",
+      id: "plus" as const,
+      name: "Plus",
       subtitle: "Öne çıkan + Analitik",
       price: "$99",
       period: "/ay",
@@ -107,8 +107,8 @@ const VendorApply = () => {
       color: "bg-violet-500",
     },
     {
-      id: "gold" as const,
-      name: "Gold",
+      id: "premium" as const,
+      name: "Premium",
       subtitle: "Premium görünürlük + Destek",
       price: "$199",
       period: "/ay",
@@ -432,8 +432,8 @@ const VendorApply = () => {
                         )}
                       </div>
 
-                      {/* Premium Badge for Gold */}
-                      {tier.id === "gold" && (
+                      {/* Premium Badge for Premium */}
+                      {tier.id === "premium" && (
                         <Badge className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-yellow-500 text-white text-xs">
                           <Crown className="w-3 h-3 mr-1" />
                           Premium
@@ -444,7 +444,7 @@ const VendorApply = () => {
                       <div className="mb-4">
                         <h3 className={`text-lg font-bold ${
                           tier.id === "freemium" ? "text-cyan-500" :
-                          tier.id === "silver" ? "text-violet-500" :
+                          tier.id === "plus" ? "text-violet-500" :
                           "text-amber-500"
                         }`}>
                           {tier.name}
@@ -467,13 +467,13 @@ const VendorApply = () => {
                           <li key={i} className="flex items-center gap-2 text-sm">
                             {feature.includes("görünürlük") ? (
                               <Zap className={`w-4 h-4 ${
-                                tier.id === "silver" ? "text-violet-500" : "text-amber-500"
+                                tier.id === "plus" ? "text-violet-500" : "text-amber-500"
                               }`} />
                             ) : (
                               <Check className="w-4 h-4 text-primary" />
                             )}
                             <span className={feature.includes("görünürlük") ? (
-                              tier.id === "silver" ? "text-violet-500" : "text-amber-500"
+                              tier.id === "plus" ? "text-violet-500" : "text-amber-500"
                             ) : "text-foreground"}>
                               {feature}
                             </span>
@@ -486,7 +486,7 @@ const VendorApply = () => {
                         className={`w-full ${
                           selectedTier === tier.id 
                             ? tier.id === "freemium" ? "bg-cyan-500 hover:bg-cyan-600" :
-                              tier.id === "silver" ? "bg-violet-500 hover:bg-violet-600" :
+                              tier.id === "plus" ? "bg-violet-500 hover:bg-violet-600" :
                               "bg-amber-500 hover:bg-amber-600"
                             : "bg-transparent border border-border text-foreground hover:bg-muted"
                         }`}

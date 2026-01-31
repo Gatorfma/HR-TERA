@@ -262,6 +262,8 @@ create or replace function public.get_product_count_filtered(
   product_filter  text default null,
   vendor_filter   text default null,
   category_filter public.product_category default null,
+  language_filter text default null,
+  country_filter  text default null,
   tier_filter     public.tier default null
 )
 returns integer
@@ -290,14 +292,22 @@ as $$
       or category_filter = any (p.categories)
     )
     and (
+      language_filter is null
+      or language_filter = any (p.languages)
+    )
+    and (
+      country_filter is null
+      or v.headquarters ilike '%' || country_filter
+    )
+    and (
       tier_filter is null
       or v.subscription = tier_filter
     );
 $$;
 
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, public.tier) to anon;
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, public.tier) to authenticated;
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, public.tier) to service_role;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to anon;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to authenticated;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to service_role;
 
 
 -- ============================================================
@@ -914,6 +924,7 @@ returns table (
   website_link text,
   linkedin_link text,
   instagram_link text,
+  logo text,
   subscription public.tier,
   is_verified boolean,
   founded_at date,
@@ -947,6 +958,7 @@ begin
     v.website_link,
     v.linkedin_link,
     v.instagram_link,
+    v.logo,
     v.subscription,
     v.is_verified,
     v.founded_at,
@@ -1021,12 +1033,12 @@ grant execute on function public.admin_get_vendors_count(text) to service_role;
 -- ============================================================
 -- RPC: admin_update_vendor_tier
 -- ============================================================
--- Purpose: Update a vendor's subscription tier (freemium/silver/gold)
+-- Purpose: Update a vendor's subscription tier (freemium/plus/premium)
 -- This controls the vendor's access level and listing priority
 --
 -- Parameters:
 --   p_vendor_id : UUID of the vendor to update
---   p_new_tier  : New tier value (freemium, silver, or gold)
+--   p_new_tier  : New tier value (freemium, plus, or premium)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1077,16 +1089,79 @@ grant execute on function public.admin_update_vendor_tier(uuid, public.tier) to 
 
 
 -- ============================================================
+-- RPC: admin_update_vendor_verification
+-- ============================================================
+-- Purpose: Update a vendor's verification status
+-- This controls whether the vendor is displayed as verified
+--
+-- Parameters:
+--   p_vendor_id   : UUID of the vendor to update
+--   p_is_verified : Boolean verification status
+--
+-- Returns: Boolean (true if update succeeded)
+-- Errors:
+--   P0403 if caller is not admin
+--   P0404 if vendor not found
+-- Side Effects: Updates vendors.is_verified and vendors.updated_at
+-- ============================================================
+create or replace function public.admin_update_vendor_verification(
+  p_vendor_id uuid,
+  p_is_verified boolean
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  rows_affected integer;
+begin
+  -- Check admin
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Update vendor verification status
+  update public.vendors
+  set
+    is_verified = p_is_verified,
+    updated_at = now()
+  where vendor_id = p_vendor_id;
+
+  get diagnostics rows_affected = row_count;
+
+  if rows_affected = 0 then
+    raise exception 'Vendor not found: %', p_vendor_id
+      using errcode = 'P0404';
+  end if;
+  
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_update_vendor_verification(uuid, boolean) to authenticated;
+grant execute on function public.admin_update_vendor_verification(uuid, boolean) to service_role;
+
+
+-- ============================================================
 -- RPC: admin_update_vendor_profile
 -- ============================================================
 -- Purpose: Update vendor profile fields (company info)
--- Allows admin to modify company_name, website, and size
+-- Allows admin to modify company_name, website, size, headquarters, and social links
 --
 -- Parameters:
 --   p_vendor_id       : UUID of the vendor to update
 --   p_company_name    : New company name (null = no change)
 --   p_company_website : New website URL (null = no change)
 --   p_company_size    : New size range like "1-10" (null = no change)
+--   p_headquarters    : New headquarters location (null = no change)
+--   p_linkedin_link   : LinkedIn profile URL (null = no change)
+--   p_instagram_link  : Instagram profile URL (null = no change)
+--   p_logo            : Company logo URL (null = no change)
+--   p_company_motto   : Company motto/tagline (null = no change)
+--   p_company_desc    : Company description (null = no change)
+--   p_founded_at      : Company founding date (null = no change)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1099,7 +1174,14 @@ create or replace function public.admin_update_vendor_profile(
   p_vendor_id uuid,
   p_company_name text default null,
   p_company_website text default null,
-  p_company_size text default null
+  p_company_size text default null,
+  p_headquarters text default null,
+  p_linkedin_link text default null,
+  p_instagram_link text default null,
+  p_logo text default null,
+  p_company_motto text default null,
+  p_company_desc text default null,
+  p_founded_at date default null
 )
 returns boolean
 language plpgsql
@@ -1151,6 +1233,31 @@ begin
       when p_company_size is not null then nullif(p_company_size, '')
       else company_size 
     end,
+    headquarters = case 
+      when p_headquarters is not null then nullif(p_headquarters, '')
+      else headquarters 
+    end,
+    linkedin_link = case 
+      when p_linkedin_link is not null then nullif(p_linkedin_link, '')
+      else linkedin_link 
+    end,
+    instagram_link = case 
+      when p_instagram_link is not null then nullif(p_instagram_link, '')
+      else instagram_link 
+    end,
+    logo = case 
+      when p_logo is not null then nullif(p_logo, '')
+      else logo 
+    end,
+    company_motto = case 
+      when p_company_motto is not null then nullif(p_company_motto, '')
+      else company_motto 
+    end,
+    company_desc = case 
+      when p_company_desc is not null then nullif(p_company_desc, '')
+      else company_desc 
+    end,
+    founded_at = coalesce(p_founded_at, founded_at),
     updated_at = now()
   where vendor_id = p_vendor_id;
 
@@ -1160,8 +1267,138 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text) to authenticated;
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text) to service_role;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to authenticated;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_search_users
+-- Purpose: Search users by email for admin assignment
+-- Parameters:
+--   search_query : Email search term (partial match)
+--   result_limit : Max results to return (default 10)
+-- Returns: List of users with their vendor assignment status
+-- Errors: P0403 if caller is not admin
+-- ============================================================
+create or replace function public.admin_search_users(
+  search_query text,
+  result_limit integer default 10
+)
+returns table (
+  user_id uuid,
+  email text,
+  full_name text,
+  assigned_vendor_id uuid,
+  assigned_vendor_name text
+)
+language plpgsql
+stable
+security definer
+set search_path = public, auth
+as $$
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate search query
+  if search_query is null or length(trim(search_query)) < 2 then
+    raise exception 'Search query must be at least 2 characters'
+      using errcode = 'P0400';
+  end if;
+
+  return query
+  select
+    u.id as user_id,
+    u.email::text as email,
+    (u.raw_user_meta_data->>'full_name')::text as full_name,
+    v.vendor_id as assigned_vendor_id,
+    v.company_name as assigned_vendor_name
+  from auth.users u
+  left join public.vendors v on v.user_id = u.id
+  where u.email ilike '%' || trim(search_query) || '%'
+  order by u.email asc
+  limit greatest(result_limit, 1);
+end;
+$$;
+
+grant execute on function public.admin_search_users(text, integer) to authenticated;
+grant execute on function public.admin_search_users(text, integer) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_assign_user_to_vendor
+-- Purpose: Assign a user account to a vendor
+-- Parameters:
+--   p_vendor_id : The vendor to assign the user to
+--   p_user_id   : The user to assign (null to unassign current user)
+-- Returns: Boolean (true if update succeeded)
+-- Errors: P0403 if not admin, P0404 if vendor/user not found,
+--         P0409 if user already assigned to another vendor
+-- ============================================================
+create or replace function public.admin_assign_user_to_vendor(
+  p_vendor_id uuid,
+  p_user_id uuid default null
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_existing_vendor_id uuid;
+  v_existing_vendor_name text;
+  rows_affected integer;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate vendor exists
+  if not exists (select 1 from public.vendors where vendor_id = p_vendor_id) then
+    raise exception 'Vendor not found: %', p_vendor_id
+      using errcode = 'P0404';
+  end if;
+
+  -- If assigning a user (not unassigning)
+  if p_user_id is not null then
+    -- Validate user exists
+    if not exists (select 1 from auth.users where id = p_user_id) then
+      raise exception 'User not found: %', p_user_id
+        using errcode = 'P0404';
+    end if;
+
+    -- Check if user is already assigned to another vendor
+    select vendor_id, company_name into v_existing_vendor_id, v_existing_vendor_name
+    from public.vendors
+    where user_id = p_user_id and vendor_id != p_vendor_id;
+
+    if v_existing_vendor_id is not null then
+      raise exception 'User is already assigned to vendor: % (%)', v_existing_vendor_name, v_existing_vendor_id
+        using errcode = 'P0409';
+    end if;
+  end if;
+
+  -- Update vendor with new user_id
+  update public.vendors
+  set
+    user_id = p_user_id,
+    updated_at = now()
+  where vendor_id = p_vendor_id;
+
+  get diagnostics rows_affected = row_count;
+
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to authenticated;
+grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to service_role;
 
 
 -- ############################################################
@@ -1335,8 +1572,8 @@ begin
     instagram_link = coalesce(nullif(v_claimer.instagram_link, ''), v_claimed.instagram_link),
     is_verified = v_claimer.is_verified or v_claimed.is_verified,
     subscription = case
-      when v_claimer.subscription = 'gold' or v_claimed.subscription = 'gold' then 'gold'::public.tier
-      when v_claimer.subscription = 'silver' or v_claimed.subscription = 'silver' then 'silver'::public.tier
+      when v_claimer.subscription = 'premium' or v_claimed.subscription = 'premium' then 'premium'::public.tier
+      when v_claimer.subscription = 'plus' or v_claimed.subscription = 'plus' then 'plus'::public.tier
       else 'freemium'::public.tier
     end,
     updated_at = now()
@@ -2054,7 +2291,7 @@ begin
     end if;
   end if;
 
-  if v_tier <> 'gold' then
+  if v_tier <> 'premium' then
     p_demo_link := null;
   end if;
 
@@ -2234,8 +2471,8 @@ begin
       raise exception 'Invalid demo link format. Must start with http:// or https://'
         using errcode = 'P0400';
     end if;
-    -- Only gold tier can have demo_link
-    if v_tier <> 'gold' then
+    -- Only premium tier can have demo_link
+    if v_tier <> 'premium' then
       p_demo_link := null;
     end if;
   end if;
@@ -2386,8 +2623,8 @@ begin
     ) desc,
     -- Then by tier
     case v.subscription
-      when 'gold' then 1
-      when 'silver' then 2
+      when 'premium' then 1
+      when 'plus' then 2
       else 3
     end,
     -- Then by rating
@@ -2901,3 +3138,383 @@ as $$
 $$;
 
 grant execute on function public.get_all_products_with_details() to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_all_categories
+-- Purpose: Fetch all product categories from the enum type
+-- Returns: Array of all category values sorted alphabetically
+-- ============================================================
+create or replace function public.get_all_categories()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select array_agg(enumlabel::text order by enumlabel)
+  from pg_enum
+  where enumtypid = 'public.product_category'::regtype;
+$$;
+
+grant execute on function public.get_all_categories() to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_all_countries
+-- Purpose: Fetch all distinct countries from vendor headquarters
+-- Returns: Array of all unique country values sorted alphabetically
+-- Note: Extracts country from headquarters field (assumes format: "City, Country")
+-- ============================================================
+create or replace function public.get_all_countries()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select array_agg(distinct country order by country)
+  from (
+    select trim(substring(v.headquarters from '([^,]+)$')) as country
+    from public.vendors v
+    where v.headquarters is not null
+      and v.headquarters != ''
+      and exists (
+        select 1 from public.products p
+        where p.vendor_id = v.vendor_id
+          and p.listing_status = 'approved'
+      )
+  ) as countries
+  where country is not null and country != '';
+$$;
+
+grant execute on function public.get_all_countries() to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_all_languages
+-- Purpose: Fetch all distinct languages from products
+-- Returns: Array of all unique language values sorted alphabetically
+-- ============================================================
+create or replace function public.get_all_languages()
+returns text[]
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select array_agg(distinct lang order by lang)
+  from (
+    select unnest(p.languages) as lang
+    from public.products p
+    where p.listing_status = 'approved'
+      and p.languages is not null
+      and array_length(p.languages, 1) > 0
+  ) as languages
+  where lang is not null and lang != '';
+$$;
+
+grant execute on function public.get_all_languages() to anon, authenticated, service_role;
+
+
+-- ############################################################
+-- ADMIN PRODUCT MANAGEMENT FUNCTIONS
+-- ############################################################
+-- Functions for admin product management (edit, list, update)
+-- All functions require admin privileges (checked via is_admin())
+-- ############################################################
+
+
+-- ============================================================
+-- RPC: admin_get_products
+-- ============================================================
+-- Purpose: List all products (paginated) for admin management
+-- Returns ALL products regardless of listing_status
+-- 
+-- Parameters:
+--   page_num     : Page number (1-based)
+--   page_size    : Number of results per page (default 20)
+--   search_query : Optional search term for product name, vendor, or category
+--   status_filter: Optional filter by listing_status
+--   tier_filter  : Optional filter by vendor subscription tier
+--
+-- Returns: Table of products with vendor info
+-- Errors: P0403 if caller is not admin
+-- ============================================================
+create or replace function public.admin_get_products(
+  page_num integer default 1,
+  page_size integer default 50,
+  search_query text default null,
+  status_filter public.listing_status default null,
+  tier_filter public.tier default null
+)
+returns table (
+  product_id uuid,
+  vendor_id uuid,
+  product_name text,
+  website_link text,
+  main_category public.product_category,
+  categories public.product_category[],
+  features text[],
+  short_desc text,
+  long_desc text,
+  logo text,
+  video_url text,
+  gallery text[],
+  pricing text,
+  languages text[],
+  demo_link text,
+  release_date date,
+  rating double precision,
+  listing_status public.listing_status,
+  product_created_at timestamptz,
+  product_updated_at timestamptz,
+  -- Vendor info
+  company_name text,
+  subscription public.tier,
+  is_verified boolean
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  -- Admin check: only admins can list all products
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  return query
+  select
+    p.product_id,
+    p.vendor_id,
+    p.product_name,
+    p.website_link,
+    p.main_category,
+    p.categories,
+    p.features,
+    p.short_desc,
+    p.long_desc,
+    p.logo,
+    p.video_url,
+    p.gallery,
+    p.pricing,
+    p.languages,
+    p.demo_link,
+    p.release_date,
+    p.rating,
+    p.listing_status,
+    p.created_at as product_created_at,
+    p.updated_at as product_updated_at,
+    v.company_name,
+    v.subscription,
+    v.is_verified
+  from public.products p
+  join public.vendors v on v.vendor_id = p.vendor_id
+  where (
+    search_query is null
+    or p.product_name ilike '%' || search_query || '%'
+    or v.company_name ilike '%' || search_query || '%'
+    or p.main_category::text ilike '%' || search_query || '%'
+  )
+  and (status_filter is null or p.listing_status = status_filter)
+  and (tier_filter is null or v.subscription = tier_filter)
+  order by p.created_at desc
+  limit greatest(page_size, 1)
+  offset greatest((page_num - 1) * page_size, 0);
+end;
+$$;
+
+grant execute on function public.admin_get_products(integer, integer, text, public.listing_status, public.tier) to authenticated;
+grant execute on function public.admin_get_products(integer, integer, text, public.listing_status, public.tier) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_get_products_count
+-- ============================================================
+-- Purpose: Get total count of products for pagination
+-- Uses same filter logic as admin_get_products
+--
+-- Parameters:
+--   search_query : Optional search term
+--   status_filter: Optional filter by listing_status
+--   tier_filter  : Optional filter by vendor subscription tier
+--
+-- Returns: Integer count
+-- Errors: P0403 if caller is not admin
+-- ============================================================
+create or replace function public.admin_get_products_count(
+  search_query text default null,
+  status_filter public.listing_status default null,
+  tier_filter public.tier default null
+)
+returns integer
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  total integer;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  select count(*)::integer into total
+  from public.products p
+  join public.vendors v on v.vendor_id = p.vendor_id
+  where (
+    search_query is null
+    or p.product_name ilike '%' || search_query || '%'
+    or v.company_name ilike '%' || search_query || '%'
+    or p.main_category::text ilike '%' || search_query || '%'
+  )
+  and (status_filter is null or p.listing_status = status_filter)
+  and (tier_filter is null or v.subscription = tier_filter);
+
+  return total;
+end;
+$$;
+
+grant execute on function public.admin_get_products_count(text, public.listing_status, public.tier) to authenticated;
+grant execute on function public.admin_get_products_count(text, public.listing_status, public.tier) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_update_product
+-- ============================================================
+-- Purpose: Update product fields for admin management
+-- Allows admin to modify product details
+--
+-- Parameters:
+--   p_product_id   : UUID of the product to update
+--   p_product_name : New product name (null = no change)
+--   p_website_link : New website URL (null = no change)
+--   p_short_desc   : New short description (null = no change)
+--   p_long_desc    : New long description (null = no change)
+--   p_main_category: New main category (null = no change)
+--   p_categories   : New categories array (null = no change)
+--   p_features     : New features array (null = no change)
+--   p_logo         : New logo (null = no change)
+--   p_video_url    : New video URL (null = no change)
+--   p_gallery      : New gallery array (null = no change)
+--   p_pricing      : New pricing (null = no change)
+--   p_languages    : New languages array (null = no change)
+--   p_demo_link    : New demo link (null = no change)
+--   p_listing_status: New listing status (null = no change)
+--
+-- Returns: Boolean (true if update succeeded)
+-- Errors:
+--   P0403 if caller is not admin
+--   P0404 if product not found
+-- ============================================================
+create or replace function public.admin_update_product(
+  p_product_id uuid,
+  p_product_name text default null,
+  p_website_link text default null,
+  p_short_desc text default null,
+  p_long_desc text default null,
+  p_main_category public.product_category default null,
+  p_categories public.product_category[] default null,
+  p_features text[] default null,
+  p_logo text default null,
+  p_video_url text default null,
+  p_gallery text[] default null,
+  p_pricing text default null,
+  p_languages text[] default null,
+  p_demo_link text default null,
+  p_listing_status public.listing_status default null
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  rows_affected integer;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate product exists
+  if not exists (select 1 from public.products where product_id = p_product_id) then
+    raise exception 'Product not found: %', p_product_id
+      using errcode = 'P0404';
+  end if;
+
+  -- Validate website URL format if provided
+  if p_website_link is not null and p_website_link != '' then
+    if not (p_website_link ~* '^https?://') then
+      raise exception 'Invalid website URL format. Must start with http:// or https://'
+        using errcode = 'P0400';
+    end if;
+  end if;
+
+  -- Validate video URL format if provided
+  if p_video_url is not null and p_video_url != '' then
+    if not (p_video_url ~* '^https?://') then
+      raise exception 'Invalid video URL format. Must start with http:// or https://'
+        using errcode = 'P0400';
+    end if;
+  end if;
+
+  -- Validate demo link format if provided
+  if p_demo_link is not null and p_demo_link != '' then
+    if not (p_demo_link ~* '^https?://') then
+      raise exception 'Invalid demo link format. Must start with http:// or https://'
+        using errcode = 'P0400';
+    end if;
+  end if;
+
+  -- Update fields (only non-null values)
+  update public.products
+  set 
+    product_name = coalesce(nullif(p_product_name, ''), product_name),
+    website_link = case 
+      when p_website_link is not null then nullif(p_website_link, '')
+      else website_link 
+    end,
+    short_desc = coalesce(nullif(p_short_desc, ''), short_desc),
+    long_desc = case 
+      when p_long_desc is not null then nullif(p_long_desc, '')
+      else long_desc 
+    end,
+    main_category = coalesce(p_main_category, main_category),
+    categories = coalesce(p_categories, categories),
+    features = coalesce(p_features, features),
+    logo = coalesce(nullif(p_logo, ''), logo),
+    video_url = case 
+      when p_video_url is not null then nullif(p_video_url, '')
+      else video_url 
+    end,
+    gallery = coalesce(p_gallery, gallery),
+    pricing = case 
+      when p_pricing is not null then nullif(p_pricing, '')
+      else pricing 
+    end,
+    languages = coalesce(p_languages, languages),
+    demo_link = case 
+      when p_demo_link is not null then nullif(p_demo_link, '')
+      else demo_link 
+    end,
+    listing_status = coalesce(p_listing_status, listing_status),
+    updated_at = now()
+  where product_id = p_product_id;
+
+  get diagnostics rows_affected = row_count;
+  
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_update_product(uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, public.listing_status) to authenticated;
+grant execute on function public.admin_update_product(uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, public.listing_status) to service_role;

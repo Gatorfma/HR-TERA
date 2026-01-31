@@ -13,7 +13,8 @@ import { Search, Package, Building2, Eye, Layers, Image as ImageIcon, ExternalLi
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { adminGetProducts, adminUpdateProduct } from "@/api/adminProductsApi";
-import { AdminProductView, ListingStatus, ProductCategory, PRODUCT_CATEGORIES } from "@/lib/admin-types";
+import { getAllCategories } from "@/api/supabaseApi";
+import { AdminProductView, ListingStatus, ProductCategory } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 
 const PRODUCTS_PER_PAGE = 10;
@@ -37,6 +38,7 @@ const ProductEditPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<AdminProductView | null>(null);
   const [editedProduct, setEditedProduct] = useState<AdminProductView | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<ProductCategory[]>([]);
 
   // Fetch products from database
   const fetchProducts = async (page: number = currentPage) => {
@@ -76,6 +78,16 @@ const ProductEditPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchProducts(1);
+    // Fetch categories from database
+    const fetchCategories = async () => {
+      try {
+        const categories = await getAllCategories();
+        setAvailableCategories(categories);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
   // Refetch when filters change (with debounce for search), reset to page 1
@@ -192,9 +204,9 @@ const ProductEditPage = () => {
 
   const getTierBadgeColor = (tier: Tier) => {
     switch (tier) {
-      case "gold":
+      case "premium":
         return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "silver":
+      case "plus":
         return "bg-gray-100 text-gray-800 border-gray-300";
       default:
         return "bg-green-100 text-green-800 border-green-300";
@@ -295,8 +307,8 @@ const ProductEditPage = () => {
                     <SelectContent>
                       <SelectItem value="all">Tüm tierler</SelectItem>
                       <SelectItem value="freemium">Freemium</SelectItem>
-                      <SelectItem value="silver">Silver</SelectItem>
-                      <SelectItem value="gold">Gold</SelectItem>
+                      <SelectItem value="plus">Plus</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
                     </SelectContent>
                   </Select>
                   <span className="text-xs text-muted-foreground self-center ml-auto">
@@ -313,7 +325,7 @@ const ProductEditPage = () => {
                   ) : error ? (
                     <div className="p-4 text-center text-red-500">
                       <p>{error}</p>
-                      <Button variant="outline" size="sm" onClick={fetchProducts} className="mt-2">
+                      <Button variant="outline" size="sm" onClick={() => fetchProducts()} className="mt-2">
                         Tekrar Dene
                       </Button>
                     </div>
@@ -471,7 +483,7 @@ const ProductEditPage = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {PRODUCT_CATEGORIES.map((category) => (
+                            {availableCategories.map((category) => (
                               <SelectItem key={category} value={category}>
                                 {category}
                               </SelectItem>
@@ -486,7 +498,7 @@ const ProductEditPage = () => {
                           Ek Kategoriler ({(editedProduct.categories || []).length}/{editedProduct.subscription === "freemium" ? 1 : 3})
                         </Label>
                         <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
-                          {PRODUCT_CATEGORIES.map((category) => {
+                          {availableCategories.map((category) => {
                             const isSelected = (editedProduct.categories || []).includes(category);
                             return (
                               <Badge
@@ -663,17 +675,17 @@ const ProductEditPage = () => {
                       <div className="space-y-2">
                         <Label htmlFor="videoUrl">
                           Video URL
-                          {editedProduct.subscription !== "gold" && (
-                            <span className="text-xs text-muted-foreground ml-2">(Sadece Gold için)</span>
+                          {editedProduct.subscription !== "premium" && (
+                            <span className="text-xs text-muted-foreground ml-2">(Sadece Premium için)</span>
                           )}
                         </Label>
                         <Input
                           id="videoUrl"
                           value={editedProduct.video_url || ""}
                           onChange={(e) => setEditedProduct({ ...editedProduct, video_url: e.target.value })}
-                          disabled={editedProduct.subscription !== "gold"}
+                          disabled={editedProduct.subscription !== "premium"}
                           placeholder="https://youtube.com/..."
-                          className={editedProduct.subscription !== "gold" ? "bg-muted" : ""}
+                          className={editedProduct.subscription !== "premium" ? "bg-muted" : ""}
                         />
                       </div>
 
