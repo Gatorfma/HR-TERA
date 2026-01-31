@@ -42,6 +42,9 @@ const UserSettingsTab = () => {
   const [editedLinkedinLink, setEditedLinkedinLink] = useState("");
   const [editedInstagramLink, setEditedInstagramLink] = useState("");
   const [editedLogo, setEditedLogo] = useState("");
+  const [editedCompanyMotto, setEditedCompanyMotto] = useState("");
+  const [editedCompanyDesc, setEditedCompanyDesc] = useState("");
+  const [editedFoundedAt, setEditedFoundedAt] = useState("");
   const [editedTier, setEditedTier] = useState<Tier>("freemium");
 
   // Hook for admin vendor management
@@ -79,6 +82,9 @@ const UserSettingsTab = () => {
       setEditedLinkedinLink(selectedVendor.linkedin_link ?? "");
       setEditedInstagramLink(selectedVendor.instagram_link ?? "");
       setEditedLogo(selectedVendor.logo ?? "");
+      setEditedCompanyMotto(selectedVendor.company_motto ?? "");
+      setEditedCompanyDesc(selectedVendor.company_desc ?? "");
+      setEditedFoundedAt(selectedVendor.founded_at ?? "");
       setEditedTier(selectedVendor.subscription ?? "freemium");
     }
   }, [selectedVendor]);
@@ -111,6 +117,9 @@ const UserSettingsTab = () => {
       linkedinLink: editedLinkedinLink || undefined,
       instagramLink: editedInstagramLink || undefined,
       logo: editedLogo || undefined,
+      companyMotto: editedCompanyMotto || undefined,
+      companyDesc: editedCompanyDesc || undefined,
+      foundedAt: editedFoundedAt || undefined,
     });
 
     if (result.success) {
@@ -490,6 +499,35 @@ const UserSettingsTab = () => {
                       placeholder="https://example.com/logo.png"
                     />
                   </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="companyMotto">Şirket Mottosu</Label>
+                    <Input
+                      id="companyMotto"
+                      value={editedCompanyMotto}
+                      onChange={(e) => setEditedCompanyMotto(e.target.value)}
+                      placeholder="Şirket sloganı veya mottosu"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="companyDesc">Şirket Açıklaması</Label>
+                    <textarea
+                      id="companyDesc"
+                      value={editedCompanyDesc}
+                      onChange={(e) => setEditedCompanyDesc(e.target.value)}
+                      placeholder="Şirket hakkında detaylı açıklama"
+                      rows={4}
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="foundedAt">Kuruluş Tarihi</Label>
+                    <Input
+                      id="foundedAt"
+                      type="date"
+                      value={editedFoundedAt}
+                      onChange={(e) => setEditedFoundedAt(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <Button
                   onClick={handleSaveCompany}
@@ -539,26 +577,6 @@ const UserSettingsTab = () => {
               </CardContent>
             </Card>
 
-            {/* Ek Bilgiler */}
-            {selectedVendor.company_motto && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Ek Bilgiler</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Şirket Mottosu</Label>
-                    <p className="text-sm text-muted-foreground">{selectedVendor.company_motto}</p>
-                  </div>
-                  {selectedVendor.company_desc && (
-                    <div className="space-y-2">
-                      <Label>Açıklama</Label>
-                      <p className="text-sm text-muted-foreground">{selectedVendor.company_desc}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
           </>
         ) : (
           <Card>

@@ -91,6 +91,9 @@ export interface UpdateVendorProfileInput {
   linkedinLink?: string | null;
   instagramLink?: string | null;
   logo?: string | null;
+  companyMotto?: string | null;
+  companyDesc?: string | null;
+  foundedAt?: string | null;
 }
 
 /**

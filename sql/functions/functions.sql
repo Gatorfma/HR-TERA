@@ -1159,6 +1159,9 @@ grant execute on function public.admin_update_vendor_verification(uuid, boolean)
 --   p_linkedin_link   : LinkedIn profile URL (null = no change)
 --   p_instagram_link  : Instagram profile URL (null = no change)
 --   p_logo            : Company logo URL (null = no change)
+--   p_company_motto   : Company motto/tagline (null = no change)
+--   p_company_desc    : Company description (null = no change)
+--   p_founded_at      : Company founding date (null = no change)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1175,7 +1178,10 @@ create or replace function public.admin_update_vendor_profile(
   p_headquarters text default null,
   p_linkedin_link text default null,
   p_instagram_link text default null,
-  p_logo text default null
+  p_logo text default null,
+  p_company_motto text default null,
+  p_company_desc text default null,
+  p_founded_at date default null
 )
 returns boolean
 language plpgsql
@@ -1243,6 +1249,15 @@ begin
       when p_logo is not null then nullif(p_logo, '')
       else logo 
     end,
+    company_motto = case 
+      when p_company_motto is not null then nullif(p_company_motto, '')
+      else company_motto 
+    end,
+    company_desc = case 
+      when p_company_desc is not null then nullif(p_company_desc, '')
+      else company_desc 
+    end,
+    founded_at = coalesce(p_founded_at, founded_at),
     updated_at = now()
   where vendor_id = p_vendor_id;
 
@@ -1252,8 +1267,8 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text) to authenticated;
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text) to service_role;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to authenticated;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to service_role;
 
 
 -- ############################################################

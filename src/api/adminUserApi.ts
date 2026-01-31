@@ -222,9 +222,9 @@ export async function adminUpdateVendorTier(
 export async function adminUpdateVendorProfile(
   input: UpdateVendorProfileInput
 ): Promise<ApiResponse<boolean>> {
-  const { vendorId, companyName, companyWebsite, companySize, headquarters, linkedinLink, instagramLink, logo } = input;
+  const { vendorId, companyName, companyWebsite, companySize, headquarters, linkedinLink, instagramLink, logo, companyMotto, companyDesc, foundedAt } = input;
 
-  console.log('[adminUpdateVendorProfile] Input:', { vendorId, companyName, companyWebsite, companySize, headquarters, linkedinLink, instagramLink, logo });
+  console.log('[adminUpdateVendorProfile] Input:', { vendorId, companyName, companyWebsite, companySize, headquarters, linkedinLink, instagramLink, logo, companyMotto, companyDesc, foundedAt });
 
   // Client-side validation
   if (!vendorId) {
@@ -278,6 +278,9 @@ export async function adminUpdateVendorProfile(
       p_linkedin_link: linkedinLink ?? null,
       p_instagram_link: instagramLink ?? null,
       p_logo: logo ?? null,
+      p_company_motto: companyMotto ?? null,
+      p_company_desc: companyDesc ?? null,
+      p_founded_at: foundedAt ?? null,
     });
     
     const { data, error } = await supabase.rpc('admin_update_vendor_profile', {
@@ -289,6 +292,9 @@ export async function adminUpdateVendorProfile(
       p_linkedin_link: linkedinLink ?? null,
       p_instagram_link: instagramLink ?? null,
       p_logo: logo ?? null,
+      p_company_motto: companyMotto ?? null,
+      p_company_desc: companyDesc ?? null,
+      p_founded_at: foundedAt ?? null,
     });
 
     if (error) {

@@ -192,6 +192,9 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                   linkedin_link: input.linkedinLink ?? v.linkedin_link,
                   instagram_link: input.instagramLink ?? v.instagram_link,
                   logo: input.logo ?? v.logo,
+                  company_motto: input.companyMotto ?? v.company_motto,
+                  company_desc: input.companyDesc ?? v.company_desc,
+                  founded_at: input.foundedAt ?? v.founded_at,
                 }
               : v
           )
@@ -207,6 +210,9 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                 linkedin_link: input.linkedinLink ?? prev.linkedin_link,
                 instagram_link: input.instagramLink ?? prev.instagram_link,
                 logo: input.logo ?? prev.logo,
+                company_motto: input.companyMotto ?? prev.company_motto,
+                company_desc: input.companyDesc ?? prev.company_desc,
+                founded_at: input.foundedAt ?? prev.founded_at,
               }
             : prev
         );
