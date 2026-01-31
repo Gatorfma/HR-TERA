@@ -924,6 +924,7 @@ returns table (
   website_link text,
   linkedin_link text,
   instagram_link text,
+  logo text,
   subscription public.tier,
   is_verified boolean,
   founded_at date,
@@ -957,6 +958,7 @@ begin
     v.website_link,
     v.linkedin_link,
     v.instagram_link,
+    v.logo,
     v.subscription,
     v.is_verified,
     v.founded_at,
@@ -1156,6 +1158,7 @@ grant execute on function public.admin_update_vendor_verification(uuid, boolean)
 --   p_headquarters    : New headquarters location (null = no change)
 --   p_linkedin_link   : LinkedIn profile URL (null = no change)
 --   p_instagram_link  : Instagram profile URL (null = no change)
+--   p_logo            : Company logo URL (null = no change)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1171,7 +1174,8 @@ create or replace function public.admin_update_vendor_profile(
   p_company_size text default null,
   p_headquarters text default null,
   p_linkedin_link text default null,
-  p_instagram_link text default null
+  p_instagram_link text default null,
+  p_logo text default null
 )
 returns boolean
 language plpgsql
@@ -1235,6 +1239,10 @@ begin
       when p_instagram_link is not null then nullif(p_instagram_link, '')
       else instagram_link 
     end,
+    logo = case 
+      when p_logo is not null then nullif(p_logo, '')
+      else logo 
+    end,
     updated_at = now()
   where vendor_id = p_vendor_id;
 
@@ -1244,8 +1252,8 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text) to authenticated;
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text) to service_role;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text) to authenticated;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text) to service_role;
 
 
 -- ############################################################

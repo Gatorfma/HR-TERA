@@ -191,6 +191,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                   headquarters: input.headquarters ?? v.headquarters,
                   linkedin_link: input.linkedinLink ?? v.linkedin_link,
                   instagram_link: input.instagramLink ?? v.instagram_link,
+                  logo: input.logo ?? v.logo,
                 }
               : v
           )
@@ -205,6 +206,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                 headquarters: input.headquarters ?? prev.headquarters,
                 linkedin_link: input.linkedinLink ?? prev.linkedin_link,
                 instagram_link: input.instagramLink ?? prev.instagram_link,
+                logo: input.logo ?? prev.logo,
               }
             : prev
         );

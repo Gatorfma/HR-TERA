@@ -24,6 +24,7 @@ export interface AdminVendorView {
   website_link: string | null;
   linkedin_link: string | null;
   instagram_link: string | null;
+  logo: string | null;
   subscription: Tier;
   is_verified: boolean;
   founded_at: string | null;
@@ -89,6 +90,7 @@ export interface UpdateVendorProfileInput {
   headquarters?: string | null;
   linkedinLink?: string | null;
   instagramLink?: string | null;
+  logo?: string | null;
 }
 
 /**
