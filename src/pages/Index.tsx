@@ -7,7 +7,7 @@ import BlogSection from "@/components/BlogSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
-import { getProducts, getAllCountries, getAllLanguages } from "@/api/supabaseApi";
+import { getProducts, getAllCountries, getAllLanguages, getAllCategories } from "@/api/supabaseApi";
 import { DashboardProduct } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -15,8 +15,10 @@ import { useAuth } from "@/contexts/AuthContext";
 const Index = () => {
   const [dashboardProducts, setDashboardProducts] = useState<DashboardProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<DashboardProduct[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [countries, setCountries] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
   const { isAdmin, isAuthenticated, isLoading } = useAuth();
@@ -30,15 +32,17 @@ const Index = () => {
     }
   }, [isLoading, isAuthenticated, isAdmin, navigate]);
 
-  // Fetch filter options (countries and languages)
+  // Fetch filter options (categories, countries, and languages)
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        const [countriesData, languagesData] = await Promise.all([
+        const [categoriesData, countriesData, languagesData] = await Promise.all([
+          getAllCategories(),
           getAllCountries(),
           getAllLanguages(),
         ]);
-        console.log("Filter options fetched:", { countriesData, languagesData });
+        console.log("Filter options fetched:", { categoriesData, countriesData, languagesData });
+        setCategories(categoriesData || []);
         setCountries(countriesData || []);
         setLanguages(languagesData || []);
       } catch (error) {
@@ -66,12 +70,14 @@ const Index = () => {
   // Fetch filtered products for ProductsSection
   const fetchFilteredProducts = useCallback(async () => {
     try {
+      const categoryFilter = selectedCategory !== "all" ? selectedCategory : null;
       const countryFilter = selectedCountry !== "all" ? selectedCountry : null;
       const languageFilter = selectedLanguage !== "all" ? selectedLanguage : null;
       
       const products = await getProducts({
         n: 8,
         page: 1,
+        categoryFilter,
         countryFilter,
         languageFilter,
       });
@@ -79,11 +85,15 @@ const Index = () => {
     } catch (error) {
       console.error("Error fetching filtered products:", error);
     }
-  }, [selectedCountry, selectedLanguage]);
+  }, [selectedCategory, selectedCountry, selectedLanguage]);
 
   useEffect(() => {
     fetchFilteredProducts();
   }, [fetchFilteredProducts]);
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+  };
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country);
@@ -99,10 +109,13 @@ const Index = () => {
       <HeroSection products={dashboardProducts} />
       <ProductsSection 
         products={filteredProducts}
+        categories={categories}
         countries={countries}
         languages={languages}
+        selectedCategory={selectedCategory}
         selectedCountry={selectedCountry}
         selectedLanguage={selectedLanguage}
+        onCategoryChange={handleCategoryChange}
         onCountryChange={handleCountryChange}
         onLanguageChange={handleLanguageChange}
       />

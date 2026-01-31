@@ -1,4 +1,4 @@
-import { ArrowUpRight, Globe, Languages } from "lucide-react";
+import { ArrowUpRight, Globe, Languages, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
 import { motion } from "framer-motion";
@@ -15,20 +15,26 @@ import {
 
 interface ProductsSectionProps {
   products?: DashboardProduct[];
+  categories?: string[];
   countries?: string[];
   languages?: string[];
+  selectedCategory?: string;
   selectedCountry?: string;
   selectedLanguage?: string;
+  onCategoryChange?: (category: string) => void;
   onCountryChange?: (country: string) => void;
   onLanguageChange?: (language: string) => void;
 }
 
 const ProductsSection = ({ 
   products = [],
+  categories = [],
   countries = [],
   languages = [],
+  selectedCategory = "all",
   selectedCountry = "all",
   selectedLanguage = "all",
+  onCategoryChange,
   onCountryChange,
   onLanguageChange,
 }: ProductsSectionProps) => {
@@ -46,7 +52,7 @@ const ProductsSection = ({
       isVerified: product.is_verified,
     }));
 
-  if (mappedProducts.length === 0 && selectedCountry === "all" && selectedLanguage === "all") return null;
+  if (mappedProducts.length === 0 && selectedCategory === "all" && selectedCountry === "all" && selectedLanguage === "all") return null;
 
   return (
     <section id="products" className="py-20 bg-background">
@@ -76,6 +82,27 @@ const ProductsSection = ({
 
           {/* Filters Row */}
           <div className="flex flex-wrap items-center gap-3">
+            {/* Category Filter */}
+            <div className="flex items-center gap-2">
+              <LayoutGrid className="w-4 h-4 text-muted-foreground" />
+              <Select
+                value={selectedCategory}
+                onValueChange={(value) => onCategoryChange?.(value)}
+              >
+                <SelectTrigger className="w-[180px] h-9 text-sm">
+                  <SelectValue placeholder={t("products.category")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t("products.allProducts")}</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Country Filter */}
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-muted-foreground" />
