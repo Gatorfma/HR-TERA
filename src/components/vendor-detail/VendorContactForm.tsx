@@ -9,10 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface VendorContactFormProps {
   vendorName: string;
-  isGold?: boolean;
+  isPremium?: boolean;
 }
 
-const VendorContactForm = ({ vendorName, isGold = false }: VendorContactFormProps) => {
+const VendorContactForm = ({ vendorName, isPremium = false }: VendorContactFormProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,7 +37,7 @@ const VendorContactForm = ({ vendorName, isGold = false }: VendorContactFormProp
       className="bg-card rounded-2xl border border-border p-6"
     >
       <h2 className="text-xl font-heading font-bold text-foreground mb-2">
-        {isGold ? "Request a Proposal" : "Contact Vendor"}
+        {isPremium ? "Request a Proposal" : "Contact Vendor"}
       </h2>
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Clock className="w-4 h-4" />
@@ -77,7 +77,7 @@ const VendorContactForm = ({ vendorName, isGold = false }: VendorContactFormProp
           />
         </div>
 
-        {isGold && (
+        {isPremium && (
           <>
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -136,7 +136,7 @@ const VendorContactForm = ({ vendorName, isGold = false }: VendorContactFormProp
           disabled={isSubmitting}
         >
           <Send className="w-4 h-4 mr-2" />
-          {isSubmitting ? "Sending..." : isGold ? "Submit Request" : "Send Message"}
+          {isSubmitting ? "Sending..." : isPremium ? "Submit Request" : "Send Message"}
         </Button>
       </form>
     </motion.div>

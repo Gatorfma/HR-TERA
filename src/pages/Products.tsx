@@ -1,15 +1,15 @@
-import { useState, useMemo, useEffect } from "react";
-import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight, Globe, Languages } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
-import { getProducts, getProductCountFiltered } from "@/api/supabaseApi";
+import { getProducts, getProductCountFiltered, getAllCategories, getAllCountries, getAllLanguages } from "@/api/supabaseApi";
 import type { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PRODUCT_CATEGORIES } from "@/lib/admin-types";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -29,8 +29,8 @@ const Products = () => {
   
   const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
     { value: "all", label: t("products.allTiers") },
-    { value: "gold", label: t("products.gold"), icon: <Crown className="w-3.5 h-3.5" /> },
-    { value: "silver", label: t("products.silver"), icon: <Award className="w-3.5 h-3.5" /> },
+    { value: "premium", label: t("products.premium"), icon: <Crown className="w-3.5 h-3.5" /> },
+    { value: "plus", label: t("products.plus"), icon: <Award className="w-3.5 h-3.5" /> },
     { value: "freemium", label: t("products.free") },
   ];
   
@@ -43,18 +43,41 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [allCountries, setAllCountries] = useState<string[]>([]);
+  const [allLanguages, setAllLanguages] = useState<string[]>([]);
 
   // Get filters from URL
   const categoryFromUrl = searchParams.get("category");
   const tierFromUrl = searchParams.get("tier");
+  const countryFromUrl = searchParams.get("country");
+  const languageFromUrl = searchParams.get("language");
   const pageFromUrl = searchParams.get("page");
   
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
-  // Initialize categories from PRODUCT_CATEGORIES
+  // Fetch filter options from database
   useEffect(() => {
-    setAllCategories(["All Products", ...PRODUCT_CATEGORIES]);
+    const fetchFilterOptions = async () => {
+      try {
+        const [categories, countries, languages] = await Promise.all([
+          getAllCategories(),
+          getAllCountries(),
+          getAllLanguages(),
+        ]);
+        setAllCategories(["All Products", ...categories]);
+        setAllCountries(countries || []);
+        setAllLanguages(languages || []);
+      } catch (err) {
+        console.error("Error fetching filter options:", err);
+        setAllCategories(["All Products"]);
+        setAllCountries([]);
+        setAllLanguages([]);
+      }
+    };
+    fetchFilterOptions();
   }, []);
 
   // Debounce search query
@@ -82,10 +105,22 @@ const Products = () => {
       setSelectedCategory("All Products");
     }
     
-    if (tierFromUrl && ["gold", "silver", "freemium"].includes(tierFromUrl)) {
+    if (tierFromUrl && ["premium", "plus", "freemium"].includes(tierFromUrl)) {
       setSelectedTier(tierFromUrl as Tier);
     } else {
       setSelectedTier("all");
+    }
+
+    if (countryFromUrl && allCountries.includes(countryFromUrl)) {
+      setSelectedCountry(countryFromUrl);
+    } else {
+      setSelectedCountry("all");
+    }
+
+    if (languageFromUrl && allLanguages.includes(languageFromUrl)) {
+      setSelectedLanguage(languageFromUrl);
+    } else {
+      setSelectedLanguage("all");
     }
 
     if (pageFromUrl) {
@@ -96,7 +131,7 @@ const Products = () => {
     } else {
       setCurrentPage(1);
     }
-  }, [categoryFromUrl, tierFromUrl, pageFromUrl, allCategories]);
+  }, [categoryFromUrl, tierFromUrl, countryFromUrl, languageFromUrl, pageFromUrl, allCategories, allCountries, allLanguages]);
 
   // Fetch products with pagination and filters
   useEffect(() => {
@@ -109,6 +144,8 @@ const Products = () => {
         const productFilter = debouncedSearchQuery.trim() || null;
         const categoryFilter = selectedCategory !== "All Products" ? selectedCategory : null;
         const tierFilter = selectedTier !== "all" ? selectedTier : null;
+        const countryFilter = selectedCountry !== "all" ? selectedCountry : null;
+        const languageFilter = selectedLanguage !== "all" ? selectedLanguage : null;
 
         // Fetch products with pagination
         const apiProducts = await getProducts({
@@ -117,6 +154,8 @@ const Products = () => {
           productFilter,
           vendorFilter: null,
           categoryFilter,
+          languageFilter,
+          countryFilter,
           tierFilter,
         });
 
@@ -125,6 +164,8 @@ const Products = () => {
           productFilter,
           vendorFilter: null,
           categoryFilter,
+          languageFilter,
+          countryFilter,
           tierFilter,
         });
 
@@ -150,7 +191,7 @@ const Products = () => {
     };
 
     fetchProducts();
-  }, [currentPage, debouncedSearchQuery, selectedCategory, selectedTier]);
+  }, [currentPage, debouncedSearchQuery, selectedCategory, selectedTier, selectedCountry, selectedLanguage]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -160,32 +201,59 @@ const Products = () => {
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
 
+  // Build URL params helper
+  const buildUrlParams = (overrides: Partial<{
+    category: string;
+    tier: Tier | "all";
+    country: string;
+    language: string;
+    search: string;
+    page: number;
+  }> = {}) => {
+    const params: Record<string, string> = {};
+    const category = overrides.category ?? selectedCategory;
+    const tier = overrides.tier ?? selectedTier;
+    const country = overrides.country ?? selectedCountry;
+    const language = overrides.language ?? selectedLanguage;
+    const search = overrides.search ?? searchQuery;
+    const page = overrides.page ?? currentPage;
+
+    if (category !== "All Products") params.category = category.toLowerCase();
+    if (tier !== "all") params.tier = tier;
+    if (country !== "all") params.country = country;
+    if (language !== "all") params.language = language;
+    if (search.trim()) params.search = search.trim();
+    if (page > 1) params.page = page.toString();
+
+    return params;
+  };
+
   // Handle category selection - update URL and reset to page 1
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
-    const params: Record<string, string> = {};
-    if (category !== "All Products") {
-      params.category = category.toLowerCase();
-    }
-    if (selectedTier !== "all") {
-      params.tier = selectedTier;
-    }
-    setSearchParams(params);
+    setSearchParams(buildUrlParams({ category, page: 1 }));
   };
 
   // Handle tier selection - update URL and reset to page 1
   const handleTierSelect = (tier: Tier | "all") => {
     setSelectedTier(tier);
     setCurrentPage(1);
-    const params: Record<string, string> = {};
-    if (selectedCategory !== "All Products") {
-      params.category = selectedCategory.toLowerCase();
-    }
-    if (tier !== "all") {
-      params.tier = tier;
-    }
-    setSearchParams(params);
+    setSearchParams(buildUrlParams({ tier, page: 1 }));
+  };
+
+  // Handle country selection - update URL and reset to page 1
+  const handleCountrySelect = (country: string) => {
+    setSelectedCountry(country);
+    setCurrentPage(1);
+    setSearchParams(buildUrlParams({ country, page: 1 }));
+  };
+
+  // Handle language selection - update URL and reset to page 1
+  const handleLanguageSelect = (language: string) => {
+    setSelectedLanguage(language);
+    setCurrentPage(1);
+    setSearchParams(buildUrlParams({ language, page: 1 }));
   };
 
   // Handle search - debounced and reset to page 1
@@ -198,18 +266,7 @@ const Products = () => {
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      const params: Record<string, string> = {};
-      if (selectedCategory !== "All Products") {
-        params.category = selectedCategory.toLowerCase();
-      }
-      if (selectedTier !== "all") {
-        params.tier = selectedTier;
-      }
-      if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
-      }
-      params.page = newPage.toString();
-      setSearchParams(params);
+      setSearchParams(buildUrlParams({ page: newPage }));
       window.scrollTo(0, 0);
     }
   };
@@ -217,12 +274,14 @@ const Products = () => {
   const clearFilters = () => {
     setSelectedCategory("All Products");
     setSelectedTier("all");
+    setSelectedCountry("all");
+    setSelectedLanguage("all");
     setSearchQuery("");
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  const hasActiveFilters = selectedCategory !== "All Products" || selectedTier !== "all" || searchQuery !== "";
+  const hasActiveFilters = selectedCategory !== "All Products" || selectedTier !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || searchQuery !== "";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -248,9 +307,9 @@ const Products = () => {
                         onClick={() => handleTierSelect(tier.value)}
                         className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
                           selectedTier === tier.value
-                            ? tier.value === "gold"
+                            ? tier.value === "premium"
                               ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "silver"
+                              : tier.value === "plus"
                               ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
                               : "bg-primary text-primary-foreground shadow-sm"
                             : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
@@ -266,21 +325,69 @@ const Products = () => {
                 {/* Category Filter */}
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">{t("products.category")}</h3>
-                  <div className="flex flex-wrap gap-2 max-h-96 p-2 overflow-y-auto">
-                    {allCategories.map((category) => (
-                      <button
-                        key={category}
-                        onClick={() => handleCategorySelect(category)}
-                        className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                          selectedCategory === category
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                        }`}
-                      >
-                        {category}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={(value) => handleCategorySelect(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("products.category")} />
+                    </SelectTrigger>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                      {allCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Country Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    {t("products.filterCountry")}
+                  </h3>
+                  <Select
+                    value={selectedCountry}
+                    onValueChange={(value) => handleCountrySelect(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("products.filterCountry")} />
+                    </SelectTrigger>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                      <SelectItem value="all">{t("products.allCountries")}</SelectItem>
+                      {allCountries.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Language Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <Languages className="w-4 h-4" />
+                    {t("products.filterLanguage")}
+                  </h3>
+                  <Select
+                    value={selectedLanguage}
+                    onValueChange={(value) => handleLanguageSelect(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("products.filterLanguage")} />
+                    </SelectTrigger>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                      <SelectItem value="all">{t("products.allLanguages")}</SelectItem>
+                      {allLanguages.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Clear Filters */}

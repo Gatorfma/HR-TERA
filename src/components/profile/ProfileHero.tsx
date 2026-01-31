@@ -26,8 +26,8 @@ const ProfileHero = () => {
 
   const tierLabels = {
     freemium: "Freemium",
-    silver: "Silver",
-    gold: "Gold"
+    plus: "Plus",
+    premium: "Premium"
   };
 
   return (

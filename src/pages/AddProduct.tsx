@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Upload, X, Lock, Info, Eye } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProductApplications } from "@/contexts/ProductApplicationsContext";
 import ListingTierBadge from "@/components/ListingTierBadge";
-import { PRODUCT_CATEGORIES } from "@/lib/admin-types";
+import { getAllCategories } from "@/api/supabaseApi";
 
 const AVAILABLE_FEATURES = [
   "Automation",
@@ -30,8 +30,6 @@ const AVAILABLE_FEATURES = [
   "Training & LMS",
   "Performance Feedback",
 ];
-
-const AVAILABLE_CATEGORIES = PRODUCT_CATEGORIES;
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -57,6 +55,20 @@ const AddProduct = () => {
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
+  // Fetch categories from database
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await getAllCategories();
+        setAvailableCategories(categories);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -134,7 +146,7 @@ const AddProduct = () => {
       toast({ title: "Hata", description: "En az bir kategori seçmelisiniz.", variant: "destructive" });
       return;
     }
-    if (vendorTier === "gold" && formData.calendlyLink && !isValidUrl(formData.calendlyLink)) {
+    if (vendorTier === "premium" && formData.calendlyLink && !isValidUrl(formData.calendlyLink)) {
       toast({ title: "Hata", description: "Geçerli bir Calendly linki girin.", variant: "destructive" });
       return;
     }
@@ -148,7 +160,7 @@ const AddProduct = () => {
         websiteUrl: formData.websiteUrl,
         logo: formData.logo,
         motto: vendorTier !== "freemium" ? formData.motto : undefined,
-        calendlyLink: vendorTier === "gold" ? formData.calendlyLink : undefined,
+        calendlyLink: vendorTier === "premium" ? formData.calendlyLink : undefined,
         categories: formData.categories,
         features: formData.features,
         galleryImages: vendorTier !== "freemium" ? formData.galleryImages : [],
@@ -174,11 +186,11 @@ const AddProduct = () => {
     }
   };
 
-  const LockedField = ({ requiredTier, label }: { requiredTier: "silver" | "gold"; label: string }) => (
+  const LockedField = ({ requiredTier, label }: { requiredTier: "plus" | "premium"; label: string }) => (
     <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
       <Lock className="w-4 h-4" />
       <span>
-        {label} {requiredTier === "silver" ? "Silver ve Gold" : "sadece Gold"} paketleri için açıktır.
+        {label} {requiredTier === "plus" ? "Plus ve Premium" : "sadece Premium"} paketleri için açıktır.
       </span>
     </div>
   );
@@ -293,7 +305,7 @@ const AddProduct = () => {
                           </div>
                         </div>
 
-                        {/* Motto (Silver/Gold) */}
+                        {/* Motto (Plus/Premium) */}
                         <div className="space-y-2">
                           <Label htmlFor="motto" className="flex items-center gap-2">
                             Motto
@@ -302,12 +314,12 @@ const AddProduct = () => {
                                 <TooltipTrigger>
                                   <Info className="w-4 h-4 text-muted-foreground" />
                                 </TooltipTrigger>
-                                <TooltipContent>Silver ve Gold paketleri için açıktır</TooltipContent>
+                                <TooltipContent>Plus ve Premium paketleri için açıktır</TooltipContent>
                               </Tooltip>
                             )}
                           </Label>
                           {vendorTier === "freemium" ? (
-                            <LockedField requiredTier="silver" label="Motto alanı" />
+                            <LockedField requiredTier="plus" label="Motto alanı" />
                           ) : (
                             <Input
                               id="motto"
@@ -321,21 +333,21 @@ const AddProduct = () => {
 
                       {/* Right Column Fields */}
                       <div className="space-y-4">
-                        {/* Calendly Link (Gold) */}
+                        {/* Calendly Link (Premium) */}
                         <div className="space-y-2">
                           <Label htmlFor="calendlyLink" className="flex items-center gap-2">
                             Calendly Linki
-                            {vendorTier !== "gold" && (
+                            {vendorTier !== "premium" && (
                               <Tooltip>
                                 <TooltipTrigger>
                                   <Info className="w-4 h-4 text-muted-foreground" />
                                 </TooltipTrigger>
-                                <TooltipContent>Sadece Gold paketinde kullanılabilir</TooltipContent>
+                                <TooltipContent>Sadece Premium paketinde kullanılabilir</TooltipContent>
                               </Tooltip>
                             )}
                           </Label>
-                          {vendorTier !== "gold" ? (
-                            <LockedField requiredTier="gold" label="Calendly linki" />
+                          {vendorTier !== "premium" ? (
+                            <LockedField requiredTier="premium" label="Calendly linki" />
                           ) : (
                             <Input
                               id="calendlyLink"
@@ -354,7 +366,7 @@ const AddProduct = () => {
                             <span className="text-destructive">*</span>
                           </Label>
                           <div className="flex flex-wrap gap-2 p-3 border border-input rounded-lg bg-background min-h-[100px]">
-                            {AVAILABLE_CATEGORIES.map((category) => {
+                            {availableCategories.map((category) => {
                               const isSelected = formData.categories.includes(category);
                               const isDisabled = !isSelected && formData.categories.length >= maxCategories;
                               return (
@@ -405,7 +417,7 @@ const AddProduct = () => {
                       </div>
                     </div>
 
-                    {/* Galeri Görselleri (Silver/Gold) */}
+                    {/* Galeri Görselleri (Plus/Premium) */}
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
                         Galeri Görselleri ({formData.galleryImages.length}/5)
@@ -414,12 +426,12 @@ const AddProduct = () => {
                             <TooltipTrigger>
                               <Info className="w-4 h-4 text-muted-foreground" />
                             </TooltipTrigger>
-                            <TooltipContent>Silver ve Gold paketleri için açıktır</TooltipContent>
+                            <TooltipContent>Plus ve Premium paketleri için açıktır</TooltipContent>
                           </Tooltip>
                         )}
                       </Label>
                       {vendorTier === "freemium" ? (
-                        <LockedField requiredTier="silver" label="Galeri" />
+                        <LockedField requiredTier="plus" label="Galeri" />
                       ) : (
                         <div className="flex items-center gap-4 p-4 border-2 border-dashed border-border rounded-lg">
                           <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">

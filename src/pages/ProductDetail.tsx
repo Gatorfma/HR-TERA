@@ -1,6 +1,6 @@
 import { useParams, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, ExternalLink, Mail, Play, Download } from "lucide-react";
+import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -112,7 +112,7 @@ interface VendorDetails {
 
 // Convert API product to the format expected by components
 const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Product => {
-  const isVendorClaimed = apiProduct.vendor_user_id !== null;
+  const isVendorClaimed = apiProduct.is_verified;
 
   const vendorTier = isVendorClaimed
     ? ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
@@ -184,7 +184,9 @@ const ProductDetail = () => {
 
       try {
         if (isUUID(slug)) {
+          console.log("Fetching product details for UUID:", slug);
           const apiProduct = await getProductDetails(slug);
+          console.log("API response:", apiProduct);
           if (apiProduct) {
             const mappedProduct = mapApiToProduct(apiProduct, t);
             setProduct(mappedProduct);
@@ -338,9 +340,9 @@ const ProductDetail = () => {
   // For unclaimed products, force freemium tier behavior
   const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
   const tier = effectiveTier;
-  const isSilverOrGold = tier === "silver" || tier === "gold";
-  const isGold = tier === "gold";
-  const categories = product.categories || [product.category];
+  const isPlusOrPremium = tier === "plus" || tier === "premium";
+  const isPremium = tier === "premium";
+  const categories = [product.category, ...product.categories];
 
   const vendorLogo = vendorDetails?.logo || product.vendor?.logo;
   const vendorHQ = vendorDetails?.headquarters || product.vendor?.location;
@@ -354,14 +356,7 @@ const ProductDetail = () => {
 
       <main className="pt-32 pb-20">
         {/* Hero Section */}
-        <div
-          className={`relative overflow-hidden ${
-            isGold ? "bg-gradient-to-br from-primary/5 via-background to-primary/10" : ""
-          }`}
-        >
-          {isGold && (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.1),transparent_50%)]" />
-          )}
+        <div className="relative overflow-hidden">
 
           <div className="container relative">
             {/* Breadcrumb */}
@@ -404,8 +399,8 @@ const ProductDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className={`mb-6 ${
-                isGold
-                  ? "p-6 rounded-2xl border border-primary/20 bg-background/50 backdrop-blur-sm shadow-[0_0_30px_hsl(var(--primary)/0.1)]"
+                isPremium
+                  ? "p-6 rounded-2xl bg-background/50 backdrop-blur-sm"
                   : ""
               }`}
             >
@@ -413,9 +408,9 @@ const ProductDetail = () => {
                 {/* Logo & Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-4 mb-4 min-w-0">
-                    {vendorLogo ? (
+                    {product.image ? (
                       <img
-                        src={vendorLogo}
+                        src={product.image}
                         alt={product.name}
                         className="w-16 h-16 rounded-xl object-cover border border-border shrink-0"
                       />
@@ -426,7 +421,7 @@ const ProductDetail = () => {
                     )}
 
                     <div className="flex-1 min-w-0">
-                      {!isUnclaimed && <TierBadge tier={tier} showFeatured={isGold} />}
+                      {!isUnclaimed && <TierBadge tier={tier} showFeatured={isPremium} />}
 
                       <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2 break-words">
                         {product.name}
@@ -438,10 +433,10 @@ const ProductDetail = () => {
 
                   {/* Category Pills */}
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {categories.slice(0, tier === "freemium" ? 1 : 3).map((cat, i) => (
+                    {categories.map((cat, i) => (
                       <Link
                         key={i}
-                        to={`/products?category=${cat.toLowerCase()}`}
+                        to={`/products?category=${encodeURIComponent(cat)}`}
                         className="px-3 py-1 bg-primary/10 text-slate-700 rounded-full text-sm font-medium hover:bg-primary/20 transition-colors"
                       >
                         {cat}
@@ -451,7 +446,7 @@ const ProductDetail = () => {
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
-                    {isUnclaimed ? null : isGold ? (
+                    {isUnclaimed ? null : isPremium ? (
                       <>
                         <Button
                           className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -473,17 +468,8 @@ const ProductDetail = () => {
                             {t("productDetail.visitWebsite")}
                           </a>
                         </Button>
-
-                        <Button
-                          variant="ghost"
-                          size="lg"
-                          onClick={() => handleProductCtaClick("download_brochure")}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          {t("productDetail.downloadBrochure")}
-                        </Button>
                       </>
-                    ) : isSilverOrGold ? (
+                    ) : isPlusOrPremium ? (
                       <>
                         <Button className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg" asChild>
                           <a
@@ -518,8 +504,8 @@ const ProductDetail = () => {
                   </div>
                 </div>
 
-                {/* Hero Image (Silver/Gold only) */}
-                {isSilverOrGold && product.screenshots && product.screenshots.length > 0 && (
+                {/* Hero Image (Plus/Premium only) */}
+                {isPlusOrPremium && product.screenshots && product.screenshots.length > 0 && (
                   <div className="lg:w-[45%] min-w-0">
                     <div className="rounded-xl overflow-hidden border border-border">
                       <img
@@ -574,8 +560,7 @@ const ProductDetail = () => {
 
                     {/* Vendor Details */}
                     <div className="mb-4 min-w-0">
-                      <Link
-                        to={`/vendors/${product.vendor.slug}`}
+                      <div
                         className="flex items-center gap-4 p-3 -mx-3 rounded-xl hover:bg-muted transition-colors min-w-0"
                       >
                         <img
@@ -587,11 +572,8 @@ const ProductDetail = () => {
                           <span className="font-semibold text-foreground block truncate">
                             {vendorDetails?.company_name || product.vendor.name}
                           </span>
-                          {!isUnclaimed && (
-                            <span className="text-xs text-muted-foreground">{t("productDetail.viewProfile")}</span>
-                          )}
                         </div>
-                      </Link>
+                      </div>
 
                       {vendorMotto && (
                         <p className="text-sm text-muted-foreground mt-3 italic break-words">“{vendorMotto}”</p>
@@ -601,48 +583,64 @@ const ProductDetail = () => {
                         <div className="mt-4 grid grid-cols-2 gap-2">
                           {vendorHQ && (
                             <div className="rounded-xl border border-border bg-muted/30 p-3">
-                              <p className="text-xs text-muted-foreground">Headquarters</p>
+                              <p className="text-xs text-muted-foreground">{t("productDetail.headquarters")}</p>
                               <p className="text-sm font-medium text-foreground break-words">{vendorHQ}</p>
                             </div>
                           )}
                           {vendorSize && (
                             <div className="rounded-xl border border-border bg-muted/30 p-3">
-                              <p className="text-xs text-muted-foreground">Company size</p>
+                              <p className="text-xs text-muted-foreground">{t("productDetail.companySize")}</p>
                               <p className="text-sm font-medium text-foreground break-words">{vendorSize}</p>
                             </div>
                           )}
                         </div>
                       )}
 
-                      {/* Website (prefer vendorDetails.website_link, fallback product.vendor.website) */}
-                      {(vendorDetails?.website_link || product.vendor.website) && (
-                        <a
-                          href={(vendorDetails?.website_link || product.vendor.website) as string}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mt-4 min-w-0"
-                        >
-                          <ExternalLink className="w-4 h-4 shrink-0" />
-                          <span className="truncate">
-                            {(vendorDetails?.website_link || product.vendor.website)?.replace(/^https?:\/\//, "")}
+                      {/* Social Links */}
+                      <div className="flex items-center justify-around mt-4">
+                        {(vendorDetails?.website_link || product.vendor.website) ? (
+                          <a
+                            href={(vendorDetails?.website_link || product.vendor.website) as string}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-emerald-600 hover:text-emerald-700 transition-colors"
+                          >
+                            <Globe className="w-5 h-5" />
+                          </a>
+                        ) : (
+                          <span className="text-emerald-600/40 cursor-default">
+                            <Globe className="w-5 h-5" />
                           </span>
-                        </a>
-                      )}
-
-                      {/* LinkedIn */}
-                      {vendorLinkedIn && (
-                        <a
-                          href={vendorLinkedIn}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mt-2 min-w-0"
-                        >
-                          <ExternalLink className="w-4 h-4 shrink-0" />
-                          <span className="truncate">
-                            {vendorLinkedIn.replace(/^https?:\/\//, "").replace(/^www\./, "")}
+                        )}
+                        {vendorLinkedIn ? (
+                          <a
+                            href={vendorLinkedIn}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#0A66C2] hover:text-[#004182] transition-colors"
+                          >
+                            <Linkedin className="w-5 h-5" />
+                          </a>
+                        ) : (
+                          <span className="text-[#0A66C2]/40 cursor-default">
+                            <Linkedin className="w-5 h-5" />
                           </span>
-                        </a>
-                      )}
+                        )}
+                        {vendorDetails?.instagram_link ? (
+                          <a
+                            href={vendorDetails.instagram_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#E4405F] hover:text-[#C13584] transition-colors"
+                          >
+                            <Instagram className="w-5 h-5" />
+                          </a>
+                        ) : (
+                          <span className="text-[#E4405F]/40 cursor-default">
+                            <Instagram className="w-5 h-5" />
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Claim Button - Only shown for unclaimed vendors */}

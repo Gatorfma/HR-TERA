@@ -11,7 +11,7 @@ const AdminTabs = ({ activeTab }: AdminTabsProps) => {
 
   const tabs: { value: AdminTabValue; label: string; path: string }[] = [
     { value: "analytics", label: "Analitik", path: "/admin" },
-    { value: "users", label: "Kullanıcı Ayarları", path: "/admin?tab=users" },
+    { value: "users", label: "Şirket Ayarları", path: "/admin?tab=users" },
     { value: "products", label: "Ürün Ayarları", path: "/admin/products" },
   ];
 

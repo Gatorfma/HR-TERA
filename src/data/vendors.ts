@@ -73,12 +73,12 @@ export interface Vendor {
   portfolioImages: string[];
   portfolioItems?: { name: string; description: string; thumbnail: string }[];
   productSlugs: string[];
-  // Silver+ fields
+  // Plus+ fields
   industries?: string[];
   regions?: string[];
   clientLogos?: string[];
   testimonials?: VendorTestimonial[];
-  // Gold+ fields
+  // Premium+ fields
   heroStats?: { label: string; value: string }[];
   caseStudies?: VendorCaseStudy[];
   packages?: VendorPackage[];
@@ -100,7 +100,7 @@ export const vendors: Vendor[] = [
     vendorType: "Design Agencies",
     addedDate: "Oct 24, 2024",
     isPro: true,
-    vendorTier: "gold",
+    vendorTier: "premium",
     rating: 4.9,
     status: "Top Rated",
     tagline: "AI-powered recruitment for the modern enterprise",
@@ -191,7 +191,7 @@ export const vendors: Vendor[] = [
     vendorType: "Development Studios",
     addedDate: "Oct 24, 2024",
     isPro: true,
-    vendorTier: "gold",
+    vendorTier: "premium",
     rating: 4.8,
     status: "Featured",
     tagline: "Building better teams through smart onboarding",
@@ -268,7 +268,7 @@ export const vendors: Vendor[] = [
     vendorType: "Freelancers",
     addedDate: "Oct 24, 2024",
     isPro: true,
-    vendorTier: "gold",
+    vendorTier: "premium",
     rating: 4.7,
     status: "Verified",
     tagline: "Payroll made simple, compliance made certain",
@@ -336,7 +336,7 @@ export const vendors: Vendor[] = [
     vendorType: "Marketing Partners",
     addedDate: "Oct 24, 2024",
     isPro: true,
-    vendorTier: "silver",
+    vendorTier: "plus",
     rating: 4.6,
     status: "Top Rated",
     tagline: "Stay compliant, stay confident",
@@ -424,7 +424,7 @@ export const vendors: Vendor[] = [
     vendorType: "Support & Maintenance",
     addedDate: "Dec 1, 2024",
     isPro: true,
-    vendorTier: "gold",
+    vendorTier: "premium",
     rating: 4.8,
     status: "Verified",
     tagline: "24/7 support for your HR technology",

@@ -8,6 +8,9 @@ import {
   adminGetVendors,
   adminUpdateVendorTier,
   adminUpdateVendorProfile,
+  adminUpdateVendorVerification,
+  adminSearchUsers,
+  adminAssignUserToVendor,
 } from '@/api/adminUserApi';
 import {
   AdminVendorView,
@@ -15,6 +18,7 @@ import {
   ApiError,
   UpdateVendorTierInput,
   UpdateVendorProfileInput,
+  UserSearchResult,
 } from '@/lib/admin-types';
 import { Tier } from '@/lib/types';
 
@@ -40,6 +44,11 @@ interface UseAdminVendorsReturn extends UseAdminVendorsState {
   updateProfile: (
     input: Omit<UpdateVendorProfileInput, 'vendorId'> & { vendorId: string }
   ) => Promise<{ success: boolean; error?: ApiError }>;
+  updateVerification: (vendorId: string, isVerified: boolean) => Promise<{ success: boolean; error?: ApiError }>;
+  
+  // User assignment
+  searchUsers: (query: string) => Promise<{ success: boolean; data?: UserSearchResult[]; error?: ApiError }>;
+  assignUserToVendor: (vendorId: string, userId: string | null) => Promise<{ success: boolean; error?: ApiError }>;
 
   // Selected vendor
   selectedVendor: AdminVendorView | null;
@@ -48,6 +57,8 @@ interface UseAdminVendorsReturn extends UseAdminVendorsState {
   // Mutation states
   isUpdatingTier: boolean;
   isUpdatingProfile: boolean;
+  isUpdatingVerification: boolean;
+  isAssigningUser: boolean;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -65,6 +76,8 @@ export function useAdminVendors(): UseAdminVendorsReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingTier, setIsUpdatingTier] = useState(false);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingVerification, setIsUpdatingVerification] = useState(false);
+  const [isAssigningUser, setIsAssigningUser] = useState(false);
 
   // Error state
   const [error, setError] = useState<ApiError | null>(null);
@@ -184,6 +197,13 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                   company_name: input.companyName ?? v.company_name,
                   website_link: input.companyWebsite ?? v.website_link,
                   company_size: input.companySize ?? v.company_size,
+                  headquarters: input.headquarters ?? v.headquarters,
+                  linkedin_link: input.linkedinLink ?? v.linkedin_link,
+                  instagram_link: input.instagramLink ?? v.instagram_link,
+                  logo: input.logo ?? v.logo,
+                  company_motto: input.companyMotto ?? v.company_motto,
+                  company_desc: input.companyDesc ?? v.company_desc,
+                  founded_at: input.foundedAt ?? v.founded_at,
                 }
               : v
           )
@@ -195,6 +215,13 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                 company_name: input.companyName ?? prev.company_name,
                 website_link: input.companyWebsite ?? prev.website_link,
                 company_size: input.companySize ?? prev.company_size,
+                headquarters: input.headquarters ?? prev.headquarters,
+                linkedin_link: input.linkedinLink ?? prev.linkedin_link,
+                instagram_link: input.instagramLink ?? prev.instagram_link,
+                logo: input.logo ?? prev.logo,
+                company_motto: input.companyMotto ?? prev.company_motto,
+                company_desc: input.companyDesc ?? prev.company_desc,
+                founded_at: input.foundedAt ?? prev.founded_at,
               }
             : prev
         );
@@ -204,6 +231,64 @@ export function useAdminVendors(): UseAdminVendorsReturn {
       return { success: result.success, error: result.error };
     },
     []
+  );
+
+  // Update vendor verification status
+  const updateVerification = useCallback(
+    async (
+      vendorId: string,
+      isVerified: boolean
+    ): Promise<{ success: boolean; error?: ApiError }> => {
+      setIsUpdatingVerification(true);
+
+      const result = await adminUpdateVendorVerification({ vendorId, isVerified });
+
+      if (result.success) {
+        // Optimistic update: update local state
+        setVendors((prev) =>
+          prev.map((v) =>
+            v.vendor_id === vendorId ? { ...v, is_verified: isVerified } : v
+          )
+        );
+        setSelectedVendor((prev) => 
+          prev?.vendor_id === vendorId ? { ...prev, is_verified: isVerified } : prev
+        );
+      }
+
+      setIsUpdatingVerification(false);
+      return { success: result.success, error: result.error };
+    },
+    []
+  );
+
+  // Search users by email
+  const searchUsers = useCallback(
+    async (query: string): Promise<{ success: boolean; data?: UserSearchResult[]; error?: ApiError }> => {
+      const result = await adminSearchUsers(query);
+      return { success: result.success, data: result.data, error: result.error };
+    },
+    []
+  );
+
+  // Assign user to vendor
+  const assignUserToVendor = useCallback(
+    async (
+      vendorId: string,
+      userId: string | null
+    ): Promise<{ success: boolean; error?: ApiError }> => {
+      setIsAssigningUser(true);
+
+      const result = await adminAssignUserToVendor({ vendorId, userId });
+
+      if (result.success) {
+        // Refetch vendors to get updated user assignment
+        await fetchVendors(currentPage, searchQuery);
+      }
+
+      setIsAssigningUser(false);
+      return { success: result.success, error: result.error };
+    },
+    [fetchVendors, currentPage, searchQuery]
   );
 
   // Note: Initial fetch happens via the useEffect that watches currentPage/searchQuery
@@ -227,6 +312,11 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     // Mutations
     updateTier,
     updateProfile,
+    updateVerification,
+    
+    // User assignment
+    searchUsers,
+    assignUserToVendor,
 
     // Selected vendor
     selectedVendor,
@@ -235,6 +325,8 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     // Mutation states
     isUpdatingTier,
     isUpdatingProfile,
+    isUpdatingVerification,
+    isAssigningUser,
   };
 }
 

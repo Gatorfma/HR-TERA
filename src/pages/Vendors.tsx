@@ -13,8 +13,8 @@ const Vendors = () => {
   
   const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
     { value: "all", label: t("products.allTiers") },
-    { value: "gold", label: t("products.gold"), icon: <Crown className="w-3.5 h-3.5" /> },
-    { value: "silver", label: t("products.silver"), icon: <Award className="w-3.5 h-3.5" /> },
+    { value: "premium", label: t("products.premium"), icon: <Crown className="w-3.5 h-3.5" /> },
+    { value: "plus", label: t("products.plus"), icon: <Award className="w-3.5 h-3.5" /> },
     { value: "freemium", label: t("products.free") },
   ];
   
@@ -28,7 +28,7 @@ const Vendors = () => {
   const tierFromUrl = searchParams.get("tier");
 
   const [selectedTier, setSelectedTier] = useState<Tier | "all">(() => {
-    if (tierFromUrl && ["gold", "silver", "freemium"].includes(tierFromUrl)) {
+    if (tierFromUrl && ["premium", "plus", "freemium"].includes(tierFromUrl)) {
       return tierFromUrl as Tier;
     }
     return "all";
@@ -55,7 +55,7 @@ const Vendors = () => {
 
   // Update tier filter when URL changes
   useEffect(() => {
-    if (tierFromUrl && ["gold", "silver", "freemium"].includes(tierFromUrl)) {
+    if (tierFromUrl && ["premium", "plus", "freemium"].includes(tierFromUrl)) {
       setSelectedTier(tierFromUrl as Tier);
     } else if (!tierFromUrl) {
       setSelectedTier("all");
@@ -89,9 +89,9 @@ const Vendors = () => {
           (vendor.headquarters || "").toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTier && matchesSearch;
       })
-      // Sort by tier: Gold first, then Silver, then Freemium
+      // Sort by tier: Premium first, then Plus, then Freemium
       .sort((a, b) => {
-        const tierOrder: Record<Tier, number> = { gold: 0, silver: 1, freemium: 2 };
+        const tierOrder: Record<Tier, number> = { premium: 0, plus: 1, freemium: 2 };
         return tierOrder[a.subscription] - tierOrder[b.subscription];
       });
   }, [vendors, selectedTier, searchQuery]);
@@ -128,9 +128,9 @@ const Vendors = () => {
                         onClick={() => handleTierSelect(tier.value)}
                         className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
                           selectedTier === tier.value
-                            ? tier.value === "gold"
+                            ? tier.value === "premium"
                               ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "silver"
+                              : tier.value === "plus"
                               ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
                               : "bg-primary text-primary-foreground shadow-sm"
                             : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"

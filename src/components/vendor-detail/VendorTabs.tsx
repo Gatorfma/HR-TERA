@@ -26,16 +26,16 @@ type TabValue = "overview" | "services" | "portfolio" | "reviews" | "resources" 
 
 const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
   const location = useLocation();
-  const isSilverOrAbove = vendor.vendorTier === "silver" || vendor.vendorTier === "gold";
-  const isGold = vendor.vendorTier === "gold";
+  const isPlusOrAbove = vendor.vendorTier === "plus" || vendor.vendorTier === "premium";
+  const isPremium = vendor.vendorTier === "premium";
 
   // Determine which tabs should be visible
-  const hasPortfolio = isSilverOrAbove && (
+  const hasPortfolio = isPlusOrAbove && (
     (vendor.portfolioItems && vendor.portfolioItems.length > 0) ||
     (vendor.clientLogos && vendor.clientLogos.length > 0) ||
-    (isGold && vendor.caseStudies && vendor.caseStudies.length > 0)
+    (isPremium && vendor.caseStudies && vendor.caseStudies.length > 0)
   );
-  const hasResources = isSilverOrAbove && vendor.featuredContent && vendor.featuredContent.length > 0;
+  const hasResources = isPlusOrAbove && vendor.featuredContent && vendor.featuredContent.length > 0;
 
   // Get initial tab from URL hash
   const getInitialTab = (): TabValue => {
@@ -96,7 +96,7 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
               >
                 <h2 className="text-xl font-heading font-bold text-foreground mb-4">About</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">{vendor.fullDescription}</p>
-                {isSilverOrAbove && vendor.extendedAbout && (
+                {isPlusOrAbove && vendor.extendedAbout && (
                   <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
                     {vendor.extendedAbout}
                   </div>
@@ -135,8 +135,8 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
                 </div>
               </motion.div>
 
-              {/* Hero Stats for Gold */}
-              {isGold && vendor.heroStats && (
+              {/* Hero Stats for Premium */}
+              {isPremium && vendor.heroStats && (
                 <div className="grid sm:grid-cols-3 gap-4">
                   {vendor.heroStats.map((stat, i) => (
                     <div key={i} className="bg-primary/10 rounded-xl p-4 text-center">
@@ -182,7 +182,7 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
                 className="bg-card rounded-xl border border-border p-6"
               >
                 <h2 className="text-xl font-heading font-bold text-foreground mb-4">Services</h2>
-                {isSilverOrAbove && vendor.serviceDescriptions ? (
+                {isPlusOrAbove && vendor.serviceDescriptions ? (
                   <div className="grid sm:grid-cols-2 gap-4">
                     {vendor.serviceDescriptions.map((service, i) => (
                       <div key={i} className="bg-muted/50 rounded-xl p-4">
@@ -202,8 +202,8 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
                 )}
               </motion.div>
 
-              {/* Industries & Regions (Silver+) */}
-              {isSilverOrAbove && (vendor.industries || vendor.regions) && (
+              {/* Industries & Regions (Plus+) */}
+              {isPlusOrAbove && (vendor.industries || vendor.regions) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -238,17 +238,17 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
                 </motion.div>
               )}
 
-              {/* Packages (Gold) */}
-              {isGold && vendor.packages && <VendorPackages packages={vendor.packages} />}
+              {/* Packages (Premium) */}
+              {isPremium && vendor.packages && <VendorPackages packages={vendor.packages} />}
 
-              {/* Process (Gold) */}
-              {isGold && vendor.processSteps && <VendorProcess steps={vendor.processSteps} />}
+              {/* Process (Premium) */}
+              {isPremium && vendor.processSteps && <VendorProcess steps={vendor.processSteps} />}
             </TabsContent>
 
             {/* Portfolio & Case Studies Tab */}
             <TabsContent value="portfolio" className="mt-0 space-y-8">
-              {/* Client Logos (Silver+) */}
-              {isSilverOrAbove && vendor.clientLogos && vendor.clientLogos.length > 0 && (
+              {/* Client Logos (Plus+) */}
+              {isPlusOrAbove && vendor.clientLogos && vendor.clientLogos.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -265,8 +265,8 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
                 </motion.div>
               )}
 
-              {/* Portfolio (Silver+) */}
-              {isSilverOrAbove && vendor.portfolioItems && vendor.portfolioItems.length > 0 && (
+              {/* Portfolio (Plus+) */}
+              {isPlusOrAbove && vendor.portfolioItems && vendor.portfolioItems.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -289,16 +289,16 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
                 </motion.div>
               )}
 
-              {/* Case Studies (Gold) */}
-              {isGold && vendor.caseStudies && <VendorCaseStudies caseStudies={vendor.caseStudies} />}
+              {/* Case Studies (Premium) */}
+              {isPremium && vendor.caseStudies && <VendorCaseStudies caseStudies={vendor.caseStudies} />}
 
-              {/* Team (Gold) */}
-              {isGold && vendor.team && <VendorTeam team={vendor.team} />}
+              {/* Team (Premium) */}
+              {isPremium && vendor.team && <VendorTeam team={vendor.team} />}
             </TabsContent>
 
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="mt-0 space-y-8">
-              {isSilverOrAbove && vendor.testimonials && vendor.testimonials.length > 0 ? (
+              {isPlusOrAbove && vendor.testimonials && vendor.testimonials.length > 0 ? (
                 <VendorTestimonials testimonials={vendor.testimonials} />
               ) : (
                 <div className="bg-card rounded-xl border border-border p-12 text-center">
@@ -311,18 +311,18 @@ const VendorTabs = ({ vendor, vendorProducts }: VendorTabsProps) => {
 
             {/* Resources Tab */}
             <TabsContent value="resources" className="mt-0 space-y-8">
-              {isGold && vendor.featuredContent && (
+              {isPremium && vendor.featuredContent && (
                 <VendorFeaturedContentSection content={vendor.featuredContent} />
               )}
 
-              {/* Campaigns (Gold) */}
-              {isGold && vendor.campaigns && <VendorCampaigns campaigns={vendor.campaigns} />}
+              {/* Campaigns (Premium) */}
+              {isPremium && vendor.campaigns && <VendorCampaigns campaigns={vendor.campaigns} />}
             </TabsContent>
 
             {/* Contact Tab */}
             <TabsContent value="contact" className="mt-0 space-y-8">
-              {isSilverOrAbove ? (
-                <VendorContactForm vendorName={vendor.name} isGold={isGold} />
+              {isPlusOrAbove ? (
+                <VendorContactForm vendorName={vendor.name} isPremium={isPremium} />
               ) : (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

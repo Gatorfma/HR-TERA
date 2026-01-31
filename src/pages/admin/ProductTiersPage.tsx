@@ -60,8 +60,8 @@ type TierFeatureJson = {
 
 const TIER_NAMES: Record<string, string> = {
   freemium: "Freemium",
-  silver: "Silver",
-  gold: "Gold",
+  plus: "Plus",
+  premium: "Premium",
 };
 
 const INITIAL_PRICING: TierPricing[] = [
@@ -76,8 +76,8 @@ const INITIAL_PRICING: TierPricing[] = [
     tagline: "Başlamak için temel listeleme.",
   },
   {
-    slug: "silver",
-    name: "Silver",
+    slug: "plus",
+    name: "Plus",
     isActive: true,
     monthlyPrice: 99,
     yearlyPrice: 999,
@@ -86,8 +86,8 @@ const INITIAL_PRICING: TierPricing[] = [
     tagline: "Öne çıkma + analitik.",
   },
   {
-    slug: "gold",
-    name: "Gold",
+    slug: "premium",
+    name: "Premium",
     isActive: true,
     monthlyPrice: 199,
     yearlyPrice: 1999,
@@ -111,7 +111,7 @@ const INITIAL_FEATURES: TierFeatures[] = [
     ],
   },
   {
-    slug: "silver",
+    slug: "plus",
     headline: "Büyüyen ekipler için daha fazla görünürlük.",
     features: [
       { id: "s1", title: "Freemium'daki her şey", description: "Tüm temel özellikler dahil", isIncluded: true },
@@ -124,10 +124,10 @@ const INITIAL_FEATURES: TierFeatures[] = [
     ],
   },
   {
-    slug: "gold",
+    slug: "premium",
     headline: "Kurumsal düzeyde premium partnerlik.",
     features: [
-      { id: "g1", title: "Silver'daki her şey", description: "Tüm Silver özellikleri dahil", isIncluded: true },
+      { id: "g1", title: "Plus'daki her şey", description: "Tüm Plus özellikleri dahil", isIncluded: true },
       { id: "g2", title: "Vaka çalışmaları", description: "Detaylı müşteri referansları", isIncluded: true },
       { id: "g3", title: "Paket ve fiyatlandırma", description: "Fiyatlandırma bölümü", isIncluded: true },
       { id: "g4", title: "Gelişmiş analitik", description: "Görüntülenme, tıklama, dönüşüm", isIncluded: true, badge: "Premium" },
@@ -256,9 +256,9 @@ const ProductTiersPage = () => {
     switch (slug) {
       case "freemium":
         return <Sparkles className="h-5 w-5" />;
-      case "silver":
+      case "plus":
         return <Star className="h-5 w-5" />;
-      case "gold":
+      case "premium":
         return <Crown className="h-5 w-5" />;
       default:
         return null;
@@ -269,9 +269,9 @@ const ProductTiersPage = () => {
     switch (slug) {
       case "freemium":
         return "text-muted-foreground";
-      case "silver":
+      case "plus":
         return "text-slate-500";
-      case "gold":
+      case "premium":
         return "text-amber-500";
       default:
         return "text-foreground";
@@ -408,7 +408,7 @@ const ProductTiersPage = () => {
             Geri Dön
           </Button>
           <h1 className="text-3xl font-bold text-foreground">Tier Fiyatları</h1>
-          <p className="text-muted-foreground mt-2">Freemium/Silver/Gold fiyatlarını ve avantajlarını yönetin.</p>
+          <p className="text-muted-foreground mt-2">Freemium/Plus/Premium fiyatlarını ve avantajlarını yönetin.</p>
         </div>
 
         {/* Pricing Table Section */}
@@ -692,9 +692,9 @@ const ProductTiersPage = () => {
                   <div
                     key={tier.slug}
                     className={`relative p-6 rounded-xl border-2 ${
-                      tier.slug === "gold"
+                      tier.slug === "premium"
                         ? "border-amber-500 bg-amber-500/5"
-                        : tier.slug === "silver"
+                        : tier.slug === "plus"
                         ? "border-slate-400 bg-slate-500/5"
                         : "border-border bg-card"
                     }`}
@@ -702,9 +702,9 @@ const ProductTiersPage = () => {
                     {tier.highlightLabel && (
                       <Badge
                         className={`absolute -top-3 left-1/2 -translate-x-1/2 ${
-                          tier.slug === "gold"
+                          tier.slug === "premium"
                             ? "bg-amber-500 text-white"
-                            : tier.slug === "silver"
+                            : tier.slug === "plus"
                             ? "bg-slate-500 text-white"
                             : "bg-primary"
                         }`}
@@ -764,9 +764,9 @@ const ProductTiersPage = () => {
 
                     <Button
                       className={`w-full ${
-                        tier.slug === "gold"
+                        tier.slug === "premium"
                           ? "bg-amber-500 hover:bg-amber-600 text-white"
-                          : tier.slug === "silver"
+                          : tier.slug === "plus"
                           ? "bg-slate-500 hover:bg-slate-600 text-white"
                           : ""
                       }`}

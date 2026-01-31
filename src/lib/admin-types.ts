@@ -24,6 +24,7 @@ export interface AdminVendorView {
   website_link: string | null;
   linkedin_link: string | null;
   instagram_link: string | null;
+  logo: string | null;
   subscription: Tier;
   is_verified: boolean;
   founded_at: string | null;
@@ -86,6 +87,40 @@ export interface UpdateVendorProfileInput {
   companyName?: string | null;
   companyWebsite?: string | null;
   companySize?: string | null;
+  headquarters?: string | null;
+  linkedinLink?: string | null;
+  instagramLink?: string | null;
+  logo?: string | null;
+  companyMotto?: string | null;
+  companyDesc?: string | null;
+  foundedAt?: string | null;
+}
+
+/**
+ * Input for updating vendor verification status
+ */
+export interface UpdateVendorVerificationInput {
+  vendorId: string;
+  isVerified: boolean;
+}
+
+/**
+ * User search result - returned from admin_search_users RPC
+ */
+export interface UserSearchResult {
+  user_id: string;
+  email: string;
+  full_name: string | null;
+  assigned_vendor_id: string | null;
+  assigned_vendor_name: string | null;
+}
+
+/**
+ * Input for assigning a user to a vendor
+ */
+export interface AssignUserToVendorInput {
+  vendorId: string;
+  userId: string | null; // null to unassign
 }
 
 /**
@@ -125,85 +160,10 @@ export type AdminErrorCode = typeof AdminErrorCodes[keyof typeof AdminErrorCodes
 // ============================================================
 
 /**
- * Product category enum matching database
+ * Product category - now dynamic from database enum
+ * Use getAllCategories() from supabaseApi to fetch available values
  */
-export type ProductCategory =
-  | 'Applicant Tracking System (ATS)'
-  | 'Smart Hiring Platforms'
-  | 'Human Resources Information System (HRIS)'
-  | 'Payroll'
-  | 'Consulting & Implementation Services'
-  | 'Learning Management Systems'
-  | 'Employee Engagement'
-  | 'Wellbeing'
-  | 'Performance Management & OKR'
-  | 'Assessment & Psychometrics'
-  | 'Workforce Management'
-  | 'Time & Attendance'
-  | 'Benefits & Perks Platforms'
-  | 'People Analytics'
-  | 'Talent Management'
-  | 'Job Analysis & Compensation'
-  | 'Freelance & Gig Economy Platforms'
-  | 'Environment, Health & Safety (EHS)'
-  | 'Remote Working & Employee Monitoring Tools'
-  | 'Feedback'
-  | 'Recognition & Appreciation & Reward'
-  | 'Internal Communication'
-  | 'Employer Branding'
-  | 'Mobile Application'
-  | 'Youth HR'
-  | 'Unified Communications'
-  | 'Employee Background Check & Screening Solutions'
-  | 'Employee Productivity Tools'
-  | 'AI Automation'
-  | 'Fringe Benefits'
-  | 'Organizational Development (OD)'
-  | 'Continuous Improvement & Lean Management'
-  | 'Corporate Social Responsibility (CSR)'
-  | 'Coaching'
-  | 'Onboarding & Orientation';
-
-/**
- * All available product categories
- */
-export const PRODUCT_CATEGORIES: ProductCategory[] = [
-  'Applicant Tracking System (ATS)',
-  'Smart Hiring Platforms',
-  'Human Resources Information System (HRIS)',
-  'Payroll',
-  'Consulting & Implementation Services',
-  'Learning Management Systems',
-  'Employee Engagement',
-  'Wellbeing',
-  'Performance Management & OKR',
-  'Assessment & Psychometrics',
-  'Workforce Management',
-  'Time & Attendance',
-  'Benefits & Perks Platforms',
-  'People Analytics',
-  'Talent Management',
-  'Job Analysis & Compensation',
-  'Freelance & Gig Economy Platforms',
-  'Environment, Health & Safety (EHS)',
-  'Remote Working & Employee Monitoring Tools',
-  'Feedback',
-  'Recognition & Appreciation & Reward',
-  'Internal Communication',
-  'Employer Branding',
-  'Mobile Application',
-  'Youth HR',
-  'Unified Communications',
-  'Employee Background Check & Screening Solutions',
-  'Employee Productivity Tools',
-  'AI Automation',
-  'Fringe Benefits',
-  'Organizational Development (OD)',
-  'Continuous Improvement & Lean Management',
-  'Corporate Social Responsibility (CSR)',
-  'Coaching',
-  'Onboarding & Orientation',
-];
+export type ProductCategory = string;
 
 /**
  * Admin product view - returned from admin_get_products RPC

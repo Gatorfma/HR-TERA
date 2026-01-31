@@ -1,5 +1,5 @@
-// Vendor tier type
-export type Tier = 'freemium' | 'silver' | 'gold';
+// Vendor tier type - matches database enum: freemium, plus, premium
+export type Tier = 'freemium' | 'plus' | 'premium';
 
 // Listing status type
 export type ListingStatus = 'pending' | 'approved' | 'rejected';
