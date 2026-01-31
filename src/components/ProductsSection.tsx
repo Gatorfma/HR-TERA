@@ -25,6 +25,7 @@ interface ProductsSectionProps {
   onCategoryChange?: (category: string) => void;
   onCountryChange?: (country: string) => void;
   onLanguageChange?: (language: string) => void;
+  onClearFilters?: () => void;
 }
 
 const ProductsSection = ({ 
@@ -38,9 +39,12 @@ const ProductsSection = ({
   onCategoryChange,
   onCountryChange,
   onLanguageChange,
+  onClearFilters,
 }: ProductsSectionProps) => {
   const { t } = useLanguage();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  
+  const hasActiveFilters = selectedCategory !== "all" || selectedCountry !== "all" || selectedLanguage !== "all";
   
   // Map API products to ProductCard format
   const mappedProducts = products
@@ -95,69 +99,81 @@ const ProductsSection = ({
           </div>
 
           {/* Desktop Filters - Always Visible */}
-          <div className="hidden desktop:flex flex-wrap items-center gap-3">
-            {/* Category Filter */}
-            <div className="flex items-center gap-2">
-              <LayoutGrid className="w-4 h-4 text-muted-foreground" />
-              <Select
-                value={selectedCategory}
-                onValueChange={(value) => onCategoryChange?.(value)}
-              >
-                <SelectTrigger className="w-[180px] h-9 text-sm">
-                  <SelectValue placeholder={t("products.category")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("products.allProducts")}</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="hidden desktop:flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Category Filter */}
+              <div className="flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4 text-muted-foreground" />
+                <Select
+                  value={selectedCategory}
+                  onValueChange={(value) => onCategoryChange?.(value)}
+                >
+                  <SelectTrigger className="w-[180px] h-9 text-sm">
+                    <SelectValue placeholder={t("products.category")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("products.allProducts")}</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Country Filter */}
+              <div className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <Select
+                  value={selectedCountry}
+                  onValueChange={(value) => onCountryChange?.(value)}
+                >
+                  <SelectTrigger className="w-[180px] h-9 text-sm">
+                    <SelectValue placeholder={t("products.filterCountry")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("products.allCountries")}</SelectItem>
+                    {countries.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Language Filter */}
+              <div className="flex items-center gap-2">
+                <Languages className="w-4 h-4 text-muted-foreground" />
+                <Select
+                  value={selectedLanguage}
+                  onValueChange={(value) => onLanguageChange?.(value)}
+                >
+                  <SelectTrigger className="w-[180px] h-9 text-sm">
+                    <SelectValue placeholder={t("products.filterLanguage")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t("products.allLanguages")}</SelectItem>
+                    {languages.map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Country Filter */}
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-muted-foreground" />
-              <Select
-                value={selectedCountry}
-                onValueChange={(value) => onCountryChange?.(value)}
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={onClearFilters}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                <SelectTrigger className="w-[180px] h-9 text-sm">
-                  <SelectValue placeholder={t("products.filterCountry")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("products.allCountries")}</SelectItem>
-                  {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Language Filter */}
-            <div className="flex items-center gap-2">
-              <Languages className="w-4 h-4 text-muted-foreground" />
-              <Select
-                value={selectedLanguage}
-                onValueChange={(value) => onLanguageChange?.(value)}
-              >
-                <SelectTrigger className="w-[180px] h-9 text-sm">
-                  <SelectValue placeholder={t("products.filterLanguage")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t("products.allLanguages")}</SelectItem>
-                  {languages.map((language) => (
-                    <SelectItem key={language} value={language}>
-                      {language}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                {t("products.clearAllFilters")}
+              </button>
+            )}
           </div>
 
           {/* Mobile Filters - Toggleable */}
@@ -231,6 +247,18 @@ const ProductsSection = ({
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Clear Filters Button - Mobile */}
+                {hasActiveFilters && (
+                  <div className="flex justify-end">
+                    <button
+                      onClick={onClearFilters}
+                      className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {t("products.clearAllFilters")}
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

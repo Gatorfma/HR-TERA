@@ -103,6 +103,12 @@ const Index = () => {
     setSelectedLanguage(language);
   };
 
+  const handleClearFilters = () => {
+    setSelectedCategory("all");
+    setSelectedCountry("all");
+    setSelectedLanguage("all");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -118,6 +124,7 @@ const Index = () => {
         onCategoryChange={handleCategoryChange}
         onCountryChange={handleCountryChange}
         onLanguageChange={handleLanguageChange}
+        onClearFilters={handleClearFilters}
       />
       <BlogSection />
       <PricingSection />
