@@ -8,10 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Mail, Building2, Calendar, Clock, AlertCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, Mail, Building2, Calendar, Clock, AlertCircle, ChevronLeft, ChevronRight, Loader2, UserPlus, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminVendors } from "@/hooks/useAdminUsers";
-import { AdminVendorView } from "@/lib/admin-types";
+import { AdminVendorView, UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 
 // Debounce hook for search
@@ -47,6 +47,12 @@ const UserSettingsTab = () => {
   const [editedFoundedAt, setEditedFoundedAt] = useState("");
   const [editedTier, setEditedTier] = useState<Tier>("freemium");
 
+  // User assignment state
+  const [userSearchInput, setUserSearchInput] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<UserSearchResult[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const debouncedUserSearch = useDebounce(userSearchInput, 300);
+
   // Hook for admin vendor management
   const {
     vendors,
@@ -62,9 +68,12 @@ const UserSettingsTab = () => {
     updateTier,
     updateProfile,
     updateVerification,
+    searchUsers,
+    assignUserToVendor,
     isUpdatingTier,
     isUpdatingProfile,
     isUpdatingVerification,
+    isAssigningUser,
   } = useAdminVendors();
 
   // Sync debounced search to hook
@@ -92,7 +101,69 @@ const UserSettingsTab = () => {
   // Handle vendor selection
   const handleSelectVendor = useCallback((vendor: AdminVendorView) => {
     setSelectedVendor(vendor);
+    // Clear user search when switching vendors
+    setUserSearchInput("");
+    setUserSearchResults([]);
   }, [setSelectedVendor]);
+
+  // Search users when debounced input changes
+  useEffect(() => {
+    if (debouncedUserSearch.length >= 2) {
+      setIsSearchingUsers(true);
+      searchUsers(debouncedUserSearch).then((result) => {
+        if (result.success && result.data) {
+          setUserSearchResults(result.data);
+        } else {
+          setUserSearchResults([]);
+        }
+        setIsSearchingUsers(false);
+      });
+    } else {
+      setUserSearchResults([]);
+    }
+  }, [debouncedUserSearch, searchUsers]);
+
+  // Handle assigning a user to vendor
+  const handleAssignUser = async (userId: string) => {
+    if (!selectedVendor?.vendor_id) return;
+
+    const result = await assignUserToVendor(selectedVendor.vendor_id, userId);
+
+    if (result.success) {
+      toast({
+        title: "Kullanıcı atandı",
+        description: "Kullanıcı başarıyla vendor'a bağlandı.",
+      });
+      setUserSearchInput("");
+      setUserSearchResults([]);
+    } else {
+      toast({
+        title: "Hata",
+        description: result.error?.message || "Kullanıcı atanamadı.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle removing user from vendor
+  const handleRemoveUser = async () => {
+    if (!selectedVendor?.vendor_id) return;
+
+    const result = await assignUserToVendor(selectedVendor.vendor_id, null);
+
+    if (result.success) {
+      toast({
+        title: "Kullanıcı kaldırıldı",
+        description: "Kullanıcı vendor'dan başarıyla kaldırıldı.",
+      });
+    } else {
+      toast({
+        title: "Hata",
+        description: result.error?.message || "Kullanıcı kaldırılamadı.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Save company profile
   const handleSaveCompany = async () => {
@@ -574,6 +645,129 @@ const UserSettingsTab = () => {
                   {isUpdatingTier && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Güncelle
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Kullanıcı Atama */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Kullanıcı Atama</CardTitle>
+                </div>
+                <CardDescription>Vendor'a bir kullanıcı hesabı bağlayın</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Current assigned user */}
+                <div className="space-y-2">
+                  <Label>Mevcut Kullanıcı</Label>
+                  {selectedVendor.user_id ? (
+                    <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {selectedVendor.user_email?.slice(0, 2).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{selectedVendor.user_email || "E-posta yok"}</p>
+                          {selectedVendor.user_full_name && (
+                            <p className="text-xs text-muted-foreground">{selectedVendor.user_full_name}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveUser}
+                        disabled={isAssigningUser}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        {isAssigningUser ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                        <span className="ml-1">Kaldır</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
+                      <p className="text-sm">Kullanıcı bağlı değil</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* User search */}
+                <div className="space-y-2">
+                  <Label>Yeni Kullanıcı Ara</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="E-posta ile ara..."
+                      value={userSearchInput}
+                      onChange={(e) => setUserSearchInput(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Search results */}
+                {isSearchingUsers && (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+
+                {!isSearchingUsers && userSearchResults.length > 0 && (
+                  <div className="space-y-1 border rounded-lg max-h-[200px] overflow-y-auto">
+                    {userSearchResults.map((user) => (
+                      <div
+                        key={user.user_id}
+                        className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                              {user.email.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{user.email}</p>
+                            {user.full_name && (
+                              <p className="text-xs text-muted-foreground">{user.full_name}</p>
+                            )}
+                            {user.assigned_vendor_name && (
+                              <p className="text-xs text-amber-600">
+                                Mevcut: {user.assigned_vendor_name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAssignUser(user.user_id)}
+                          disabled={isAssigningUser || !!user.assigned_vendor_id}
+                        >
+                          {isAssigningUser ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : user.assigned_vendor_id ? (
+                            "Atanmış"
+                          ) : (
+                            "Ata"
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!isSearchingUsers && userSearchInput.length >= 2 && userSearchResults.length === 0 && (
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    Kullanıcı bulunamadı
+                  </div>
+                )}
+
+                {userSearchInput.length > 0 && userSearchInput.length < 2 && (
+                  <p className="text-xs text-muted-foreground">En az 2 karakter girin</p>
+                )}
               </CardContent>
             </Card>
 

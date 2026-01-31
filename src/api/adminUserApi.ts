@@ -11,6 +11,8 @@ import {
   UpdateVendorTierInput,
   UpdateVendorProfileInput,
   UpdateVendorVerificationInput,
+  UserSearchResult,
+  AssignUserToVendorInput,
   ApiResponse,
   AdminErrorCodes,
 } from '@/lib/admin-types';
@@ -379,6 +381,116 @@ export async function adminUpdateVendorVerification(
     return { success: true, data: data ?? false };
   } catch (err) {
     console.error('[adminUpdateVendorVerification] Exception:', err);
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.DATABASE_ERROR,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+
+// ============================================================
+// Admin: Search Users
+// ============================================================
+
+export async function adminSearchUsers(
+  searchQuery: string,
+  limit: number = 10
+): Promise<ApiResponse<UserSearchResult[]>> {
+  // Validate search query
+  if (!searchQuery || searchQuery.trim().length < 2) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'Search query must be at least 2 characters',
+      },
+    };
+  }
+
+  try {
+    console.log('[adminSearchUsers] Calling RPC with:', { search_query: searchQuery, result_limit: limit });
+    
+    const { data, error } = await supabase.rpc('admin_search_users', {
+      search_query: searchQuery.trim(),
+      result_limit: limit,
+    });
+
+    if (error) {
+      console.error('[adminSearchUsers] RPC error:', error);
+      const parsed = parseSupabaseError(error);
+      return { success: false, error: parsed };
+    }
+
+    console.log('[adminSearchUsers] Success:', data);
+    return { success: true, data: data ?? [] };
+  } catch (err) {
+    console.error('[adminSearchUsers] Exception:', err);
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.DATABASE_ERROR,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+
+// ============================================================
+// Admin: Assign User to Vendor
+// ============================================================
+
+export async function adminAssignUserToVendor(
+  input: AssignUserToVendorInput
+): Promise<ApiResponse<boolean>> {
+  const { vendorId, userId } = input;
+
+  console.log('[adminAssignUserToVendor] Input:', { vendorId, userId });
+
+  // Validate vendor ID
+  if (!vendorId || !isValidUUID(vendorId)) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'Invalid vendor ID format',
+      },
+    };
+  }
+
+  // Validate user ID if provided (null is allowed for unassignment)
+  if (userId !== null && !isValidUUID(userId)) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'Invalid user ID format',
+      },
+    };
+  }
+
+  try {
+    console.log('[adminAssignUserToVendor] Calling RPC with:', { p_vendor_id: vendorId, p_user_id: userId });
+    
+    const { data, error } = await supabase.rpc('admin_assign_user_to_vendor', {
+      p_vendor_id: vendorId,
+      p_user_id: userId,
+    });
+
+    if (error) {
+      console.error('[adminAssignUserToVendor] RPC error:', error);
+      const parsed = parseSupabaseError(error);
+      return { success: false, error: parsed };
+    }
+
+    console.log('[adminAssignUserToVendor] Success:', data);
+    return { success: true, data: data ?? false };
+  } catch (err) {
+    console.error('[adminAssignUserToVendor] Exception:', err);
     return {
       success: false,
       error: {

@@ -105,6 +105,25 @@ export interface UpdateVendorVerificationInput {
 }
 
 /**
+ * User search result - returned from admin_search_users RPC
+ */
+export interface UserSearchResult {
+  user_id: string;
+  email: string;
+  full_name: string | null;
+  assigned_vendor_id: string | null;
+  assigned_vendor_name: string | null;
+}
+
+/**
+ * Input for assigning a user to a vendor
+ */
+export interface AssignUserToVendorInput {
+  vendorId: string;
+  userId: string | null; // null to unassign
+}
+
+/**
  * Standard API response wrapper
  */
 export interface ApiResponse<T = void> {

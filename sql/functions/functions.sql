@@ -1271,6 +1271,136 @@ grant execute on function public.admin_update_vendor_profile(uuid, text, text, t
 grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to service_role;
 
 
+-- ============================================================
+-- RPC: admin_search_users
+-- Purpose: Search users by email for admin assignment
+-- Parameters:
+--   search_query : Email search term (partial match)
+--   result_limit : Max results to return (default 10)
+-- Returns: List of users with their vendor assignment status
+-- Errors: P0403 if caller is not admin
+-- ============================================================
+create or replace function public.admin_search_users(
+  search_query text,
+  result_limit integer default 10
+)
+returns table (
+  user_id uuid,
+  email text,
+  full_name text,
+  assigned_vendor_id uuid,
+  assigned_vendor_name text
+)
+language plpgsql
+stable
+security definer
+set search_path = public, auth
+as $$
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate search query
+  if search_query is null or length(trim(search_query)) < 2 then
+    raise exception 'Search query must be at least 2 characters'
+      using errcode = 'P0400';
+  end if;
+
+  return query
+  select
+    u.id as user_id,
+    u.email::text as email,
+    (u.raw_user_meta_data->>'full_name')::text as full_name,
+    v.vendor_id as assigned_vendor_id,
+    v.company_name as assigned_vendor_name
+  from auth.users u
+  left join public.vendors v on v.user_id = u.id
+  where u.email ilike '%' || trim(search_query) || '%'
+  order by u.email asc
+  limit greatest(result_limit, 1);
+end;
+$$;
+
+grant execute on function public.admin_search_users(text, integer) to authenticated;
+grant execute on function public.admin_search_users(text, integer) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_assign_user_to_vendor
+-- Purpose: Assign a user account to a vendor
+-- Parameters:
+--   p_vendor_id : The vendor to assign the user to
+--   p_user_id   : The user to assign (null to unassign current user)
+-- Returns: Boolean (true if update succeeded)
+-- Errors: P0403 if not admin, P0404 if vendor/user not found,
+--         P0409 if user already assigned to another vendor
+-- ============================================================
+create or replace function public.admin_assign_user_to_vendor(
+  p_vendor_id uuid,
+  p_user_id uuid default null
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_existing_vendor_id uuid;
+  v_existing_vendor_name text;
+  rows_affected integer;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate vendor exists
+  if not exists (select 1 from public.vendors where vendor_id = p_vendor_id) then
+    raise exception 'Vendor not found: %', p_vendor_id
+      using errcode = 'P0404';
+  end if;
+
+  -- If assigning a user (not unassigning)
+  if p_user_id is not null then
+    -- Validate user exists
+    if not exists (select 1 from auth.users where id = p_user_id) then
+      raise exception 'User not found: %', p_user_id
+        using errcode = 'P0404';
+    end if;
+
+    -- Check if user is already assigned to another vendor
+    select vendor_id, company_name into v_existing_vendor_id, v_existing_vendor_name
+    from public.vendors
+    where user_id = p_user_id and vendor_id != p_vendor_id;
+
+    if v_existing_vendor_id is not null then
+      raise exception 'User is already assigned to vendor: % (%)', v_existing_vendor_name, v_existing_vendor_id
+        using errcode = 'P0409';
+    end if;
+  end if;
+
+  -- Update vendor with new user_id
+  update public.vendors
+  set
+    user_id = p_user_id,
+    updated_at = now()
+  where vendor_id = p_vendor_id;
+
+  get diagnostics rows_affected = row_count;
+
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to authenticated;
+grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to service_role;
+
+
 -- ############################################################
 -- ADMIN PRODUCT/OWNERSHIP REQUEST FUNCTIONS
 -- ############################################################

@@ -9,6 +9,8 @@ import {
   adminUpdateVendorTier,
   adminUpdateVendorProfile,
   adminUpdateVendorVerification,
+  adminSearchUsers,
+  adminAssignUserToVendor,
 } from '@/api/adminUserApi';
 import {
   AdminVendorView,
@@ -16,6 +18,7 @@ import {
   ApiError,
   UpdateVendorTierInput,
   UpdateVendorProfileInput,
+  UserSearchResult,
 } from '@/lib/admin-types';
 import { Tier } from '@/lib/types';
 
@@ -42,6 +45,10 @@ interface UseAdminVendorsReturn extends UseAdminVendorsState {
     input: Omit<UpdateVendorProfileInput, 'vendorId'> & { vendorId: string }
   ) => Promise<{ success: boolean; error?: ApiError }>;
   updateVerification: (vendorId: string, isVerified: boolean) => Promise<{ success: boolean; error?: ApiError }>;
+  
+  // User assignment
+  searchUsers: (query: string) => Promise<{ success: boolean; data?: UserSearchResult[]; error?: ApiError }>;
+  assignUserToVendor: (vendorId: string, userId: string | null) => Promise<{ success: boolean; error?: ApiError }>;
 
   // Selected vendor
   selectedVendor: AdminVendorView | null;
@@ -51,6 +58,7 @@ interface UseAdminVendorsReturn extends UseAdminVendorsState {
   isUpdatingTier: boolean;
   isUpdatingProfile: boolean;
   isUpdatingVerification: boolean;
+  isAssigningUser: boolean;
 }
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -69,6 +77,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
   const [isUpdatingTier, setIsUpdatingTier] = useState(false);
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [isUpdatingVerification, setIsUpdatingVerification] = useState(false);
+  const [isAssigningUser, setIsAssigningUser] = useState(false);
 
   // Error state
   const [error, setError] = useState<ApiError | null>(null);
@@ -252,6 +261,36 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     []
   );
 
+  // Search users by email
+  const searchUsers = useCallback(
+    async (query: string): Promise<{ success: boolean; data?: UserSearchResult[]; error?: ApiError }> => {
+      const result = await adminSearchUsers(query);
+      return { success: result.success, data: result.data, error: result.error };
+    },
+    []
+  );
+
+  // Assign user to vendor
+  const assignUserToVendor = useCallback(
+    async (
+      vendorId: string,
+      userId: string | null
+    ): Promise<{ success: boolean; error?: ApiError }> => {
+      setIsAssigningUser(true);
+
+      const result = await adminAssignUserToVendor({ vendorId, userId });
+
+      if (result.success) {
+        // Refetch vendors to get updated user assignment
+        await fetchVendors(currentPage, searchQuery);
+      }
+
+      setIsAssigningUser(false);
+      return { success: result.success, error: result.error };
+    },
+    [fetchVendors, currentPage, searchQuery]
+  );
+
   // Note: Initial fetch happens via the useEffect that watches currentPage/searchQuery
 
   return {
@@ -274,6 +313,10 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     updateTier,
     updateProfile,
     updateVerification,
+    
+    // User assignment
+    searchUsers,
+    assignUserToVendor,
 
     // Selected vendor
     selectedVendor,
@@ -283,6 +326,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
     isUpdatingTier,
     isUpdatingProfile,
     isUpdatingVerification,
+    isAssigningUser,
   };
 }
 
