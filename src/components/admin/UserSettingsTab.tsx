@@ -40,6 +40,7 @@ const UserSettingsTab = () => {
   const [editedCompanySize, setEditedCompanySize] = useState("");
   const [editedHeadquarters, setEditedHeadquarters] = useState("");
   const [editedLinkedinLink, setEditedLinkedinLink] = useState("");
+  const [editedInstagramLink, setEditedInstagramLink] = useState("");
   const [editedTier, setEditedTier] = useState<Tier>("freemium");
 
   // Hook for admin vendor management
@@ -75,6 +76,7 @@ const UserSettingsTab = () => {
       setEditedCompanySize(selectedVendor.company_size ?? "");
       setEditedHeadquarters(selectedVendor.headquarters ?? "");
       setEditedLinkedinLink(selectedVendor.linkedin_link ?? "");
+      setEditedInstagramLink(selectedVendor.instagram_link ?? "");
       setEditedTier(selectedVendor.subscription ?? "freemium");
     }
   }, [selectedVendor]);
@@ -105,6 +107,7 @@ const UserSettingsTab = () => {
       companySize: editedCompanySize || undefined,
       headquarters: editedHeadquarters || undefined,
       linkedinLink: editedLinkedinLink || undefined,
+      instagramLink: editedInstagramLink || undefined,
     });
 
     if (result.success) {
@@ -464,6 +467,15 @@ const UserSettingsTab = () => {
                       value={editedLinkedinLink}
                       onChange={(e) => setEditedLinkedinLink(e.target.value)}
                       placeholder="https://linkedin.com/company/..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="instagramLink">Instagram</Label>
+                    <Input
+                      id="instagramLink"
+                      value={editedInstagramLink}
+                      onChange={(e) => setEditedInstagramLink(e.target.value)}
+                      placeholder="https://instagram.com/..."
                     />
                   </div>
                 </div>

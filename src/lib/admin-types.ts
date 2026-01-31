@@ -88,6 +88,7 @@ export interface UpdateVendorProfileInput {
   companySize?: string | null;
   headquarters?: string | null;
   linkedinLink?: string | null;
+  instagramLink?: string | null;
 }
 
 /**
