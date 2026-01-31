@@ -332,7 +332,7 @@ const Products = () => {
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t("products.category")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
                       {allCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
@@ -355,7 +355,7 @@ const Products = () => {
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t("products.filterCountry")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
                       <SelectItem value="all">{t("products.allCountries")}</SelectItem>
                       {allCountries.map((country) => (
                         <SelectItem key={country} value={country}>
@@ -379,7 +379,7 @@ const Products = () => {
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t("products.filterLanguage")} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
                       <SelectItem value="all">{t("products.allLanguages")}</SelectItem>
                       {allLanguages.map((language) => (
                         <SelectItem key={language} value={language}>
