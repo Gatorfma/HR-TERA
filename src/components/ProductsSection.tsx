@@ -1,4 +1,4 @@
-import { ArrowUpRight, Globe, Languages, LayoutGrid } from "lucide-react";
+import { ArrowUpRight, Globe, Languages, LayoutGrid, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
 import { motion } from "framer-motion";
@@ -24,6 +24,7 @@ interface ProductsSectionProps {
   onCategoryChange?: (category: string) => void;
   onCountryChange?: (country: string) => void;
   onLanguageChange?: (language: string) => void;
+  onClearFilters?: () => void;
 }
 
 const ProductsSection = ({ 
@@ -37,8 +38,11 @@ const ProductsSection = ({
   onCategoryChange,
   onCountryChange,
   onLanguageChange,
+  onClearFilters,
 }: ProductsSectionProps) => {
   const { t } = useLanguage();
+  
+  const hasActiveFilters = selectedCategory !== "all" || selectedCountry !== "all" || selectedLanguage !== "all";
   
   // Map API products to ProductCard format
   const mappedProducts = products
@@ -144,6 +148,17 @@ const ProductsSection = ({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={onClearFilters}
+                className="flex items-center justify-center w-9 h-9 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                title={t("products.clearFilters")}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </motion.div>
 
