@@ -1146,7 +1146,7 @@ grant execute on function public.admin_update_vendor_verification(uuid, boolean)
 -- RPC: admin_update_vendor_profile
 -- ============================================================
 -- Purpose: Update vendor profile fields (company info)
--- Allows admin to modify company_name, website, size, and headquarters
+-- Allows admin to modify company_name, website, size, headquarters, and social links
 --
 -- Parameters:
 --   p_vendor_id       : UUID of the vendor to update
@@ -1154,6 +1154,7 @@ grant execute on function public.admin_update_vendor_verification(uuid, boolean)
 --   p_company_website : New website URL (null = no change)
 --   p_company_size    : New size range like "1-10" (null = no change)
 --   p_headquarters    : New headquarters location (null = no change)
+--   p_linkedin_link   : LinkedIn profile URL (null = no change)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1167,7 +1168,8 @@ create or replace function public.admin_update_vendor_profile(
   p_company_name text default null,
   p_company_website text default null,
   p_company_size text default null,
-  p_headquarters text default null
+  p_headquarters text default null,
+  p_linkedin_link text default null
 )
 returns boolean
 language plpgsql
@@ -1223,6 +1225,10 @@ begin
       when p_headquarters is not null then nullif(p_headquarters, '')
       else headquarters 
     end,
+    linkedin_link = case 
+      when p_linkedin_link is not null then nullif(p_linkedin_link, '')
+      else linkedin_link 
+    end,
     updated_at = now()
   where vendor_id = p_vendor_id;
 
@@ -1232,8 +1238,8 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text) to authenticated;
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text) to service_role;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text) to authenticated;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text) to service_role;
 
 
 -- ############################################################

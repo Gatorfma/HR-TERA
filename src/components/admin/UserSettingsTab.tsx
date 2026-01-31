@@ -39,6 +39,7 @@ const UserSettingsTab = () => {
   const [editedCompanyWebsite, setEditedCompanyWebsite] = useState("");
   const [editedCompanySize, setEditedCompanySize] = useState("");
   const [editedHeadquarters, setEditedHeadquarters] = useState("");
+  const [editedLinkedinLink, setEditedLinkedinLink] = useState("");
   const [editedTier, setEditedTier] = useState<Tier>("freemium");
 
   // Hook for admin vendor management
@@ -73,6 +74,7 @@ const UserSettingsTab = () => {
       setEditedCompanyWebsite(selectedVendor.website_link ?? "");
       setEditedCompanySize(selectedVendor.company_size ?? "");
       setEditedHeadquarters(selectedVendor.headquarters ?? "");
+      setEditedLinkedinLink(selectedVendor.linkedin_link ?? "");
       setEditedTier(selectedVendor.subscription ?? "freemium");
     }
   }, [selectedVendor]);
@@ -102,6 +104,7 @@ const UserSettingsTab = () => {
       companyWebsite: editedCompanyWebsite || undefined,
       companySize: editedCompanySize || undefined,
       headquarters: editedHeadquarters || undefined,
+      linkedinLink: editedLinkedinLink || undefined,
     });
 
     if (result.success) {
@@ -452,6 +455,15 @@ const UserSettingsTab = () => {
                       value={editedHeadquarters}
                       onChange={(e) => setEditedHeadquarters(e.target.value)}
                       placeholder="ör: İstanbul, Türkiye"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedinLink">LinkedIn</Label>
+                    <Input
+                      id="linkedinLink"
+                      value={editedLinkedinLink}
+                      onChange={(e) => setEditedLinkedinLink(e.target.value)}
+                      placeholder="https://linkedin.com/company/..."
                     />
                   </div>
                 </div>

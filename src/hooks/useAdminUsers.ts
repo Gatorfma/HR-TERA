@@ -189,6 +189,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                   website_link: input.companyWebsite ?? v.website_link,
                   company_size: input.companySize ?? v.company_size,
                   headquarters: input.headquarters ?? v.headquarters,
+                  linkedin_link: input.linkedinLink ?? v.linkedin_link,
                 }
               : v
           )
@@ -201,6 +202,7 @@ export function useAdminVendors(): UseAdminVendorsReturn {
                 website_link: input.companyWebsite ?? prev.website_link,
                 company_size: input.companySize ?? prev.company_size,
                 headquarters: input.headquarters ?? prev.headquarters,
+                linkedin_link: input.linkedinLink ?? prev.linkedin_link,
               }
             : prev
         );
