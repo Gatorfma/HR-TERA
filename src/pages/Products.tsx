@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -26,14 +26,14 @@ interface Product {
 
 const Products = () => {
   const { t } = useLanguage();
-  
+
   const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
     { value: "all", label: t("products.allTiers") },
-    { value: "gold", label: t("products.gold"), icon: <Crown className="w-3.5 h-3.5" /> },
-    { value: "silver", label: t("products.silver"), icon: <Award className="w-3.5 h-3.5" /> },
+    { value: "premium", label: t("products.premium"), icon: <Crown className="w-3.5 h-3.5" /> },
+    { value: "plus", label: t("products.plus"), icon: <Award className="w-3.5 h-3.5" /> },
     { value: "freemium", label: t("products.free") },
   ];
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -48,7 +48,7 @@ const Products = () => {
   const categoryFromUrl = searchParams.get("category");
   const tierFromUrl = searchParams.get("tier");
   const pageFromUrl = searchParams.get("page");
-  
+
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
 
@@ -70,9 +70,7 @@ const Products = () => {
   // Update filters when URL changes
   useEffect(() => {
     if (categoryFromUrl) {
-      const matched = allCategories.find(
-        (cat) => cat.toLowerCase() === categoryFromUrl.toLowerCase()
-      );
+      const matched = allCategories.find((cat) => cat.toLowerCase() === categoryFromUrl.toLowerCase());
       if (matched) {
         setSelectedCategory(matched);
       } else {
@@ -81,8 +79,8 @@ const Products = () => {
     } else {
       setSelectedCategory("All Products");
     }
-    
-    if (tierFromUrl && ["gold", "silver", "freemium"].includes(tierFromUrl)) {
+
+    if (tierFromUrl && ["premium", "plus", "freemium"].includes(tierFromUrl)) {
       setSelectedTier(tierFromUrl as Tier);
     } else {
       setSelectedTier("all");
@@ -142,7 +140,7 @@ const Products = () => {
         setProducts(mappedProducts);
         setTotalCount(count);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load products");
+        setError(err instanceof Error ? err.message : t("products.fail"));
         console.error("Error fetching products:", err);
       } finally {
         setLoading(false);
@@ -222,7 +220,8 @@ const Products = () => {
     setSearchParams({});
   };
 
-  const hasActiveFilters = selectedCategory !== "All Products" || selectedTier !== "all" || searchQuery !== "";
+  const hasActiveFilters =
+    selectedCategory !== "All Products" || selectedTier !== "all" || searchQuery !== "";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -248,9 +247,9 @@ const Products = () => {
                         onClick={() => handleTierSelect(tier.value)}
                         className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
                           selectedTier === tier.value
-                            ? tier.value === "gold"
+                            ? tier.value === "premium"
                               ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "silver"
+                              : tier.value === "plus"
                               ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
                               : "bg-primary text-primary-foreground shadow-sm"
                             : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
@@ -320,7 +319,8 @@ const Products = () => {
                   ) : (
                     <>
                       <span className="font-medium text-foreground">
-                        {(currentPage - 1) * PRODUCTS_PER_PAGE + 1} - {Math.min(currentPage * PRODUCTS_PER_PAGE, totalCount)}
+                        {(currentPage - 1) * PRODUCTS_PER_PAGE + 1} -{" "}
+                        {Math.min(currentPage * PRODUCTS_PER_PAGE, totalCount)}
                       </span>
                       {t("products.of")}{" "}
                       <span className="font-medium text-foreground">{totalCount}</span>
@@ -338,7 +338,9 @@ const Products = () => {
                   </div>
                 ) : error ? (
                   <div className="text-center py-16">
-                    <p className="text-destructive text-lg">{t("common.error")}: {error}</p>
+                    <p className="text-destructive text-lg">
+                      {t("common.error")}: {error}
+                    </p>
                     <button
                       onClick={() => window.location.reload()}
                       className="mt-4 text-primary hover:underline font-medium"
@@ -349,10 +351,7 @@ const Products = () => {
                 ) : products.length === 0 ? (
                   <div className="text-center py-16">
                     <p className="text-muted-foreground text-lg">{t("products.noProducts")}</p>
-                    <button
-                      onClick={clearFilters}
-                      className="mt-4 text-primary hover:underline font-medium"
-                    >
+                    <button onClick={clearFilters} className="mt-4 text-primary hover:underline font-medium">
                       {t("products.clearFilters")}
                     </button>
                   </div>
@@ -360,11 +359,7 @@ const Products = () => {
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {products.map((product) => (
-                        <Link
-                          key={product.id}
-                          to={`/products/${product.id}`}
-                          className="group"
-                        >
+                        <Link key={product.id} to={`/products/${product.id}`} className="group">
                           <article className="bg-card rounded-2xl overflow-hidden shadow-card border border-border transition-all duration-250 ease-in-out hover:-translate-y-1 hover:shadow-lg cursor-pointer">
                             {/* Image */}
                             <div className="aspect-[16/10] overflow-hidden bg-muted relative">
@@ -384,9 +379,7 @@ const Products = () => {
                             <div className="p-5">
                               {/* Category & Verified Row */}
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  {product.category}
-                                </span>
+                                <span className="text-xs font-medium text-muted-foreground">{product.category}</span>
                                 {product.isVerified && (
                                   <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
                                     <BadgeCheck className="h-3 w-3" />

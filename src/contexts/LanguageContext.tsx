@@ -48,11 +48,12 @@ const en: Record<string, string> = {
   "products.vendorTier": "Vendor Tier",
   "products.category": "Category",
   "products.allTiers": "All Tiers",
-  "products.gold": "Gold",
-  "products.silver": "Silver",
+  "products.premium": "Premium",
+  "products.plus": "Plus",
   "products.free": "Free",
   "products.allProducts": "All Products",
   "products.clearAllFilters": "Clear all filters",
+  "products.fail": "Failed to load products",
 
   // Vendors Section
   "vendors.title": "Vendors",
@@ -415,11 +416,12 @@ const tr: Record<string, string> = {
   "products.vendorTier": "Satıcı Seviyesi",
   "products.category": "Kategori",
   "products.allTiers": "Tüm Seviyeler",
-  "products.gold": "Altın",
-  "products.silver": "Gümüş",
+  "products.premium": "Premium",
+  "products.plus": "Plus",
   "products.free": "Ücretsiz",
   "products.allProducts": "Tüm Ürünler",
   "products.clearAllFilters": "Tüm filtreleri temizle",
+  "products.fail": "Çözümler yüklenemedi",
 
   // Vendors Section
   "vendors.title": "Satıcılar",
