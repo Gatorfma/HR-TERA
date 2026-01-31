@@ -924,6 +924,7 @@ returns table (
   website_link text,
   linkedin_link text,
   instagram_link text,
+  logo text,
   subscription public.tier,
   is_verified boolean,
   founded_at date,
@@ -957,6 +958,7 @@ begin
     v.website_link,
     v.linkedin_link,
     v.instagram_link,
+    v.logo,
     v.subscription,
     v.is_verified,
     v.founded_at,
@@ -1087,16 +1089,79 @@ grant execute on function public.admin_update_vendor_tier(uuid, public.tier) to 
 
 
 -- ============================================================
+-- RPC: admin_update_vendor_verification
+-- ============================================================
+-- Purpose: Update a vendor's verification status
+-- This controls whether the vendor is displayed as verified
+--
+-- Parameters:
+--   p_vendor_id   : UUID of the vendor to update
+--   p_is_verified : Boolean verification status
+--
+-- Returns: Boolean (true if update succeeded)
+-- Errors:
+--   P0403 if caller is not admin
+--   P0404 if vendor not found
+-- Side Effects: Updates vendors.is_verified and vendors.updated_at
+-- ============================================================
+create or replace function public.admin_update_vendor_verification(
+  p_vendor_id uuid,
+  p_is_verified boolean
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  rows_affected integer;
+begin
+  -- Check admin
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Update vendor verification status
+  update public.vendors
+  set
+    is_verified = p_is_verified,
+    updated_at = now()
+  where vendor_id = p_vendor_id;
+
+  get diagnostics rows_affected = row_count;
+
+  if rows_affected = 0 then
+    raise exception 'Vendor not found: %', p_vendor_id
+      using errcode = 'P0404';
+  end if;
+  
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_update_vendor_verification(uuid, boolean) to authenticated;
+grant execute on function public.admin_update_vendor_verification(uuid, boolean) to service_role;
+
+
+-- ============================================================
 -- RPC: admin_update_vendor_profile
 -- ============================================================
 -- Purpose: Update vendor profile fields (company info)
--- Allows admin to modify company_name, website, and size
+-- Allows admin to modify company_name, website, size, headquarters, and social links
 --
 -- Parameters:
 --   p_vendor_id       : UUID of the vendor to update
 --   p_company_name    : New company name (null = no change)
 --   p_company_website : New website URL (null = no change)
 --   p_company_size    : New size range like "1-10" (null = no change)
+--   p_headquarters    : New headquarters location (null = no change)
+--   p_linkedin_link   : LinkedIn profile URL (null = no change)
+--   p_instagram_link  : Instagram profile URL (null = no change)
+--   p_logo            : Company logo URL (null = no change)
+--   p_company_motto   : Company motto/tagline (null = no change)
+--   p_company_desc    : Company description (null = no change)
+--   p_founded_at      : Company founding date (null = no change)
 --
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
@@ -1109,7 +1174,14 @@ create or replace function public.admin_update_vendor_profile(
   p_vendor_id uuid,
   p_company_name text default null,
   p_company_website text default null,
-  p_company_size text default null
+  p_company_size text default null,
+  p_headquarters text default null,
+  p_linkedin_link text default null,
+  p_instagram_link text default null,
+  p_logo text default null,
+  p_company_motto text default null,
+  p_company_desc text default null,
+  p_founded_at date default null
 )
 returns boolean
 language plpgsql
@@ -1161,6 +1233,31 @@ begin
       when p_company_size is not null then nullif(p_company_size, '')
       else company_size 
     end,
+    headquarters = case 
+      when p_headquarters is not null then nullif(p_headquarters, '')
+      else headquarters 
+    end,
+    linkedin_link = case 
+      when p_linkedin_link is not null then nullif(p_linkedin_link, '')
+      else linkedin_link 
+    end,
+    instagram_link = case 
+      when p_instagram_link is not null then nullif(p_instagram_link, '')
+      else instagram_link 
+    end,
+    logo = case 
+      when p_logo is not null then nullif(p_logo, '')
+      else logo 
+    end,
+    company_motto = case 
+      when p_company_motto is not null then nullif(p_company_motto, '')
+      else company_motto 
+    end,
+    company_desc = case 
+      when p_company_desc is not null then nullif(p_company_desc, '')
+      else company_desc 
+    end,
+    founded_at = coalesce(p_founded_at, founded_at),
     updated_at = now()
   where vendor_id = p_vendor_id;
 
@@ -1170,8 +1267,138 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text) to authenticated;
-grant execute on function public.admin_update_vendor_profile(uuid, text, text, text) to service_role;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to authenticated;
+grant execute on function public.admin_update_vendor_profile(uuid, text, text, text, text, text, text, text, text, text, date) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_search_users
+-- Purpose: Search users by email for admin assignment
+-- Parameters:
+--   search_query : Email search term (partial match)
+--   result_limit : Max results to return (default 10)
+-- Returns: List of users with their vendor assignment status
+-- Errors: P0403 if caller is not admin
+-- ============================================================
+create or replace function public.admin_search_users(
+  search_query text,
+  result_limit integer default 10
+)
+returns table (
+  user_id uuid,
+  email text,
+  full_name text,
+  assigned_vendor_id uuid,
+  assigned_vendor_name text
+)
+language plpgsql
+stable
+security definer
+set search_path = public, auth
+as $$
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate search query
+  if search_query is null or length(trim(search_query)) < 2 then
+    raise exception 'Search query must be at least 2 characters'
+      using errcode = 'P0400';
+  end if;
+
+  return query
+  select
+    u.id as user_id,
+    u.email::text as email,
+    (u.raw_user_meta_data->>'full_name')::text as full_name,
+    v.vendor_id as assigned_vendor_id,
+    v.company_name as assigned_vendor_name
+  from auth.users u
+  left join public.vendors v on v.user_id = u.id
+  where u.email ilike '%' || trim(search_query) || '%'
+  order by u.email asc
+  limit greatest(result_limit, 1);
+end;
+$$;
+
+grant execute on function public.admin_search_users(text, integer) to authenticated;
+grant execute on function public.admin_search_users(text, integer) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_assign_user_to_vendor
+-- Purpose: Assign a user account to a vendor
+-- Parameters:
+--   p_vendor_id : The vendor to assign the user to
+--   p_user_id   : The user to assign (null to unassign current user)
+-- Returns: Boolean (true if update succeeded)
+-- Errors: P0403 if not admin, P0404 if vendor/user not found,
+--         P0409 if user already assigned to another vendor
+-- ============================================================
+create or replace function public.admin_assign_user_to_vendor(
+  p_vendor_id uuid,
+  p_user_id uuid default null
+)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_existing_vendor_id uuid;
+  v_existing_vendor_name text;
+  rows_affected integer;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate vendor exists
+  if not exists (select 1 from public.vendors where vendor_id = p_vendor_id) then
+    raise exception 'Vendor not found: %', p_vendor_id
+      using errcode = 'P0404';
+  end if;
+
+  -- If assigning a user (not unassigning)
+  if p_user_id is not null then
+    -- Validate user exists
+    if not exists (select 1 from auth.users where id = p_user_id) then
+      raise exception 'User not found: %', p_user_id
+        using errcode = 'P0404';
+    end if;
+
+    -- Check if user is already assigned to another vendor
+    select vendor_id, company_name into v_existing_vendor_id, v_existing_vendor_name
+    from public.vendors
+    where user_id = p_user_id and vendor_id != p_vendor_id;
+
+    if v_existing_vendor_id is not null then
+      raise exception 'User is already assigned to vendor: % (%)', v_existing_vendor_name, v_existing_vendor_id
+        using errcode = 'P0409';
+    end if;
+  end if;
+
+  -- Update vendor with new user_id
+  update public.vendors
+  set
+    user_id = p_user_id,
+    updated_at = now()
+  where vendor_id = p_vendor_id;
+
+  get diagnostics rows_affected = row_count;
+
+  return rows_affected > 0;
+end;
+$$;
+
+grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to authenticated;
+grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to service_role;
 
 
 -- ############################################################

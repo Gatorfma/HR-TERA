@@ -8,10 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Mail, Building2, Calendar, Clock, AlertCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, Mail, Building2, Calendar, Clock, AlertCircle, ChevronLeft, ChevronRight, Loader2, UserPlus, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminVendors } from "@/hooks/useAdminUsers";
-import { AdminVendorView } from "@/lib/admin-types";
+import { AdminVendorView, UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 
 // Debounce hook for search
@@ -38,7 +38,20 @@ const UserSettingsTab = () => {
   const [editedCompanyName, setEditedCompanyName] = useState("");
   const [editedCompanyWebsite, setEditedCompanyWebsite] = useState("");
   const [editedCompanySize, setEditedCompanySize] = useState("");
+  const [editedHeadquarters, setEditedHeadquarters] = useState("");
+  const [editedLinkedinLink, setEditedLinkedinLink] = useState("");
+  const [editedInstagramLink, setEditedInstagramLink] = useState("");
+  const [editedLogo, setEditedLogo] = useState("");
+  const [editedCompanyMotto, setEditedCompanyMotto] = useState("");
+  const [editedCompanyDesc, setEditedCompanyDesc] = useState("");
+  const [editedFoundedAt, setEditedFoundedAt] = useState("");
   const [editedTier, setEditedTier] = useState<Tier>("freemium");
+
+  // User assignment state
+  const [userSearchInput, setUserSearchInput] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<UserSearchResult[]>([]);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const debouncedUserSearch = useDebounce(userSearchInput, 300);
 
   // Hook for admin vendor management
   const {
@@ -54,8 +67,13 @@ const UserSettingsTab = () => {
     setSelectedVendor,
     updateTier,
     updateProfile,
+    updateVerification,
+    searchUsers,
+    assignUserToVendor,
     isUpdatingTier,
     isUpdatingProfile,
+    isUpdatingVerification,
+    isAssigningUser,
   } = useAdminVendors();
 
   // Sync debounced search to hook
@@ -69,6 +87,13 @@ const UserSettingsTab = () => {
       setEditedCompanyName(selectedVendor.company_name ?? "");
       setEditedCompanyWebsite(selectedVendor.website_link ?? "");
       setEditedCompanySize(selectedVendor.company_size ?? "");
+      setEditedHeadquarters(selectedVendor.headquarters ?? "");
+      setEditedLinkedinLink(selectedVendor.linkedin_link ?? "");
+      setEditedInstagramLink(selectedVendor.instagram_link ?? "");
+      setEditedLogo(selectedVendor.logo ?? "");
+      setEditedCompanyMotto(selectedVendor.company_motto ?? "");
+      setEditedCompanyDesc(selectedVendor.company_desc ?? "");
+      setEditedFoundedAt(selectedVendor.founded_at ?? "");
       setEditedTier(selectedVendor.subscription ?? "freemium");
     }
   }, [selectedVendor]);
@@ -76,7 +101,69 @@ const UserSettingsTab = () => {
   // Handle vendor selection
   const handleSelectVendor = useCallback((vendor: AdminVendorView) => {
     setSelectedVendor(vendor);
+    // Clear user search when switching vendors
+    setUserSearchInput("");
+    setUserSearchResults([]);
   }, [setSelectedVendor]);
+
+  // Search users when debounced input changes
+  useEffect(() => {
+    if (debouncedUserSearch.length >= 2) {
+      setIsSearchingUsers(true);
+      searchUsers(debouncedUserSearch).then((result) => {
+        if (result.success && result.data) {
+          setUserSearchResults(result.data);
+        } else {
+          setUserSearchResults([]);
+        }
+        setIsSearchingUsers(false);
+      });
+    } else {
+      setUserSearchResults([]);
+    }
+  }, [debouncedUserSearch, searchUsers]);
+
+  // Handle assigning a user to vendor
+  const handleAssignUser = async (userId: string) => {
+    if (!selectedVendor?.vendor_id) return;
+
+    const result = await assignUserToVendor(selectedVendor.vendor_id, userId);
+
+    if (result.success) {
+      toast({
+        title: "Kullanıcı atandı",
+        description: "Kullanıcı başarıyla vendor'a bağlandı.",
+      });
+      setUserSearchInput("");
+      setUserSearchResults([]);
+    } else {
+      toast({
+        title: "Hata",
+        description: result.error?.message || "Kullanıcı atanamadı.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle removing user from vendor
+  const handleRemoveUser = async () => {
+    if (!selectedVendor?.vendor_id) return;
+
+    const result = await assignUserToVendor(selectedVendor.vendor_id, null);
+
+    if (result.success) {
+      toast({
+        title: "Kullanıcı kaldırıldı",
+        description: "Kullanıcı vendor'dan başarıyla kaldırıldı.",
+      });
+    } else {
+      toast({
+        title: "Hata",
+        description: result.error?.message || "Kullanıcı kaldırılamadı.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Save company profile
   const handleSaveCompany = async () => {
@@ -97,6 +184,13 @@ const UserSettingsTab = () => {
       companyName: editedCompanyName || undefined,
       companyWebsite: editedCompanyWebsite || undefined,
       companySize: editedCompanySize || undefined,
+      headquarters: editedHeadquarters || undefined,
+      linkedinLink: editedLinkedinLink || undefined,
+      instagramLink: editedInstagramLink || undefined,
+      logo: editedLogo || undefined,
+      companyMotto: editedCompanyMotto || undefined,
+      companyDesc: editedCompanyDesc || undefined,
+      foundedAt: editedFoundedAt || undefined,
     });
 
     if (result.success) {
@@ -133,6 +227,36 @@ const UserSettingsTab = () => {
       toast({
         title: "Tier güncellendi",
         description: `${selectedVendor.company_name || selectedVendor.user_email} için tier ${editedTier} olarak ayarlandı.`,
+      });
+    } else {
+      toast({
+        title: "Hata",
+        description: result.error?.message || "Güncelleme başarısız.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Update verification status
+  const handleUpdateVerification = async (newStatus: boolean) => {
+    console.log('[handleUpdateVerification] selectedVendor:', selectedVendor);
+    console.log('[handleUpdateVerification] newStatus:', newStatus);
+    
+    if (!selectedVendor?.vendor_id) {
+      toast({
+        title: "Hata",
+        description: `Vendor seçilmedi.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const result = await updateVerification(selectedVendor.vendor_id, newStatus);
+
+    if (result.success) {
+      toast({
+        title: "Doğrulama durumu güncellendi",
+        description: `${selectedVendor.company_name || selectedVendor.user_email} ${newStatus ? "doğrulandı" : "doğrulanmamış olarak işaretlendi"}.`,
       });
     } else {
       toast({
@@ -326,16 +450,31 @@ const UserSettingsTab = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Doğrulama Durumu</Label>
-                    <div>
-                      {selectedVendor.is_verified ? (
-                        <Badge className="bg-green-100 text-green-800 border-green-300">
-                          Doğrulanmış
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-amber-100 text-amber-800 border-amber-300">
-                          Doğrulanmamış
-                        </Badge>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <Select
+                        value={selectedVendor.is_verified ? "verified" : "unverified"}
+                        onValueChange={(value) => handleUpdateVerification(value === "verified")}
+                        disabled={isUpdatingVerification}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="verified">
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                              Doğrulanmış
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="unverified">
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                              Doğrulanmamış
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isUpdatingVerification && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -396,8 +535,69 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Merkez</Label>
-                    <Input value={selectedVendor.headquarters ?? "—"} disabled className="bg-muted" />
+                    <Label htmlFor="headquarters">Merkez</Label>
+                    <Input
+                      id="headquarters"
+                      value={editedHeadquarters}
+                      onChange={(e) => setEditedHeadquarters(e.target.value)}
+                      placeholder="ör: İstanbul, Türkiye"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedinLink">LinkedIn</Label>
+                    <Input
+                      id="linkedinLink"
+                      value={editedLinkedinLink}
+                      onChange={(e) => setEditedLinkedinLink(e.target.value)}
+                      placeholder="https://linkedin.com/company/..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="instagramLink">Instagram</Label>
+                    <Input
+                      id="instagramLink"
+                      value={editedInstagramLink}
+                      onChange={(e) => setEditedInstagramLink(e.target.value)}
+                      placeholder="https://instagram.com/..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="logo">Logo URL</Label>
+                    <Input
+                      id="logo"
+                      value={editedLogo}
+                      onChange={(e) => setEditedLogo(e.target.value)}
+                      placeholder="https://example.com/logo.png"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="companyMotto">Şirket Mottosu</Label>
+                    <Input
+                      id="companyMotto"
+                      value={editedCompanyMotto}
+                      onChange={(e) => setEditedCompanyMotto(e.target.value)}
+                      placeholder="Şirket sloganı veya mottosu"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="companyDesc">Şirket Açıklaması</Label>
+                    <textarea
+                      id="companyDesc"
+                      value={editedCompanyDesc}
+                      onChange={(e) => setEditedCompanyDesc(e.target.value)}
+                      placeholder="Şirket hakkında detaylı açıklama"
+                      rows={4}
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="foundedAt">Kuruluş Tarihi</Label>
+                    <Input
+                      id="foundedAt"
+                      type="date"
+                      value={editedFoundedAt}
+                      onChange={(e) => setEditedFoundedAt(e.target.value)}
+                    />
                   </div>
                 </div>
                 <Button
@@ -448,26 +648,129 @@ const UserSettingsTab = () => {
               </CardContent>
             </Card>
 
-            {/* Ek Bilgiler */}
-            {selectedVendor.company_motto && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Ek Bilgiler</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Şirket Mottosu</Label>
-                    <p className="text-sm text-muted-foreground">{selectedVendor.company_motto}</p>
-                  </div>
-                  {selectedVendor.company_desc && (
-                    <div className="space-y-2">
-                      <Label>Açıklama</Label>
-                      <p className="text-sm text-muted-foreground">{selectedVendor.company_desc}</p>
+            {/* Kullanıcı Atama */}
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">Kullanıcı Atama</CardTitle>
+                </div>
+                <CardDescription>Vendor'a bir kullanıcı hesabı bağlayın</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Current assigned user */}
+                <div className="space-y-2">
+                  <Label>Mevcut Kullanıcı</Label>
+                  {selectedVendor.user_id ? (
+                    <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {selectedVendor.user_email?.slice(0, 2).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{selectedVendor.user_email || "E-posta yok"}</p>
+                          {selectedVendor.user_full_name && (
+                            <p className="text-xs text-muted-foreground">{selectedVendor.user_full_name}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleRemoveUser}
+                        disabled={isAssigningUser}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        {isAssigningUser ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                        <span className="ml-1">Kaldır</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
+                      <p className="text-sm">Kullanıcı bağlı değil</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            )}
+                </div>
+
+                {/* User search */}
+                <div className="space-y-2">
+                  <Label>Yeni Kullanıcı Ara</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="E-posta ile ara..."
+                      value={userSearchInput}
+                      onChange={(e) => setUserSearchInput(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Search results */}
+                {isSearchingUsers && (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+
+                {!isSearchingUsers && userSearchResults.length > 0 && (
+                  <div className="space-y-1 border rounded-lg max-h-[200px] overflow-y-auto">
+                    {userSearchResults.map((user) => (
+                      <div
+                        key={user.user_id}
+                        className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                              {user.email.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">{user.email}</p>
+                            {user.full_name && (
+                              <p className="text-xs text-muted-foreground">{user.full_name}</p>
+                            )}
+                            {user.assigned_vendor_name && (
+                              <p className="text-xs text-amber-600">
+                                Mevcut: {user.assigned_vendor_name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleAssignUser(user.user_id)}
+                          disabled={isAssigningUser || !!user.assigned_vendor_id}
+                        >
+                          {isAssigningUser ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : user.assigned_vendor_id ? (
+                            "Atanmış"
+                          ) : (
+                            "Ata"
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {!isSearchingUsers && userSearchInput.length >= 2 && userSearchResults.length === 0 && (
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    Kullanıcı bulunamadı
+                  </div>
+                )}
+
+                {userSearchInput.length > 0 && userSearchInput.length < 2 && (
+                  <p className="text-xs text-muted-foreground">En az 2 karakter girin</p>
+                )}
+              </CardContent>
+            </Card>
+
           </>
         ) : (
           <Card>
