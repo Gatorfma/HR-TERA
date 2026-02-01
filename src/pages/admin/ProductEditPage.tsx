@@ -1,39 +1,58 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Form } from "@/components/ui/form";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Search,
   Package,
-  Building2,
-  Link as LinkIcon,
-  Tag,
-  Eye,
-  Calendar,
-  Clock,
   AlertCircle,
-  ArrowLeft,
   Loader2,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
-  X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
-import ImageUpload from "@/components/admin/ImageUpload";
-import { adminGetProducts, adminUpdateProduct, adminSearchVendors } from "@/api/adminProductsApi";
+import { supabase } from "@/api/supabaseClient";
 import { getAllCategories } from "@/api/supabaseApi";
 import { AdminProductView, ListingStatus, ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
+
+// New imports from product-form components
+import { useProductForm } from "@/hooks/useProductForm";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { useKeyboardShortcuts, createProductFormShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { apiProductToFormValues, formValuesToApiProduct } from "@/lib/schemas/product.schema";
+import {
+  BasicInfoSection,
+  CategorySection,
+  FeaturesSection,
+  MediaSection,
+  LinksSection,
+  VendorAssignSection,
+  StatusSection,
+  FormActions,
+  ProductListSkeleton,
+  UnsavedChangesDialog,
+  KeyboardShortcutsDialog,
+  ProductPreviewDialog,
+  SkipLinks,
+  CompactFormProgress,
+} from "@/components/product-form";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -74,80 +93,88 @@ const ProductEditPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [availableCategories, setAvailableCategories] = useState<ProductCategory[]>([]);
 
-  // Edited form fields
-  const [editedProductName, setEditedProductName] = useState("");
-  const [editedWebsiteLink, setEditedWebsiteLink] = useState("");
-  const [editedShortDesc, setEditedShortDesc] = useState("");
-  const [editedLongDesc, setEditedLongDesc] = useState("");
-  const [editedMainCategory, setEditedMainCategory] = useState<ProductCategory | "">("");
-  const [editedCategories, setEditedCategories] = useState<ProductCategory[]>([]);
-  const [editedFeatures, setEditedFeatures] = useState("");
-  const [editedLogo, setEditedLogo] = useState("");
-  const [editedVideoUrl, setEditedVideoUrl] = useState("");
-  const [editedGallery, setEditedGallery] = useState<string[]>([]);
-  const [editedPricing, setEditedPricing] = useState("");
-  const [editedLanguages, setEditedLanguages] = useState("");
-  const [editedDemoLink, setEditedDemoLink] = useState("");
-  const [editedReleaseDate, setEditedReleaseDate] = useState("");
-  const [editedListingStatus, setEditedListingStatus] = useState<ListingStatus>("pending");
-
-  // Vendor search state
-  const [vendorSearchInput, setVendorSearchInput] = useState("");
-  const [vendorSearchResults, setVendorSearchResults] = useState<VendorSearchResult[]>([]);
-  const [isSearchingVendors, setIsSearchingVendors] = useState(false);
+  // Vendor state
   const [selectedVendor, setSelectedVendor] = useState<VendorSearchResult | null>(null);
-  const debouncedVendorSearch = useDebounce(vendorSearchInput, 300);
 
-  // Fetch products
-  const fetchProducts = useCallback(async (page: number = 1, search: string = "") => {
-    setIsLoading(true);
-    setError(null);
+  // UI state
+  const [showPreview, setShowPreview] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
-    try {
-      const response = await adminGetProducts({
-        page,
-        pageSize: PRODUCTS_PER_PAGE,
-        searchQuery: search || null,
-        statusFilter: null,
-        tierFilter: null,
-      });
+  // Get effective tier from selected vendor
+  const effectiveTier: Tier = selectedVendor?.subscription || "freemium";
 
-      setProducts(response.products);
-      setTotalPages(response.totalPages);
-      setTotalCount(response.totalCount);
-      setCurrentPage(page);
+  // Use the new form hook
+  const {
+    form,
+    isDirty,
+    isValid,
+    constraints,
+    resetForm,
+    populateForm,
+    getApiValues,
+    addCategory,
+    removeCategory,
+    canAddCategory,
+    addFeature,
+    removeFeature,
+    canAddFeature,
+    addLanguage,
+    removeLanguage,
+    addGalleryImage,
+    removeGalleryImage,
+    canAddGallery,
+    canUseVideo,
+    canUseDemo,
+    completedFields,
+    totalRequiredFields,
+    completionPercentage,
+  } = useProductForm({
+    tier: effectiveTier,
+  });
 
-      // Auto-select first product if none selected
-      if (response.products.length > 0 && !selectedProduct) {
-        const first = response.products[0];
-        setSelectedProduct(first);
-        syncFormFields(first);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Ürünler yüklenirken hata oluştu");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedProduct]);
+  // Unsaved changes warning
+  const { showDialog, confirmLeave, cancelLeave, checkUnsavedChanges } = useUnsavedChanges({
+    isDirty,
+  });
 
-  // Sync form fields from selected product
-  const syncFormFields = (product: AdminProductView) => {
-    setEditedProductName(product.product_name || "");
-    setEditedWebsiteLink(product.website_link || "");
-    setEditedShortDesc(product.short_desc || "");
-    setEditedLongDesc(product.long_desc || "");
-    setEditedMainCategory(product.main_category || "");
-    setEditedCategories(product.categories || []);
-    setEditedFeatures((product.features || []).join(", "));
-    setEditedLogo(product.logo || "");
-    setEditedVideoUrl(product.video_url || "");
-    setEditedGallery(product.gallery || []);
-    setEditedPricing(product.pricing || "");
-    setEditedLanguages((product.languages || []).join(", "));
-    setEditedDemoLink(product.demo_link || "");
-    setEditedReleaseDate(product.release_date || "");
-    setEditedListingStatus(product.listing_status || "pending");
-    // Set current vendor info
+  // Keyboard shortcuts
+  const { shortcuts } = useKeyboardShortcuts({
+    shortcuts: createProductFormShortcuts({
+      onSave: () => handleSave(),
+      onPreview: () => setShowPreview(true),
+      onCancel: () => {
+        if (showPreview) setShowPreview(false);
+        else if (showShortcuts) setShowShortcuts(false);
+      },
+      onShowHelp: () => setShowShortcuts(true),
+    }),
+    enabled: !!selectedProduct,
+  });
+
+  // Ürün seçimi ve form doldurma
+  const doSelectProduct = useCallback((product: AdminProductView) => {
+    setSelectedProduct(product);
+
+    // Form'u ürün verileriyle doldur
+    populateForm({
+      product_name: product.product_name,
+      short_desc: product.short_desc,
+      long_desc: product.long_desc,
+      main_category: product.main_category,
+      categories: product.categories,
+      features: product.features,
+      logo: product.logo,
+      gallery: product.gallery,
+      video_url: product.video_url,
+      website_link: product.website_link,
+      demo_link: product.demo_link,
+      pricing: product.pricing,
+      languages: product.languages,
+      release_date: product.release_date,
+      listing_status: product.listing_status,
+    });
+
+    // Vendor bilgilerini ayarla
     setSelectedVendor({
       vendor_id: product.vendor_id,
       company_name: product.company_name,
@@ -155,88 +182,157 @@ const ProductEditPage = () => {
       is_verified: product.is_verified,
       headquarters: null,
     });
-    setVendorSearchInput("");
-    setVendorSearchResults([]);
-  };
+  }, [populateForm]);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    fetchProducts(1);
-    // Fetch categories
-    getAllCategories().then(setAvailableCategories).catch(console.error);
-  }, []);
+  // Kaydedilmemiş değişiklik kontrolüyle ürün seçimi
+  const handleSelectProduct = useCallback((product: AdminProductView) => {
+    // Aynı ürün seçiliyse bir şey yapma
+    if (selectedProduct?.product_id === product.product_id) return;
 
-  // Refetch when search changes
-  useEffect(() => {
-    fetchProducts(1, debouncedSearch);
-  }, [debouncedSearch]);
-
-  // Search vendors when input changes
-  useEffect(() => {
-    if (debouncedVendorSearch.length >= 2) {
-      setIsSearchingVendors(true);
-      adminSearchVendors(debouncedVendorSearch).then((results) => {
-        setVendorSearchResults(results);
-        setIsSearchingVendors(false);
-      });
-    } else {
-      setVendorSearchResults([]);
+    // Geçiş yapmadan önce kaydedilmemiş değişiklikleri kontrol et
+    const blocked = checkUnsavedChanges(() => doSelectProduct(product));
+    if (!blocked) {
+      doSelectProduct(product);
     }
-  }, [debouncedVendorSearch]);
+  }, [selectedProduct, checkUnsavedChanges, doSelectProduct]);
 
-  const handleSelectProduct = (product: AdminProductView) => {
-    setSelectedProduct(product);
-    syncFormFields(product);
-  };
+  // Ürünleri getir
+  const fetchProducts = useCallback(async (page: number = 1, search: string = "") => {
+    setIsLoading(true);
+    setError(null);
 
+    try {
+      const { data: productsData, error: productsError } = await supabase.rpc('admin_get_products', {
+        page_num: page,
+        page_size: PRODUCTS_PER_PAGE,
+        search_query: search || null,
+        status_filter: null,
+        tier_filter: null,
+      });
+
+      if (productsError) throw productsError;
+
+      const { data: countData, error: countError } = await supabase.rpc('admin_get_products_count', {
+        search_query: search || null,
+        status_filter: null,
+        tier_filter: null,
+      });
+
+      if (countError) throw countError;
+
+      const count = countData ?? 0;
+      const pages = Math.ceil(count / PRODUCTS_PER_PAGE);
+
+      setProducts(productsData ?? []);
+      setTotalPages(pages);
+      setTotalCount(count);
+      setCurrentPage(page);
+
+      // Hiç ürün seçili değilse ilk ürünü otomatik seç
+      if ((productsData ?? []).length > 0 && !selectedProduct) {
+        const first = productsData[0];
+        doSelectProduct(first);
+      }
+    } catch (err: any) {
+      setError(err?.message || "Ürünler yüklenirken hata oluştu");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedProduct, doSelectProduct]);
+
+  // Handle vendor selection
   const handleSelectVendor = (vendor: VendorSearchResult) => {
     setSelectedVendor(vendor);
-    setVendorSearchInput("");
-    setVendorSearchResults([]);
   };
 
+  // Clear vendor (reset to original)
+  const handleClearVendor = () => {
+    if (selectedProduct) {
+      setSelectedVendor({
+        vendor_id: selectedProduct.vendor_id,
+        company_name: selectedProduct.company_name,
+        subscription: selectedProduct.subscription,
+        is_verified: selectedProduct.is_verified,
+        headquarters: null,
+      });
+    }
+  };
+
+  // Search vendors via RPC
+  const searchVendors = useCallback(async (query: string, limit = 30): Promise<VendorSearchResult[]> => {
+    const trimmed = query?.trim() || "";
+    const { data, error } = await supabase.rpc('admin_get_vendors', {
+      page_num: 1,
+      page_size: limit,
+      search_query: trimmed.length > 0 ? trimmed : null,
+    });
+    if (error) {
+      console.error('[searchVendors] Error:', error);
+      return [];
+    }
+    return (data || []).map((v: any) => ({
+      vendor_id: v.vendor_id,
+      company_name: v.company_name,
+      subscription: v.subscription,
+      is_verified: v.is_verified,
+      headquarters: v.headquarters,
+    }));
+  }, []);
+
+  // Handle save
   const handleSave = async () => {
     if (!selectedProduct) return;
 
+    const isFormValid = await form.trigger();
+    if (!isFormValid) {
+      toast({
+        title: "Validasyon Hatası",
+        description: "Lütfen tüm zorunlu alanları doldurun",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // Parse arrays
-      const featuresArray = editedFeatures.split(",").map((f) => f.trim()).filter((f) => f);
-      const languagesArray = editedLanguages.split(",").map((l) => l.trim()).filter((l) => l);
-
-      // Check if vendor changed
+      const apiValues = getApiValues();
       const vendorChanged = selectedVendor?.vendor_id !== selectedProduct.vendor_id;
 
-      await adminUpdateProduct({
-        productId: selectedProduct.product_id,
-        vendorId: vendorChanged ? selectedVendor?.vendor_id : null,
-        productName: editedProductName || null,
-        websiteLink: editedWebsiteLink || null,
-        shortDesc: editedShortDesc || null,
-        longDesc: editedLongDesc || null,
-        mainCategory: editedMainCategory || null,
-        categories: editedCategories.length > 0 ? editedCategories : null,
-        features: featuresArray.length > 0 ? featuresArray : null,
-        logo: editedLogo || null,
-        videoUrl: editedVideoUrl || null,
-        gallery: editedGallery.length > 0 ? editedGallery : null,
-        pricing: editedPricing || null,
-        languages: languagesArray.length > 0 ? languagesArray : null,
-        demoLink: editedDemoLink || null,
-        releaseDate: editedReleaseDate || null,
-        listingStatus: editedListingStatus || null,
+      const { error } = await supabase.rpc('admin_update_product', {
+        p_product_id: selectedProduct.product_id,
+        p_vendor_id: vendorChanged ? selectedVendor?.vendor_id : null,
+        p_product_name: apiValues.productName ?? null,
+        p_website_link: apiValues.websiteLink ?? null,
+        p_short_desc: apiValues.shortDesc ?? null,
+        p_long_desc: apiValues.longDesc ?? null,
+        p_main_category: apiValues.mainCategory ?? null,
+        p_categories: apiValues.categories ?? null,
+        p_features: apiValues.features ?? null,
+        p_logo: apiValues.logo ?? null,
+        p_video_url: apiValues.videoUrl ?? null,
+        p_gallery: apiValues.gallery ?? null,
+        p_pricing: apiValues.pricing ?? null,
+        p_languages: apiValues.languages ?? null,
+        p_demo_link: apiValues.demoLink ?? null,
+        p_release_date: apiValues.releaseDate ?? null,
+        p_listing_status: apiValues.listingStatus ?? null,
       });
+
+      if (error) throw error;
 
       const vendorMsg = vendorChanged ? " Vendor değiştirildi." : "";
       toast({
         title: "Ürün güncellendi",
-        description: `${editedProductName} bilgileri kaydedildi.${vendorMsg}`,
+        description: `${apiValues.productName} bilgileri kaydedildi.${vendorMsg}`,
       });
 
-      // Refresh list and update selected product
+      // Refresh list
       await fetchProducts(currentPage, debouncedSearch);
-      
-      // Update selectedProduct with new vendor info
+
+      // Reset form dirty state
+      form.reset(form.getValues());
+
+      // Update selected product with new vendor info
       if (vendorChanged && selectedVendor) {
         setSelectedProduct((prev) =>
           prev
@@ -260,6 +356,24 @@ const ProductEditPage = () => {
       setIsSaving(false);
     }
   };
+
+  // Handle cancel - revert to original product data
+  const handleCancel = () => {
+    if (selectedProduct) {
+      doSelectProduct(selectedProduct);
+    }
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    fetchProducts(1);
+    getAllCategories().then(setAvailableCategories).catch(console.error);
+  }, []);
+
+  // Refetch when search changes
+  useEffect(() => {
+    fetchProducts(1, debouncedSearch);
+  }, [debouncedSearch]);
 
   const getTierBadgeColor = (tier: Tier) => {
     switch (tier) {
@@ -298,31 +412,6 @@ const ProductEditPage = () => {
     }
   };
 
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "—";
-    return new Date(dateStr).toLocaleDateString("tr-TR");
-  };
-
-  // Effective tier from selected vendor
-  const effectiveTier = selectedVendor?.subscription || "freemium";
-  const maxCategories = effectiveTier === "freemium" ? 1 : 3;
-
-  // Loading skeleton
-  const ProductListSkeleton = () => (
-    <div className="space-y-2 p-2">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center gap-3 p-3">
-          <Skeleton className="h-10 w-10 rounded-lg" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-          <Skeleton className="h-5 w-16 rounded" />
-        </div>
-      ))}
-    </div>
-  );
-
   // Error state
   if (error && !isLoading && products.length === 0) {
     return (
@@ -345,547 +434,261 @@ const ProductEditPage = () => {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/admin/products")}
-          className="-ml-2 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Geri Dön
-        </Button>
+      <TooltipProvider>
+        <SkipLinks />
 
-        <h1 className="text-3xl font-bold text-foreground">Ürün Düzenleme</h1>
-        <p className="text-muted-foreground mt-2 mb-8">
-          Sistemdeki ürün kayıtlarını görüntüleyin ve düzenleyin.
-        </p>
+        <div className="container mx-auto px-4 py-8">
+          {/* Breadcrumb */}
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/admin">Admin</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/admin/products">Ürünler</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>
+                  {selectedProduct?.product_name || "Ürün Düzenleme"}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Side - Product List */}
-          <Card className="lg:col-span-1 flex flex-col max-h-[80vh]">
-            <CardHeader className="pb-3 flex-shrink-0">
-              <CardTitle className="text-lg">Ürünler</CardTitle>
-              <CardDescription>
-                Sistemdeki ürünleri yönetin ({totalCount} ürün)
-              </CardDescription>
-              <div className="relative mt-2">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Ürün adı ara…"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="p-0 flex-1 min-h-0 flex flex-col">
-              <ScrollArea className="flex-1">
-                {isLoading ? (
-                  <ProductListSkeleton />
-                ) : products.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <p>Ürün bulunamadı.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1 p-2">
-                    {products.map((product) => (
-                      <button
-                        key={product.product_id}
-                        onClick={() => handleSelectProduct(product)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                          selectedProduct?.product_id === product.product_id
-                            ? "bg-primary/10 border border-primary/20"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <Avatar className="h-10 w-10 rounded-lg">
-                          <AvatarImage src={product.logo} className="object-cover" />
-                          <AvatarFallback className="bg-primary/20 text-primary text-sm rounded-lg">
-                            {product.product_name.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm text-foreground truncate">
-                            {product.product_name}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {product.company_name || "Sahipsiz"}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1 items-end">
-                          <Badge
-                            className={`text-[10px] px-1.5 py-0 capitalize ${getTierBadgeColor(
-                              product.subscription
-                            )}`}
-                          >
-                            {product.subscription}
-                          </Badge>
-                          <Badge
-                            className={`text-[10px] px-1.5 py-0 ${getStatusBadgeColor(
-                              product.listing_status
-                            )}`}
-                          >
-                            {getStatusLabel(product.listing_status)}
-                          </Badge>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
+          <h1 className="text-3xl font-bold text-foreground">Ürün Düzenleme</h1>
+          <p className="text-muted-foreground mt-2 mb-8">
+            Sistemdeki ürün kayıtlarını görüntüleyip düzenleyin.
+          </p>
 
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between p-3 border-t flex-shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fetchProducts(currentPage - 1, debouncedSearch)}
-                    disabled={currentPage <= 1 || isLoading}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    {currentPage} / {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fetchProducts(currentPage + 1, debouncedSearch)}
-                    disabled={currentPage >= totalPages || isLoading}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Side - Product List */}
+            <Card className="lg:col-span-1 flex flex-col max-h-[80vh]">
+              <CardHeader className="pb-3 flex-shrink-0">
+                <CardTitle className="text-lg">Ürünler</CardTitle>
+                <CardDescription>
+                  Sistemdeki ürünleri yönetin ({totalCount} ürün)
+                </CardDescription>
+                <div className="relative mt-2">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Ürün adı ara..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Right Side - Product Details */}
-          <div className="lg:col-span-2 space-y-4">
-            {selectedProduct ? (
-              <>
-                {/* Ürün Bilgileri (readonly) */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg">Ürün Bilgileri</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 flex-1 min-h-0 flex flex-col">
+                <ScrollArea className="flex-1">
+                  {isLoading ? (
+                    <ProductListSkeleton count={5} />
+                  ) : products.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground">
+                      <p>Ürün bulunamadı.</p>
                     </div>
-                    <CardDescription>Ürün detayları (salt okunur)</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          Oluşturulma Tarihi
-                        </Label>
-                        <Input
-                          value={formatDate(selectedProduct.product_created_at)}
-                          disabled
-                          className="bg-muted"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          Son Güncelleme
-                        </Label>
-                        <Input
-                          value={formatDate(selectedProduct.product_updated_at)}
-                          disabled
-                          className="bg-muted"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Yayın Durumu</Label>
-                        <Select
-                          value={editedListingStatus}
-                          onValueChange={(value: ListingStatus) => setEditedListingStatus(value)}
+                  ) : (
+                    <div className="space-y-1 p-2">
+                      {products.map((product) => (
+                        <button
+                          key={product.product_id}
+                          onClick={() => handleSelectProduct(product)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                            selectedProduct?.product_id === product.product_id
+                              ? "bg-primary/10 border border-primary/20"
+                              : "hover:bg-muted"
+                          }`}
                         >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Beklemede</SelectItem>
-                            <SelectItem value="approved">Onaylandı</SelectItem>
-                            <SelectItem value="rejected">Reddedildi</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Rating</Label>
-                        <Input
-                          value={selectedProduct.rating?.toFixed(1) || "N/A"}
-                          disabled
-                          className="bg-muted"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Vendor Atama */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg">Vendor Atama</CardTitle>
-                      {selectedVendor?.vendor_id !== selectedProduct.vendor_id && (
-                        <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-xs">
-                          Değiştirildi
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription>Ürünün bağlı olduğu şirket</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Current vendor */}
-                    {selectedVendor ? (
-                      <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                              {selectedVendor.company_name?.slice(0, 2).toUpperCase() || "V"}
+                          <Avatar className="h-10 w-10 rounded-lg">
+                            <AvatarImage src={product.logo} className="object-cover" />
+                            <AvatarFallback className="bg-primary/20 text-primary text-sm rounded-lg">
+                              {product.product_name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {selectedVendor.company_name || "İsimsiz Vendor"}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-foreground truncate">
+                              {product.product_name}
                             </p>
-                            <div className="flex items-center gap-2">
-                              <Badge
-                                className={`text-[10px] capitalize ${getTierBadgeColor(
-                                  selectedVendor.subscription
-                                )}`}
-                              >
-                                {selectedVendor.subscription}
-                              </Badge>
-                              {selectedVendor.is_verified && (
-                                <CheckCircle className="h-3 w-3 text-green-500" />
-                              )}
-                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {product.company_name || "Sahipsiz"}
+                            </p>
                           </div>
-                        </div>
-                        {selectedVendor.vendor_id !== selectedProduct.vendor_id && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              // Reset to original vendor
-                              setSelectedVendor({
-                                vendor_id: selectedProduct.vendor_id,
-                                company_name: selectedProduct.company_name,
-                                subscription: selectedProduct.subscription,
-                                is_verified: selectedProduct.is_verified,
-                                headquarters: null,
-                              });
-                            }}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
-                        <p className="text-sm">Vendor bağlı değil</p>
-                      </div>
-                    )}
-
-                    {/* Vendor search */}
-                    <div className="space-y-2">
-                      <Label>Vendor Ara</Label>
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Şirket adı ile ara..."
-                          value={vendorSearchInput}
-                          onChange={(e) => setVendorSearchInput(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Search results */}
-                    {isSearchingVendors && (
-                      <div className="flex items-center justify-center p-4">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-
-                    {!isSearchingVendors && vendorSearchResults.length > 0 && (
-                      <div className="space-y-1 border rounded-lg max-h-[200px] overflow-y-auto">
-                        {vendorSearchResults.map((vendor) => (
-                          <div
-                            key={vendor.vendor_id}
-                            className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                                  {vendor.company_name?.slice(0, 2).toUpperCase() || "V"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium">
-                                  {vendor.company_name || "İsimsiz"}
-                                </p>
-                                <Badge
-                                  className={`text-[10px] capitalize ${getTierBadgeColor(
-                                    vendor.subscription
-                                  )}`}
-                                >
-                                  {vendor.subscription}
-                                </Badge>
-                              </div>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleSelectVendor(vendor)}
+                          <div className="flex flex-col gap-1 items-end">
+                            <Badge
+                              className={`text-[10px] px-1.5 py-0 capitalize ${getTierBadgeColor(
+                                product.subscription
+                              )}`}
                             >
-                              Seç
-                            </Button>
+                              {product.subscription}
+                            </Badge>
+                            <Badge
+                              className={`text-[10px] px-1.5 py-0 ${getStatusBadgeColor(
+                                product.listing_status
+                              )}`}
+                            >
+                              {getStatusLabel(product.listing_status)}
+                            </Badge>
                           </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {!isSearchingVendors &&
-                      vendorSearchInput.length >= 2 &&
-                      vendorSearchResults.length === 0 && (
-                        <div className="p-4 text-center text-muted-foreground text-sm">
-                          Vendor bulunamadı
-                        </div>
-                      )}
-                  </CardContent>
-                </Card>
-
-                {/* Temel Bilgiler */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <Tag className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg">Temel Bilgiler</CardTitle>
+                        </button>
+                      ))}
                     </div>
-                    <CardDescription>Ürün bilgilerini düzenleyin</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="productName">Ürün Adı *</Label>
-                        <Input
-                          id="productName"
-                          value={editedProductName}
-                          onChange={(e) => setEditedProductName(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="websiteLink">Web Sitesi</Label>
-                        <Input
-                          id="websiteLink"
-                          value={editedWebsiteLink}
-                          onChange={(e) => setEditedWebsiteLink(e.target.value)}
-                          placeholder="https://"
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="shortDesc">Kısa Açıklama *</Label>
-                        <Textarea
-                          id="shortDesc"
-                          value={editedShortDesc}
-                          onChange={(e) => setEditedShortDesc(e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="longDesc">Detaylı Açıklama</Label>
-                        <Textarea
-                          id="longDesc"
-                          value={editedLongDesc}
-                          onChange={(e) => setEditedLongDesc(e.target.value)}
-                          rows={4}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Ana Kategori *</Label>
-                        <Select
-                          value={editedMainCategory}
-                          onValueChange={(value: ProductCategory) => setEditedMainCategory(value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Kategori seçin" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableCategories.map((cat) => (
-                              <SelectItem key={cat} value={cat}>
-                                {cat}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>
-                          Ek Kategoriler ({editedCategories.length}/{maxCategories})
-                        </Label>
-                        <Select
-                          value=""
-                          onValueChange={(value: ProductCategory) => {
-                            if (!editedCategories.includes(value) && editedCategories.length < maxCategories) {
-                              setEditedCategories([...editedCategories, value]);
-                            }
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Kategori ekle..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableCategories
-                              .filter((c) => !editedCategories.includes(c))
-                              .map((cat) => (
-                                <SelectItem key={cat} value={cat}>
-                                  {cat}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        {editedCategories.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {editedCategories.map((cat) => (
-                              <Badge
-                                key={cat}
-                                variant="secondary"
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  setEditedCategories(editedCategories.filter((c) => c !== cat))
-                                }
-                              >
-                                {cat} <X className="h-3 w-3 ml-1" />
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label htmlFor="features">Özellikler (virgülle ayırın)</Label>
-                        <Textarea
-                          id="features"
-                          value={editedFeatures}
-                          onChange={(e) => setEditedFeatures(e.target.value)}
-                          placeholder="AI Asistan, Raporlama, Entegrasyonlar..."
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Bağlantılar & Medya */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <LinkIcon className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg">Bağlantılar & Medya</CardTitle>
-                    </div>
-                    <CardDescription>Logo, video ve galeri</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Logo *</Label>
-                        <ImageUpload
-                          value={editedLogo}
-                          onChange={(value) => setEditedLogo(value)}
-                          previewSize="sm"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="demoLink">Demo Link</Label>
-                        <Input
-                          id="demoLink"
-                          value={editedDemoLink}
-                          onChange={(e) => setEditedDemoLink(e.target.value)}
-                          placeholder="https://calendly.com/..."
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="videoUrl">Video URL</Label>
-                        <Input
-                          id="videoUrl"
-                          value={editedVideoUrl}
-                          onChange={(e) => setEditedVideoUrl(e.target.value)}
-                          placeholder="https://youtube.com/..."
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="pricing">Fiyatlandırma</Label>
-                        <Input
-                          id="pricing"
-                          value={editedPricing}
-                          onChange={(e) => setEditedPricing(e.target.value)}
-                          placeholder="Free, $99/ay, vb."
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="languages">Desteklenen Diller (virgülle)</Label>
-                        <Input
-                          id="languages"
-                          value={editedLanguages}
-                          onChange={(e) => setEditedLanguages(e.target.value)}
-                          placeholder="Türkçe, English..."
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="releaseDate">Yayınlanma Tarihi</Label>
-                        <Input
-                          id="releaseDate"
-                          type="date"
-                          value={editedReleaseDate}
-                          onChange={(e) => setEditedReleaseDate(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <Label>Galeri</Label>
-                        <ImageUpload
-                          multiple
-                          value={editedGallery}
-                          onChange={(value) => setEditedGallery(value)}
-                          maxImages={10}
-                          showUrlInput={true}
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Kaydet
-                    </Button>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <Card>
-                <CardContent className="flex items-center justify-center h-[400px]">
-                  {isLoading ? (
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  ) : (
-                    <p className="text-muted-foreground">
-                      Detayları görmek için bir ürün seçin
-                    </p>
                   )}
-                </CardContent>
-              </Card>
-            )}
+                </ScrollArea>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between p-3 border-t flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchProducts(currentPage - 1, debouncedSearch)}
+                      disabled={currentPage <= 1 || isLoading}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchProducts(currentPage + 1, debouncedSearch)}
+                      disabled={currentPage >= totalPages || isLoading}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Right Side - Product Form */}
+            <div className="lg:col-span-2 space-y-4">
+              {selectedProduct ? (
+                <Form {...form}>
+                  {/* Progress indicator */}
+                  <CompactFormProgress
+                    completedFields={completedFields}
+                    totalRequiredFields={totalRequiredFields}
+                    completionPercentage={completionPercentage}
+                  />
+
+                  {/* Status Section */}
+                  <StatusSection
+                    form={form}
+                    createdAt={selectedProduct.product_created_at}
+                    updatedAt={selectedProduct.product_updated_at}
+                    rating={selectedProduct.rating}
+                  />
+
+                  {/* Vendor Assignment */}
+                  <VendorAssignSection
+                    selectedVendor={selectedVendor}
+                    onSelectVendor={handleSelectVendor}
+                    onClearVendor={handleClearVendor}
+                    searchVendors={searchVendors}
+                    originalVendorId={selectedProduct.vendor_id}
+                  />
+
+                  {/* Basic Info */}
+                  <BasicInfoSection form={form} />
+
+                  {/* Categories */}
+                  <CategorySection
+                    form={form}
+                    categories={availableCategories}
+                    tier={effectiveTier}
+                    addCategory={addCategory}
+                    removeCategory={removeCategory}
+                    canAddCategory={canAddCategory}
+                  />
+
+                  {/* Features */}
+                  <FeaturesSection
+                    form={form}
+                    tier={effectiveTier}
+                    addFeature={addFeature}
+                    removeFeature={removeFeature}
+                    canAddFeature={canAddFeature}
+                  />
+
+                  {/* Media */}
+                  <MediaSection
+                    form={form}
+                    tier={effectiveTier}
+                    canUseVideo={canUseVideo}
+                    canAddGallery={canAddGallery}
+                    addGalleryImage={addGalleryImage}
+                    removeGalleryImage={removeGalleryImage}
+                  />
+
+                  {/* Links */}
+                  <LinksSection
+                    form={form}
+                    tier={effectiveTier}
+                    canUseDemo={canUseDemo}
+                    addLanguage={addLanguage}
+                    removeLanguage={removeLanguage}
+                  />
+
+                  {/* Actions */}
+                  <Card id="form-actions">
+                    <CardContent className="pt-6">
+                      <FormActions
+                        onSave={handleSave}
+                        onCancel={handleCancel}
+                        onPreview={() => setShowPreview(true)}
+                        onShowShortcuts={() => setShowShortcuts(true)}
+                        isSaving={isSaving}
+                        isDirty={isDirty}
+                        isValid={isValid}
+                      />
+                    </CardContent>
+                  </Card>
+                </Form>
+              ) : (
+                <Card>
+                  <CardContent className="flex items-center justify-center h-[400px]">
+                    {isLoading ? (
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    ) : (
+                      <p className="text-muted-foreground">
+                        Detayları görmek için bir ürün seçin
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Dialogs */}
+        <UnsavedChangesDialog
+          open={showDialog}
+          onConfirm={confirmLeave}
+          onCancel={cancelLeave}
+        />
+
+        <KeyboardShortcutsDialog
+          open={showShortcuts}
+          onOpenChange={setShowShortcuts}
+          shortcuts={shortcuts}
+        />
+
+        <ProductPreviewDialog
+          open={showPreview}
+          onOpenChange={setShowPreview}
+          values={form.getValues()}
+          tier={effectiveTier}
+          companyName={selectedVendor?.company_name || undefined}
+        />
+      </TooltipProvider>
     </AdminLayout>
   );
 };

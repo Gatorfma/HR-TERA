@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
-import { adminLookupVendor, adminBulkCreateProducts } from "@/api/adminProductsApi";
+import { supabase } from "@/api/supabaseClient";
 import { getAllCategories } from "@/api/supabaseApi";
 
 interface ParsedProduct {
@@ -83,7 +83,11 @@ const ProductBulkUploadPage = () => {
 
     setVendorStatus("loading");
     try {
-      const vendor = await adminLookupVendor(vendorId.trim());
+      const { data, error } = await supabase.rpc('admin_lookup_vendor', {
+        p_vendor_id: vendorId.trim(),
+      });
+      if (error) throw error;
+      const vendor = data?.length > 0 ? data[0] : null;
       if (vendor) {
         setVendorStatus("valid");
         setResolvedVendor(vendor);
@@ -306,22 +310,27 @@ const ProductBulkUploadPage = () => {
         short_desc: p.productName,
       }));
 
-      const result = await adminBulkCreateProducts(vendorId.trim(), productsToImport);
+      const { data: result, error } = await supabase.rpc('admin_bulk_create_products', {
+        p_vendor_id: vendorId.trim(),
+        p_products: productsToImport,
+      });
+
+      if (error) throw error;
 
       setImportResults({
         success: result.success_count,
         failed: result.error_count,
-        errors: result.errors.map((e) => ({ name: e.product_name, message: e.error })),
+        errors: result.errors.map((e: any) => ({ name: e.product_name, message: e.error })),
       });
 
       toast({
         title: "İçe aktarma tamamlandı",
         description: `${result.success_count} başarılı, ${result.error_count} başarısız.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Hata",
-        description: error instanceof Error ? error.message : "İçe aktarma başarısız oldu.",
+        description: error?.message || "İçe aktarma başarısız oldu.",
         variant: "destructive",
       });
     } finally {
