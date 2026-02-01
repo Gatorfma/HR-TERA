@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, User, Link as LinkIcon, Tag, Sparkles, Save, AlertTriangle, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { adminCreateProduct, adminLookupVendor } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
@@ -478,27 +479,13 @@ const ProductCreatePage = () => {
 
                 {/* Logo */}
                 <div className="space-y-2">
-                  <Label htmlFor="logo">Logo * (URL veya Base64)</Label>
-                  <Input
-                    id="logo"
+                  <Label>Logo *</Label>
+                  <ImageUpload
                     value={formData.logo}
-                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                    placeholder="https://example.com/logo.png veya data:image/..."
-                    className={errors.logo ? "border-red-500" : ""}
+                    onChange={(value) => setFormData({ ...formData, logo: value })}
+                    previewSize="md"
+                    error={errors.logo}
                   />
-                  {errors.logo && (
-                    <p className="text-xs text-red-500">{errors.logo}</p>
-                  )}
-                  {formData.logo && !errors.logo && (
-                    <div className="w-16 h-16 rounded-lg border overflow-hidden bg-muted">
-                      <img
-                        src={formData.logo}
-                        alt="Logo preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
-                    </div>
-                  )}
                 </div>
 
                 {/* Gallery */}

@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Search, Package, Building2, Eye, Layers, Image as ImageIcon, ExternalLink, ArrowLeft, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { adminGetProducts, adminUpdateProduct } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { AdminProductView, ListingStatus, ProductCategory } from "@/lib/admin-types";
@@ -461,12 +462,11 @@ const ProductEditPage = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="logo">Logo (Base64 veya URL)</Label>
-                        <Input
-                          id="logo"
+                        <Label>Logo</Label>
+                        <ImageUpload
                           value={editedProduct.logo}
-                          onChange={(e) => setEditedProduct({ ...editedProduct, logo: e.target.value })}
-                          placeholder="data:image/... veya https://..."
+                          onChange={(value) => setEditedProduct({ ...editedProduct, logo: value })}
+                          previewSize="sm"
                         />
                       </div>
 

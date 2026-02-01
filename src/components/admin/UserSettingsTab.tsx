@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Mail, Building2, Calendar, Clock, AlertCircle, ChevronLeft, ChevronRight, Loader2, UserPlus, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAdminVendors } from "@/hooks/useAdminUsers";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { AdminVendorView, UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 
@@ -563,12 +564,11 @@ const UserSettingsTab = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="logo">Logo (URL veya Base64)</Label>
-                    <Input
-                      id="logo"
+                    <Label>Logo</Label>
+                    <ImageUpload
                       value={editedLogo}
-                      onChange={(e) => setEditedLogo(e.target.value)}
-                      placeholder="https://example.com/logo.png"
+                      onChange={(value) => setEditedLogo(value)}
+                      previewSize="sm"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">

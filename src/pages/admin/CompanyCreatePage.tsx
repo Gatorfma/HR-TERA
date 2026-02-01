@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Building2, Link as LinkIcon, Save, AlertTriangle, Loader2, Search, UserPlus, X, CheckCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
+import ImageUpload from "@/components/admin/ImageUpload";
 import { adminCreateVendor, adminSearchUsers } from "@/api/adminUserApi";
 import { UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -465,23 +466,12 @@ const CompanyCreatePage = () => {
 
                 {/* Logo */}
                 <div className="space-y-2">
-                  <Label htmlFor="logo">Logo (URL veya Base64)</Label>
-                  <Input
-                    id="logo"
+                  <Label>Logo</Label>
+                  <ImageUpload
                     value={formData.logo}
-                    onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
-                    placeholder="https://example.com/logo.png veya data:image/..."
+                    onChange={(value) => setFormData({ ...formData, logo: value })}
+                    previewSize="md"
                   />
-                  {formData.logo && (
-                    <div className="w-16 h-16 rounded-lg border overflow-hidden bg-muted">
-                      <img
-                        src={formData.logo}
-                        alt="Logo preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
