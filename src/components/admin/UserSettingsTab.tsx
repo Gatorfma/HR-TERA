@@ -732,7 +732,7 @@ const UserSettingsTab = () => {
                   <div className="space-y-2">
                     <Label htmlFor="foundedAt">Kuruluş Yılı</Label>
                     <Select
-                      value={editedFoundedAt}
+                      value={String(new Date(editedFoundedAt).getFullYear())}
                       onValueChange={(value) => setEditedFoundedAt(value)}
                     >
                       <SelectTrigger id="foundedAt" className="w-full">
