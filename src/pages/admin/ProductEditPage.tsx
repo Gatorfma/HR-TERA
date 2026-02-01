@@ -27,7 +27,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { adminGetProducts, adminUpdateProduct, adminSearchVendors } from "@/api/adminProductsApi";
+import { adminGetProducts, adminUpdateProduct, adminGetVendors } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { AdminProductView, ListingStatus, ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -554,7 +554,7 @@ const ProductEditPage = () => {
                     selectedVendor={selectedVendor}
                     onSelectVendor={handleSelectVendor}
                     onClearVendor={handleClearVendor}
-                    searchVendors={adminSearchVendors}
+                    searchVendors={adminGetVendors}
                     originalVendorId={selectedProduct.vendor_id}
                   />
 

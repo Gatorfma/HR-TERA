@@ -15,7 +15,7 @@ import { Save, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { adminCreateProduct, adminSearchVendors } from "@/api/adminProductsApi";
+import { adminCreateProduct, adminGetVendors } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -235,7 +235,7 @@ const ProductCreatePage = () => {
                   selectedVendor={selectedVendor}
                   onSelectVendor={handleSelectVendor}
                   onClearVendor={handleClearVendor}
-                  searchVendors={adminSearchVendors}
+                  searchVendors={adminGetVendors}
                   error={vendorError}
                 />
 
