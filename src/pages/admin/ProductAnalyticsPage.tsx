@@ -82,7 +82,7 @@ const ProductAnalyticsPage = () => {
           productName: row.product_name,
           description: row.short_desc ?? "",
           categories: Array.from(categorySet),
-          vendorName: row.vendor_name ?? "Bilinmeyen Vendor",
+          vendorName: row.vendor_name ?? "Bilinmeyen Şirket",
           tier: row.subscription ?? "freemium",
           visits: Number(row.visits ?? 0),
           rating: row.rating ?? null,

@@ -1429,11 +1429,8 @@ begin
       using errcode = 'P0403';
   end if;
 
-  -- Validate search query
-  if search_query is null or length(trim(search_query)) < 2 then
-    raise exception 'Search query must be at least 2 characters'
-      using errcode = 'P0400';
-  end if;
+  -- Logic updated: No minimum length check.
+  -- If search_query is null or empty, returns users ordered by email.
 
   return query
   select
@@ -1444,7 +1441,10 @@ begin
     v.company_name as assigned_vendor_name
   from auth.users u
   left join public.vendors v on v.user_id = u.id
-  where u.email ilike '%' || trim(search_query) || '%'
+  where 
+    (search_query is null or trim(search_query) = '')
+    or
+    (u.email ilike '%' || trim(search_query) || '%')
   order by u.email asc
   limit greatest(result_limit, 1);
 end;

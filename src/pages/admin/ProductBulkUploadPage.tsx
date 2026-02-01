@@ -283,7 +283,7 @@ const ProductBulkUploadPage = () => {
     if (vendorStatus !== "valid" || !resolvedVendor) {
       toast({
         title: "Hata",
-        description: "Lütfen geçerli bir Vendor ID girin.",
+        description: "Lütfen geçerli bir Şirket ID girin.",
         variant: "destructive",
       });
       return;
@@ -384,30 +384,30 @@ const ProductBulkUploadPage = () => {
                   {/* Vendor Selection */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-lg">Vendor Seçimi</CardTitle>
-                      <CardDescription>Ürünlerin ekleneceği vendor'ı belirtin</CardDescription>
+                      <CardTitle className="text-lg">Şirket Seçimi</CardTitle>
+                      <CardDescription>Ürünlerin ekleneceği şirketi belirtin</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="vendorId">Vendor ID *</Label>
+                        <Label htmlFor="vendorId">Şirket ID *</Label>
                         <Input
                           id="vendorId"
                           value={vendorId}
                           onChange={(e) => setVendorId(e.target.value)}
                           onBlur={handleVendorIdBlur}
-                          placeholder="Vendor UUID"
+                          placeholder="Şirket UUID"
                         />
                         {vendorStatus === "loading" && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Vendor aranıyor...</span>
+                            <span>Şirket aranıyor...</span>
                           </div>
                         )}
                         {vendorStatus === "valid" && resolvedVendor && (
                           <div className="flex items-center gap-2 text-sm text-green-600">
                             <CheckCircle className="h-4 w-4" />
                             <span>
-                              Vendor: {resolvedVendor.company_name || "İsimsiz"} 
+                              Şirket: {resolvedVendor.company_name || "İsimsiz"} 
                               <Badge className="ml-2 capitalize">{resolvedVendor.subscription}</Badge>
                             </span>
                           </div>
@@ -415,7 +415,7 @@ const ProductBulkUploadPage = () => {
                         {vendorStatus === "invalid" && (
                           <div className="flex items-center gap-2 text-sm text-red-600">
                             <AlertCircle className="h-4 w-4" />
-                            <span>Geçersiz Vendor ID</span>
+                            <span>Geçersiz Şirket ID</span>
                           </div>
                         )}
                       </div>
@@ -506,7 +506,7 @@ const ProductBulkUploadPage = () => {
                   </p>
                   {resolvedVendor && (
                     <p className="text-sm text-primary mt-1">
-                      Vendor: {resolvedVendor.company_name || "İsimsiz"} ({resolvedVendor.subscription})
+                      Şirket: {resolvedVendor.company_name || "İsimsiz"} ({resolvedVendor.subscription})
                     </p>
                   )}
                 </div>

@@ -172,6 +172,7 @@ export async function adminLookupVendor(
 
 /**
  * Search vendors by company name for admin product assignment
+ * Returns empty array if query is null/empty (use adminFetchVendorsForDropdown for full list)
  */
 export async function adminSearchVendors(
   searchQuery: string,
@@ -192,6 +193,48 @@ export async function adminSearchVendors(
   }
 
   return (data as VendorSearchResult[]) || [];
+}
+
+/**
+ * Fetch vendors for dropdown - supports both full list (no/minimal query) and search
+ * When query is null or < 2 chars: returns paginated vendors from admin_get_vendors
+ * When query has 2+ chars: returns search results from admin_search_vendors
+ */
+export async function adminFetchVendorsForDropdown(
+  searchQuery: string | null,
+  limit: number = 20
+): Promise<VendorSearchResult[]> {
+  const trimmed = searchQuery?.trim() ?? "";
+
+  if (trimmed.length >= 2) {
+    return adminSearchVendors(trimmed, limit);
+  }
+
+  const { data, error } = await supabase.rpc('admin_get_vendors', {
+    page_num: 1,
+    page_size: limit,
+    search_query: null,
+  });
+
+  if (error) {
+    console.error('[adminFetchVendorsForDropdown] Error:', error);
+    return [];
+  }
+
+  const vendors = (data as Array<{
+    vendor_id: string;
+    company_name: string | null;
+    subscription: Tier;
+    is_verified: boolean;
+    headquarters?: string | null;
+  }>) || [];
+  return vendors.map((v) => ({
+    vendor_id: v.vendor_id,
+    company_name: v.company_name,
+    subscription: v.subscription,
+    is_verified: v.is_verified,
+    headquarters: v.headquarters ?? null,
+  }));
 }
 
 /**

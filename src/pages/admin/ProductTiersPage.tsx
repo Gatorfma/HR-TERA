@@ -682,7 +682,7 @@ const ProductTiersPage = () => {
         <Card>
           <CardHeader>
             <CardTitle>Fiyatlandırma Önizleme</CardTitle>
-            <CardDescription>Fiyatlandırma kartlarının vendor'lara nasıl görüneceği.</CardDescription>
+            <CardDescription>Fiyatlandırma kartlarının şirketlere nasıl görüneceği.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
