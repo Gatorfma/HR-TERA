@@ -13,6 +13,7 @@ import {
   UpdateVendorVerificationInput,
   UserSearchResult,
   AssignUserToVendorInput,
+  CreateVendorInput,
   ApiResponse,
   AdminErrorCodes,
 } from '@/lib/admin-types';
@@ -491,6 +492,104 @@ export async function adminAssignUserToVendor(
     return { success: true, data: data ?? false };
   } catch (err) {
     console.error('[adminAssignUserToVendor] Exception:', err);
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.DATABASE_ERROR,
+        message: err instanceof Error ? err.message : 'Unknown error',
+      },
+    };
+  }
+}
+
+
+// ============================================================
+// Admin: Create Vendor
+// ============================================================
+
+export async function adminCreateVendor(
+  input: CreateVendorInput
+): Promise<ApiResponse<string>> {
+  const {
+    companyName,
+    userId,
+    isVerified,
+    companySize,
+    companyMotto,
+    companyDesc,
+    headquarters,
+    foundedAt,
+    websiteLink,
+    linkedinLink,
+    instagramLink,
+    logo,
+    subscription,
+  } = input;
+
+  console.log('[adminCreateVendor] Input:', input);
+
+  // Validate user ID format if provided
+  if (userId && !isValidUUID(userId)) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'Invalid user ID format',
+      },
+    };
+  }
+
+  // Validate company size format if provided
+  if (companySize && !isValidCompanySize(companySize)) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'Invalid company size format. Must be like "1-10" or "50-100"',
+      },
+    };
+  }
+
+  // Validate website URL format if provided
+  if (websiteLink && !isValidUrl(websiteLink)) {
+    return {
+      success: false,
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: 'Invalid website URL format. Must start with http:// or https://',
+      },
+    };
+  }
+
+  try {
+    console.log('[adminCreateVendor] Calling RPC');
+    
+    const { data, error } = await supabase.rpc('admin_create_vendor', {
+      p_company_name: companyName ?? null,
+      p_user_id: userId ?? null,
+      p_is_verified: isVerified ?? false,
+      p_company_size: companySize ?? null,
+      p_company_motto: companyMotto ?? null,
+      p_company_desc: companyDesc ?? null,
+      p_headquarters: headquarters ?? null,
+      p_founded_at: foundedAt ?? null,
+      p_website_link: websiteLink ?? null,
+      p_linkedin_link: linkedinLink ?? null,
+      p_instagram_link: instagramLink ?? null,
+      p_logo: logo ?? null,
+      p_subscription: subscription ?? 'freemium',
+    });
+
+    if (error) {
+      console.error('[adminCreateVendor] RPC error:', error);
+      const parsed = parseSupabaseError(error);
+      return { success: false, error: parsed };
+    }
+
+    console.log('[adminCreateVendor] Success, vendor_id:', data);
+    return { success: true, data: data as string };
+  } catch (err) {
+    console.error('[adminCreateVendor] Exception:', err);
     return {
       success: false,
       error: {

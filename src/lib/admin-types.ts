@@ -124,6 +124,25 @@ export interface AssignUserToVendorInput {
 }
 
 /**
+ * Input for creating a new vendor
+ */
+export interface CreateVendorInput {
+  companyName?: string | null;
+  userId?: string | null;
+  isVerified?: boolean;
+  companySize?: string | null;
+  companyMotto?: string | null;
+  companyDesc?: string | null;
+  headquarters?: string | null;
+  foundedAt?: string | null;
+  websiteLink?: string | null;
+  linkedinLink?: string | null;
+  instagramLink?: string | null;
+  logo?: string | null;
+  subscription?: 'freemium' | 'plus' | 'premium';
+}
+
+/**
  * Standard API response wrapper
  */
 export interface ApiResponse<T = void> {

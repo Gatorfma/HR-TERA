@@ -1272,6 +1272,132 @@ grant execute on function public.admin_update_vendor_profile(uuid, text, text, t
 
 
 -- ============================================================
+-- RPC: admin_create_vendor
+-- Purpose: Create a new vendor (company) record
+-- Parameters:
+--   p_company_name    : Company name
+--   p_user_id         : Optional user to link (null if none)
+--   p_is_verified     : Verification status (default false)
+--   p_company_size    : Company size range (e.g. "1-10")
+--   p_company_motto   : Company motto/tagline
+--   p_company_desc    : Company description
+--   p_headquarters    : Company headquarters location
+--   p_founded_at      : Company founding date
+--   p_website_link    : Website URL
+--   p_linkedin_link   : LinkedIn URL
+--   p_instagram_link  : Instagram URL
+--   p_logo            : Logo URL or base64
+--   p_subscription    : Tier (freemium/plus/premium)
+--
+-- Returns: UUID of the newly created vendor
+-- Errors: P0403 if not admin, P0400 for validation errors
+-- ============================================================
+create or replace function public.admin_create_vendor(
+  p_company_name text default null,
+  p_user_id uuid default null,
+  p_is_verified boolean default false,
+  p_company_size text default null,
+  p_company_motto text default null,
+  p_company_desc text default null,
+  p_headquarters text default null,
+  p_founded_at date default null,
+  p_website_link text default null,
+  p_linkedin_link text default null,
+  p_instagram_link text default null,
+  p_logo text default null,
+  p_subscription public.tier default 'freemium'
+)
+returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public, auth
+as $$
+declare
+  v_vendor_id uuid;
+  v_existing_vendor_id uuid;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate company_size format if provided
+  if p_company_size is not null and p_company_size != '' then
+    if not (p_company_size ~ '^[0-9]+-[0-9]+$') then
+      raise exception 'Invalid company size format. Must be like "1-10" or "50-100"'
+        using errcode = 'P0400';
+    end if;
+  end if;
+
+  -- Validate website URL format if provided
+  if p_website_link is not null and p_website_link != '' then
+    if not (p_website_link ~* '^https?://') then
+      raise exception 'Invalid website URL format. Must start with http:// or https://'
+        using errcode = 'P0400';
+    end if;
+  end if;
+
+  -- If user_id is provided, check if user exists
+  if p_user_id is not null then
+    if not exists (select 1 from auth.users where id = p_user_id) then
+      raise exception 'User not found: %', p_user_id
+        using errcode = 'P0404';
+    end if;
+
+    -- Check if user is already assigned to another vendor
+    select vendor_id into v_existing_vendor_id
+    from public.vendors
+    where user_id = p_user_id;
+
+    if v_existing_vendor_id is not null then
+      raise exception 'User is already assigned to vendor: %', v_existing_vendor_id
+        using errcode = 'P0409';
+    end if;
+  end if;
+
+  -- Insert new vendor
+  insert into public.vendors (
+    user_id,
+    is_verified,
+    company_name,
+    company_size,
+    company_motto,
+    company_desc,
+    headquarters,
+    founded_at,
+    website_link,
+    linkedin_link,
+    instagram_link,
+    logo,
+    subscription
+  ) values (
+    p_user_id,
+    coalesce(p_is_verified, false),
+    nullif(p_company_name, ''),
+    nullif(p_company_size, ''),
+    nullif(p_company_motto, ''),
+    nullif(p_company_desc, ''),
+    nullif(p_headquarters, ''),
+    p_founded_at,
+    nullif(p_website_link, ''),
+    nullif(p_linkedin_link, ''),
+    nullif(p_instagram_link, ''),
+    nullif(p_logo, ''),
+    coalesce(p_subscription, 'freemium')
+  )
+  returning vendor_id into v_vendor_id;
+
+  return v_vendor_id;
+end;
+$$;
+
+grant execute on function public.admin_create_vendor(text, uuid, boolean, text, text, text, text, date, text, text, text, text, public.tier) to authenticated;
+grant execute on function public.admin_create_vendor(text, uuid, boolean, text, text, text, text, date, text, text, text, text, public.tier) to service_role;
+
+
+-- ============================================================
 -- RPC: admin_search_users
 -- Purpose: Search users by email for admin assignment
 -- Parameters:
