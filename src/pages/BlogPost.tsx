@@ -81,16 +81,39 @@ const BlogPost = () => {
       // List
       if (line.startsWith('- ') || line.startsWith('* ')) {
         const listItems = [];
-        while (i < lines.length && (lines[i].trim().startsWith('- ') || lines[i].trim().startsWith('* '))) {
-          listItems.push(lines[i].trim().substring(2));
-          i++;
+        while (i < lines.length) {
+          const rawLine = lines[i];
+          const trimmedLine = rawLine.trim();
+
+          if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+            // Check for indentation level
+            const leadingSpaces = rawLine.search(/\S|$/);
+            let indentClass = "";
+            let bulletClass = "list-disc";
+
+            if (leadingSpaces >= 8) {
+              indentClass = "ml-16";
+              bulletClass = "list-[square]";
+            } else if (leadingSpaces >= 4) {
+              indentClass = "ml-12";
+              bulletClass = "list-[circle]";
+            } else if (leadingSpaces >= 2) {
+              indentClass = "ml-6";
+              bulletClass = "list-[circle]";
+            }
+
+            listItems.push({ text: trimmedLine.substring(2), indentClass, bulletClass });
+            i++;
+          } else {
+            break;
+          }
         }
         i--; // Step back
         elements.push(
           <ul key={`list-${i}`} className="list-disc pl-6 mb-4 space-y-2 text-muted-foreground leading-relaxed">
             {listItems.map((item, idx) => (
-              <li key={idx}>
-                {parseInline(item)}
+              <li key={idx} className={`${item.indentClass} ${item.bulletClass}`}>
+                {parseInline(item.text)}
               </li>
             ))}
           </ul>

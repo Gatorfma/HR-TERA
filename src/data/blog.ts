@@ -227,6 +227,44 @@ Ayrıca otel odasındaki Madeline’nın dile, kendini ifadeye olan yetkinliğin
     publishDate: "Dec 25, 2024",
     readTime: "5 min read",
     tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "DİZİ", "DOUGLASS IS CANCELLED", "HUMAN RESOURCES", "İNSAN KAYNAKLARI"]
+  },
+  {
+    id: "6",
+    slug: "neresinden-baktigina-bagli-degil-anacim",
+    title: "Neresinden Baktığına Bağlı Değil Anacım",
+    excerpt: "Bakış açısı ve algı üzerine bir değerlendirme.",
+    content: `Geçen haftalarda şans eseri gördüğüm bir clubhouse söyleşinde “çalışan bağlılığı”na ilişkin duyduklarım beni epey düşündürdü. Böyle kibarca ifade edeyim, siz anlayın ne demek istediğimi ?
+
+Herkes bu kadar mı yanlış anlar, bu kadar mı kötü örnek verir derken, ararda goller ağlara takılıyordu söyleşide.
+
+Dayanamadım, daldım ama sert oldu biraz sanırım ?
+
+- Bağlılık, süre ile ilişkili değildir. 15 yıldır sizinle çalışan ama yenilere zorbalık yaparak istifalarını hızlandıran, sadece evi yakın veya sosyal çevre nedeniyle sizi bırakmayan bir dinozor, bağlı çalışan mı şimdi ?
+      - Veya sadece 6 ay çalışan ama yaptığı isle, fark yaratan, katma değer sağlayan biri mi bağsız çalışan şimdi ?
+- “Biz bir aileyiz”
+      - Hiç bir zaman doğru değildi ama belki biraz eskiden “eh” diyebilirim.
+      - Çalıştığınız firma, sadece aile üyelerini kapsamıyorsa, hiç bir zaman aile değilsiniz.
+      - Değerlerinizi %100 gerçekleştirdiğine inandığınız STK’lar bile aile değildir, profesyonel bir yönetim varsa.
+      - Sonuçta “vefalı kurumlar” olabilir tabii ama sadece bu. Vefalı kurumlar veya vefalı yöneticiler. Başka anlam uzamasına gerek yok.
+- “Buraya girersiniz ama çıkamazsınız” dendi o toplantıda. Bu söylem, “mafya” söylemi değil mi ya ?
+- Mutluluk veya memnuniyet, tamamen bağlılıkla aynı şeyler değildir. Mutlu olabilirsiniz, memnun olabilirsiniz ama gönülden bağlı olmak tamamen farklı bir düzey.
+
+![Elephant](https://www.artemizguler.com/piyano_media/2021/03/fil.jpg)
+
+              - elephant in the room near wall. Creative concept
+
+Bağlılık, son derece karışık, fazla etmeni olan, kültürden bağımsız değerlendirelemeyecek bir konu. Karanlık odadaki fil gibi, neresi tutarsanız orasını anlatacağınız bir alan değil bağlılıkseverler.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2021/03/fil.jpg",
+    category: "Genel",
+    author: {
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
+    },
+    publishDate: "Mar 11, 2021",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN MEMNUNİYETİ", "ÇALIŞAN MUTLULUĞU", "ENGAGE & GROW", "HUMAN RESOURCES", "İNSAN KAYNAKLARI"]
   }
 ];
 
