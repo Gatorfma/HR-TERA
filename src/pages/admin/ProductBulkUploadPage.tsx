@@ -145,7 +145,7 @@ const ProductBulkUploadPage = () => {
 
       // Check if first row is a header
       const firstRow = jsonData[0] as string[];
-      const headerKeywords = ["category", "kategori", "product", "ürün", "website", "site"];
+      const headerKeywords = ["category", "kategori", "product", "çözüm", "website", "site"];
       const isHeader = firstRow.some((cell) =>
         headerKeywords.some((keyword) =>
           String(cell || "").toLowerCase().includes(keyword)
@@ -198,7 +198,7 @@ const ProductBulkUploadPage = () => {
 
       toast({
         title: "Dosya işlendi",
-        description: `${products.length} ürün bulundu: ${validCount} geçerli, ${invalidCount} geçersiz.`,
+        description: `${products.length} çözüm bulundu: ${validCount} geçerli, ${invalidCount} geçersiz.`,
       });
     } catch (error) {
       toast({
@@ -258,15 +258,15 @@ const ProductBulkUploadPage = () => {
 
     toast({
       title: "Kategori eşlendi",
-      description: `'${rawCategory}' → '${targetCategory}' olarak eşlendi (${affectedCount} ürün).`,
+      description: `'${rawCategory}' → '${targetCategory}' olarak eşlendi (${affectedCount} çözüm).`,
     });
   };
 
   const handleRejectProduct = (productId: string) => {
     setParsedProducts((prev) => prev.filter((p) => p.id !== productId));
     toast({
-      title: "Ürün çıkarıldı",
-      description: "Ürün listeden çıkarıldı.",
+      title: "Çözüm çıkarıldı",
+      description: "Çözüm listeden çıkarıldı.",
     });
   };
 
@@ -274,8 +274,8 @@ const ProductBulkUploadPage = () => {
     const invalidCount = parsedProducts.filter((p) => p.status === "invalid").length;
     setParsedProducts((prev) => prev.filter((p) => p.status !== "invalid"));
     toast({
-      title: "Geçersiz ürünler çıkarıldı",
-      description: `${invalidCount} geçersiz ürün listeden çıkarıldı.`,
+      title: "Geçersiz çözümler çıkarıldı",
+      description: `${invalidCount} geçersiz çözüm listeden çıkarıldı.`,
     });
   };
 
@@ -369,7 +369,7 @@ const ProductBulkUploadPage = () => {
                   </div>
                   <div>
                     <h1 className="text-2xl font-bold text-foreground">
-                      Excel ile Toplu Ürün Ekle
+                      Excel ile Toplu Çözüm Ekle
                     </h1>
                     <p className="text-muted-foreground">
                       Excel dosyanız aşağıdaki sırayla sütunlar içermelidir: Category, Product Name, Website.
@@ -385,7 +385,7 @@ const ProductBulkUploadPage = () => {
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">Şirket Seçimi</CardTitle>
-                      <CardDescription>Ürünlerin ekleneceği şirketi belirtin</CardDescription>
+                      <CardDescription>Çözümlerin ekleneceği şirketi belirtin</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
@@ -500,9 +500,9 @@ const ProductBulkUploadPage = () => {
               {/* Header */}
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">Ürün Listesi</h1>
+                  <h1 className="text-2xl font-bold text-foreground">Çözüm Listesi</h1>
                   <p className="text-muted-foreground">
-                    {parsedProducts.length} ürün • {validCount} geçerli • {invalidCount} geçersiz
+                    {parsedProducts.length} çözüm • {validCount} geçerli • {invalidCount} geçersiz
                   </p>
                   {resolvedVendor && (
                     <p className="text-sm text-primary mt-1">
@@ -563,7 +563,7 @@ const ProductBulkUploadPage = () => {
               {invalidCount > 0 && (
                 <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/20 mb-6">
                   <span className="text-destructive font-medium">
-                    {invalidCount} geçersiz ürün beklemede.
+                    {invalidCount} geçersiz çözüm beklemede.
                   </span>
                   <Button
                     variant="destructive"
@@ -589,7 +589,7 @@ const ProductBulkUploadPage = () => {
                   </>
                 ) : (
                   <>
-                    {validCount} Ürünü İçe Aktar
+                    {validCount} Çözümü İçe Aktar
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </>
                 )}

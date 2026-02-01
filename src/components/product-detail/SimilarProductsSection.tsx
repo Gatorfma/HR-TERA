@@ -30,7 +30,7 @@ const SimilarProductsSection = ({ products }: SimilarProductsSectionProps) => {
         transition={{ duration: 0.5 }}
       >
         <h2 className="text-2xl md:text-3xl font-heading font-bold text-foreground mb-8">
-          Benzer Ürünler
+          Benzer Çözümler
         </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

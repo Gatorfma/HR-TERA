@@ -108,7 +108,7 @@ export const ProductApplicationsProvider = ({ children }: { children: ReactNode 
     } catch (err) {
       console.error("[ProductApplications] Failed to load applications:", err);
       setApplications([]);
-      setError("Ürün başvuruları yüklenemedi.");
+      setError("Çözüm başvuruları yüklenemedi.");
     } finally {
       setIsLoading(false);
     }

@@ -266,7 +266,7 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
 
     toast({
       title: "Başvuru Onaylandı",
-      description: "Liste başvurusu onaylandı ve ürün yayına alındı.",
+      description: "Liste başvurusu onaylandı ve çözüm yayına alındı.",
     });
     loadListingRequests();
   };
@@ -419,7 +419,7 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
           </button>
           <span>/</span>
           <button onClick={() => navigate("/admin/products")} className="hover:text-foreground transition-colors">
-            Ürün Ayarları
+            Çözüm Ayarları
           </button>
           <span>/</span>
           <span className="text-foreground">Talepler</span>

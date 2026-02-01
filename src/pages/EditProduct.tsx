@@ -117,7 +117,7 @@ const EditProduct = () => {
         if (!product) {
           toast({
             title: "Hata",
-            description: "Ürün bulunamadı veya erişim yetkiniz yok.",
+            description: "Çözüm bulunamadı veya erişim yetkiniz yok.",
             variant: "destructive",
           });
           navigate("/profile?tab=products");
@@ -147,7 +147,7 @@ const EditProduct = () => {
         console.error("[EditProduct] Failed to load product:", err);
         toast({
           title: "Hata",
-          description: "Ürün bilgileri yüklenirken bir hata oluştu.",
+          description: "Çözüm bilgileri yüklenirken bir hata oluştu.",
           variant: "destructive",
         });
         navigate("/profile?tab=products");
@@ -212,7 +212,7 @@ const EditProduct = () => {
 
     // Validation
     if (!formData.name.trim()) {
-      toast({ title: "Hata", description: "Ürün adı gereklidir.", variant: "destructive" });
+      toast({ title: "Hata", description: "Çözüm adı gereklidir.", variant: "destructive" });
       return;
     }
     if (!formData.shortDescription.trim()) {
@@ -257,7 +257,7 @@ const EditProduct = () => {
 
       toast({
         title: "Başarılı",
-        description: "Ürün bilgileri güncellendi.",
+        description: "Çözüm bilgileri güncellendi.",
       });
 
       navigate("/profile?tab=products");
@@ -296,7 +296,7 @@ const EditProduct = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground">Ürün bilgileri yükleniyor...</p>
+                <p className="text-muted-foreground">Çözüm bilgileri yükleniyor...</p>
               </div>
             </div>
           </div>
@@ -318,8 +318,8 @@ const EditProduct = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-heading font-bold text-foreground">Ürünü Düzenle</h1>
-              <p className="text-muted-foreground text-sm">Ürün bilgilerinizi güncelleyin</p>
+              <h1 className="text-2xl font-heading font-bold text-foreground">Çözümü Düzenle</h1>
+              <p className="text-muted-foreground text-sm">Çözüm bilgilerinizi güncelleyin</p>
             </div>
           </div>
 
@@ -336,10 +336,10 @@ const EditProduct = () => {
                     <div className="grid md:grid-cols-2 gap-6">
                       {/* Left Column Fields */}
                       <div className="space-y-4">
-                        {/* Ürün Adı */}
+                        {/* Çözüm Adı */}
                         <div className="space-y-2">
                           <Label htmlFor="name">
-                            Ürün Adı <span className="text-destructive">*</span>
+                            Çözüm Adı <span className="text-destructive">*</span>
                           </Label>
                           <Input
                             id="name"
@@ -356,7 +356,7 @@ const EditProduct = () => {
                           </Label>
                           <Textarea
                             id="shortDescription"
-                            placeholder="Ürününüzü kısaca tanımlayın"
+                            placeholder="Çözümünüzü kısaca tanımlayın"
                             rows={3}
                             value={formData.shortDescription}
                             onChange={(e) => handleInputChange("shortDescription", e.target.value)}
@@ -368,7 +368,7 @@ const EditProduct = () => {
                           <Label htmlFor="longDescription">Uzun Açıklama</Label>
                           <Textarea
                             id="longDescription"
-                            placeholder="Ürününüzü detaylı olarak tanımlayın"
+                            placeholder="Çözümünüzü detaylı olarak tanımlayın"
                             rows={5}
                             value={formData.longDescription}
                             onChange={(e) => handleInputChange("longDescription", e.target.value)}
@@ -618,10 +618,10 @@ const EditProduct = () => {
                             </span>
                           </div>
                           <h3 className="font-heading font-bold text-foreground mb-1">
-                            {formData.name || "Ürün Adı"}
+                            {formData.name || "Çözüm Adı"}
                           </h3>
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {formData.shortDescription || "Ürün açıklaması burada görünecek..."}
+                            {formData.shortDescription || "Çözüm açıklaması burada görünecek..."}
                           </p>
                         </div>
                       </div>
@@ -629,7 +629,7 @@ const EditProduct = () => {
                       {/* Tier Info */}
                       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                         <p className="text-xs text-muted-foreground">
-                          Bu ürün <span className="font-semibold capitalize">{vendorTier}</span> paketi ile
+                          Bu çözüm <span className="font-semibold capitalize">{vendorTier}</span> paketi ile
                           listelenecektir.
                         </p>
                       </div>

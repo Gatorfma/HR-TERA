@@ -136,7 +136,7 @@ const MyProductsTab = () => {
         setProducts(mappedProducts);
       } catch (err) {
         console.error("Error fetching products:", err);
-        setError("Ürünler yüklenirken bir hata oluştu");
+        setError("Çözümler yüklenirken bir hata oluştu");
       } finally {
         setLoading(false);
       }
@@ -223,7 +223,7 @@ const MyProductsTab = () => {
 
         <Button className="rounded-full gap-2" onClick={() => navigate("/profile/products/new")}>
           <Plus className="w-4 h-4" />
-          Yeni Ürün Ekle
+          Yeni Çözüm Ekle
         </Button>
       </div>
 
@@ -232,7 +232,7 @@ const MyProductsTab = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Ürünler yükleniyor...</p>
+            <p className="text-muted-foreground">Çözümler yükleniyor...</p>
           </div>
         </div>
       )}
@@ -251,11 +251,11 @@ const MyProductsTab = () => {
       {!loading && !error && products.length === 0 && (
         <div className="text-center py-12 bg-muted/30 rounded-xl border border-border">
           <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold text-foreground mb-2">Henüz ürün eklemediniz</h3>
-          <p className="text-muted-foreground mb-4">İlk ürününüzü ekleyerek başlayın</p>
+          <h3 className="font-semibold text-foreground mb-2">Henüz çözüm eklemediniz</h3>
+          <p className="text-muted-foreground mb-4">İlk çözümünüzü ekleyerek başlayın</p>
           <Button className="rounded-full gap-2" onClick={() => navigate("/profile/products/new")}>
             <Plus className="w-4 h-4" />
-            Yeni Ürün Ekle
+            Yeni Çözüm Ekle
           </Button>
         </div>
       )}
@@ -400,7 +400,7 @@ const MyProductsTab = () => {
       {/* No results for filter */}
       {!loading && !error && products.length > 0 && filteredProducts.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Bu filtreye uygun ürün bulunamadı</p>
+          <p className="text-muted-foreground">Bu filtreye uygun çözüm bulunamadı</p>
         </div>
       )}
 
@@ -411,7 +411,7 @@ const MyProductsTab = () => {
           Bekleyen Talep Başvuruları
         </h3>
         <p className="text-sm text-muted-foreground">
-          Bekleyen başvuru yok. Ürünler sayfasından sahipsiz ürünleri talep edebilirsiniz.
+          Bekleyen başvuru yok. Çözümler sayfasından sahipsiz çözümleri talep edebilirsiniz.
         </p>
       </div>
     </div>

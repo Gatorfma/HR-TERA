@@ -125,7 +125,7 @@ const ProductEditPage = () => {
         syncFormFields(first);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ürünler yüklenirken hata oluştu");
+      setError(err instanceof Error ? err.message : "Çözümler yüklenirken hata oluştu");
     } finally {
       setIsLoading(false);
     }
@@ -230,7 +230,7 @@ const ProductEditPage = () => {
 
       const vendorMsg = vendorChanged ? " Şirket değiştirildi." : "";
       toast({
-        title: "Ürün güncellendi",
+        title: "Çözüm güncellendi",
         description: `${editedProductName} bilgileri kaydedildi.${vendorMsg}`,
       });
 
@@ -357,23 +357,23 @@ const ProductEditPage = () => {
           Geri Dön
         </Button>
 
-        <h1 className="text-3xl font-bold text-foreground">Ürün Düzenleme</h1>
+        <h1 className="text-3xl font-bold text-foreground">Çözüm Düzenleme</h1>
         <p className="text-muted-foreground mt-2 mb-8">
-          Sistemdeki ürün kayıtlarını görüntüleyin ve düzenleyin.
+          Sistemdeki çözüm kayıtlarını görüntüleyin ve düzenleyin.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Side - Product List */}
           <Card className="lg:col-span-1 flex flex-col max-h-[80vh]">
             <CardHeader className="pb-3 flex-shrink-0">
-              <CardTitle className="text-lg">Ürünler</CardTitle>
+              <CardTitle className="text-lg">Çözümler</CardTitle>
               <CardDescription>
-                Sistemdeki ürünleri yönetin ({totalCount} ürün)
+                Sistemdeki çözümleri yönetin ({totalCount} çözüm)
               </CardDescription>
               <div className="relative mt-2">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Ürün adı ara…"
+                  placeholder="Çözüm adı ara…"
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="pl-10"
@@ -386,7 +386,7 @@ const ProductEditPage = () => {
                   <ProductListSkeleton />
                 ) : products.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
-                    <p>Ürün bulunamadı.</p>
+                    <p>Çözüm bulunamadı.</p>
                   </div>
                 ) : (
                   <div className="space-y-1 p-2">
@@ -467,14 +467,14 @@ const ProductEditPage = () => {
           <div className="lg:col-span-2 space-y-4">
             {selectedProduct ? (
               <>
-                {/* Ürün Bilgileri (readonly) */}
+                {/* Çözüm Bilgileri (readonly) */}
                 <Card>
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
                       <Package className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg">Ürün Bilgileri</CardTitle>
+                      <CardTitle className="text-lg">Çözüm Bilgileri</CardTitle>
                     </div>
-                    <CardDescription>Ürün detayları (salt okunur)</CardDescription>
+                    <CardDescription>Çözüm detayları (salt okunur)</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -540,7 +540,7 @@ const ProductEditPage = () => {
                         </Badge>
                       )}
                     </div>
-                    <CardDescription>Ürünün bağlı olduğu şirket</CardDescription>
+                    <CardDescription>Çözümün bağlı olduğu şirket</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Current vendor */}
@@ -673,12 +673,12 @@ const ProductEditPage = () => {
                       <Tag className="h-5 w-5 text-primary" />
                       <CardTitle className="text-lg">Temel Bilgiler</CardTitle>
                     </div>
-                    <CardDescription>Ürün bilgilerini düzenleyin</CardDescription>
+                    <CardDescription>Çözüm bilgilerini düzenleyin</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="productName">Ürün Adı *</Label>
+                        <Label htmlFor="productName">Çözüm Adı *</Label>
                         <Input
                           id="productName"
                           value={editedProductName}
@@ -879,7 +879,7 @@ const ProductEditPage = () => {
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   ) : (
                     <p className="text-muted-foreground">
-                      Detayları görmek için bir ürün seçin
+                      Detayları görmek için bir çözüm seçin
                     </p>
                   )}
                 </CardContent>

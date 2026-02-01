@@ -127,7 +127,7 @@ const AddProduct = () => {
 
     // Validation
     if (!formData.name.trim()) {
-      toast({ title: "Hata", description: "Ürün adı gereklidir.", variant: "destructive" });
+      toast({ title: "Hata", description: "Çözüm adı gereklidir.", variant: "destructive" });
       return;
     }
     if (!formData.shortDescription.trim()) {
@@ -169,7 +169,7 @@ const AddProduct = () => {
 
       toast({
         title: "Başvuru Gönderildi",
-        description: "Ürün başvurunuz alındı. İnceleme sonrası size bilgi vereceğiz.",
+        description: "Çözüm başvurunuz alındı. İnceleme sonrası size bilgi vereceğiz.",
       });
 
       navigate("/profile?tab=applications");
@@ -207,8 +207,8 @@ const AddProduct = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-heading font-bold text-foreground">Yeni Ürün Ekle</h1>
-              <p className="text-muted-foreground text-sm">Ürün bilgilerinizi doldurun ve başvurunuzu gönderin</p>
+              <h1 className="text-2xl font-heading font-bold text-foreground">Yeni Çözüm Ekle</h1>
+              <p className="text-muted-foreground text-sm">Çözüm bilgilerinizi doldurun ve başvurunuzu gönderin</p>
             </div>
           </div>
 
@@ -225,10 +225,10 @@ const AddProduct = () => {
                     <div className="grid md:grid-cols-2 gap-6">
                       {/* Left Column Fields */}
                       <div className="space-y-4">
-                        {/* Ürün Adı */}
+                        {/* Çözüm Adı */}
                         <div className="space-y-2">
                           <Label htmlFor="name">
-                            Ürün Adı <span className="text-destructive">*</span>
+                            Çözüm Adı <span className="text-destructive">*</span>
                           </Label>
                           <Input
                             id="name"
@@ -245,7 +245,7 @@ const AddProduct = () => {
                           </Label>
                           <Textarea
                             id="shortDescription"
-                            placeholder="Ürününüzü kısaca tanımlayın"
+                            placeholder="Çözümünüzü kısaca tanımlayın"
                             rows={3}
                             value={formData.shortDescription}
                             onChange={(e) => handleInputChange("shortDescription", e.target.value)}
@@ -323,7 +323,7 @@ const AddProduct = () => {
                           ) : (
                             <Input
                               id="motto"
-                              placeholder="Ürününüzün sloganı"
+                              placeholder="Çözümünüzün sloganı"
                               value={formData.motto}
                               onChange={(e) => handleInputChange("motto", e.target.value)}
                             />
@@ -499,10 +499,10 @@ const AddProduct = () => {
                             </span>
                           </div>
                           <h3 className="font-heading font-bold text-foreground mb-1">
-                            {formData.name || "Ürün Adı"}
+                            {formData.name || "Çözüm Adı"}
                           </h3>
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {formData.shortDescription || "Ürün açıklaması burada görünecek..."}
+                            {formData.shortDescription || "Çözüm açıklaması burada görünecek..."}
                           </p>
                           {vendorTier !== "freemium" && formData.motto && (
                             <p className="text-xs text-primary mt-2 italic">"{formData.motto}"</p>
@@ -513,7 +513,7 @@ const AddProduct = () => {
                       {/* Tier Info */}
                       <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                         <p className="text-xs text-muted-foreground">
-                          Bu ürün <span className="font-semibold capitalize">{vendorTier}</span> paketi ile
+                          Bu çözüm <span className="font-semibold capitalize">{vendorTier}</span> paketi ile
                           listelenecektir.
                         </p>
                       </div>

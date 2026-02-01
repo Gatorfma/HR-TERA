@@ -604,13 +604,13 @@ const ProductDetail = () => {
                           {vendorHQ && (
                             <div className="rounded-xl border border-border bg-muted/30 p-3">
                               <p className="text-xs text-muted-foreground">{t("productDetail.headquarters")}</p>
-                              <p className="text-sm font-medium text-foreground break-words mt-2">{vendorHQ}</p>
+                              <p className="text-sm font-medium text-foreground break-words mt-1">{vendorHQ}</p>
                             </div>
                           )}
                           {vendorSize && (
                             <div className="rounded-xl border border-border bg-muted/30 p-3">
                               <p className="text-xs text-muted-foreground">{t("productDetail.companySize")}</p>
-                              <p className="text-sm font-medium text-foreground break-words mt-2">{vendorSize}</p>
+                              <p className="text-sm font-medium text-foreground break-words mt-1">{vendorSize}</p>
                             </div>
                           )}
                         </div>

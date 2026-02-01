@@ -44,8 +44,8 @@ const Profile = () => {
   }
 
   const tabs = [
-    { id: "products" as ProfileTab, label: "Ürünlerim", icon: <Package className="w-4 h-4" /> },
-    { id: "applications" as ProfileTab, label: "Ürün Başvuruları", icon: <FileText className="w-4 h-4" /> },
+    { id: "products" as ProfileTab, label: "Çözümlerim", icon: <Package className="w-4 h-4" /> },
+    { id: "applications" as ProfileTab, label: "Çözüm Başvuruları", icon: <FileText className="w-4 h-4" /> },
     { id: "settings" as ProfileTab, label: "Ayarlar", icon: <Settings className="w-4 h-4" /> },
   ];
 

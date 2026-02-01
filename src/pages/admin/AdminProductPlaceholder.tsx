@@ -35,7 +35,7 @@ const AdminProductPlaceholder = () => {
             onClick={() => navigate("/admin/products")}
             className="hover:text-foreground transition-colors"
           >
-            Ürün Ayarları
+            Çözüm Ayarları
           </button>
           <span>/</span>
           <span className="text-foreground">{currentSection?.title || "Sayfa"}</span>

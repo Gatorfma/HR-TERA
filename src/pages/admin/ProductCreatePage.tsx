@@ -96,7 +96,7 @@ const ProductCreatePage = () => {
   const validateForm = (): boolean => {
     const e: Record<string, string> = {};
     if (!selectedVendor) e.vendorId = "Şirket seçiniz";
-    if (!productName.trim()) e.productName = "Ürün adı zorunludur";
+    if (!productName.trim()) e.productName = "Çözüm adı zorunludur";
     if (!shortDesc.trim()) e.shortDesc = "Kısa açıklama zorunludur";
     if (!logo.trim()) e.logo = "Logo zorunludur";
     if (!mainCategory) e.mainCategory = "Ana kategori zorunludur";
@@ -132,14 +132,14 @@ const ProductCreatePage = () => {
       });
 
       toast({
-        title: "Ürün oluşturuldu",
-        description: `"${productName}" ürünü başarıyla eklendi.`,
+        title: "Çözüm oluşturuldu",
+        description: `"${productName}" çözümü başarıyla eklendi.`,
       });
       navigate("/admin/products/edit");
     } catch (err) {
       toast({
         title: "Hata",
-        description: err instanceof Error ? err.message : "Ürün oluşturulamadı",
+        description: err instanceof Error ? err.message : "Çözüm oluşturulamadı",
         variant: "destructive",
       });
     } finally {
@@ -187,8 +187,8 @@ const ProductCreatePage = () => {
           Geri Dön
         </Button>
 
-        <h1 className="text-3xl font-bold text-foreground">Yeni Ürün Oluştur</h1>
-        <p className="text-muted-foreground mt-2 mb-8">Ürün bilgilerini girin ve kaydedin.</p>
+        <h1 className="text-3xl font-bold text-foreground">Yeni Çözüm Oluştur</h1>
+        <p className="text-muted-foreground mt-2 mb-8">Çözüm bilgilerini girin ve kaydedin.</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Temel Bilgiler */}
@@ -198,11 +198,11 @@ const ProductCreatePage = () => {
                 <Tag className="h-5 w-5 text-primary" />
                 <CardTitle className="text-lg">Temel Bilgiler</CardTitle>
               </div>
-              <CardDescription>Ürün adı, açıklama ve kategoriler</CardDescription>
+              <CardDescription>Çözüm adı, açıklama ve kategoriler</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="productName">Ürün Adı *</Label>
+                <Label htmlFor="productName">Çözüm Adı *</Label>
                 <Input
                   id="productName"
                   value={productName}
@@ -301,7 +301,7 @@ const ProductCreatePage = () => {
                 <Building2 className="h-5 w-5 text-primary" />
                 <CardTitle className="text-lg">Şirket Atama</CardTitle>
               </div>
-              <CardDescription>Ürünün bağlı olacağı şirket *</CardDescription>
+              <CardDescription>Çözümün bağlı olacağı şirket *</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-0">
               {selectedVendor ? (
@@ -488,15 +488,15 @@ const ProductCreatePage = () => {
               <Save className="h-5 w-5 text-primary" />
               <CardTitle className="text-lg">Kaydet</CardTitle>
             </div>
-            <CardDescription>Ürünü veritabanına ekle</CardDescription>
+            <CardDescription>Çözümü veritabanına ekle</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 text-sm text-muted-foreground mb-6">
               <p className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                Ürün tier'ı seçilen şirketin tier'ına göre belirlenir.
+                Çözüm tier'ı seçilen şirketin tier'ına göre belirlenir.
               </p>
-              <p>• Oluşturulduktan sonra Ürün Düzenleme sayfasından düzenleyebilirsiniz.</p>
+              <p>• Oluşturulduktan sonra Çözüm Düzenleme sayfasından düzenleyebilirsiniz.</p>
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => navigate("/admin/products")}>

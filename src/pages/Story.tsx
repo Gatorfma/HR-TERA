@@ -51,7 +51,7 @@ const Story = () => {
 
 						<p>
 							Site ve e-topluluk büyüdükçe, İKcılara yönelik bir pazaryeri fikri geldi
-							aklıma. Amacım, İK’da satın alınan tüm hizmet ve ürünleri tanıtmaktı. 2 kez
+							aklıma. Amacım, İK’da satın alınan tüm hizmet ve çözümleri tanıtmaktı. 2 kez
 							bunu denedim. 2004-2006 yıllarında, o dönemki internet kullanım oranlarına
 							göre fena da değildi ama ilerlemedi.
 						</p>
@@ -59,7 +59,7 @@ const Story = () => {
 						<p>
 							Daha sonraki yıllarda farklı girişimlerim oldu, farklı girişimlerde yer
 							aldım. Chatbotu İK’da ilk ben görüştüm büyük firmalarla. İş görüşmelerinde
-							adayın yüz ifadelerini analiz eden, İK Analitiğinde ürün geliştiren çözümlere
+							adayın yüz ifadelerini analiz eden, İK Analitiğinde çözüm geliştiren çözümlere
 							bulaştım.
 						</p>
 
