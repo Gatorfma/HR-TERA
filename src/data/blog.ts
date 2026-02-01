@@ -88,9 +88,57 @@ Siz ne dersiniz ?`,
       role: "Author",
       bio: "Artemiz Güler"
     },
-    publishDate: "Feb 1, 2026",
+    publishDate: "Jun 23, 2025",
     readTime: "5 min read",
     tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "PROMPT", "YAPAY ZEKA"]
+  },
+  {
+    id: "3",
+    slug: "avrupaya-is-yapanlar-veya-avrupada-is-arayanlar-icin",
+    title: "Avrupaya İş Yapanlar Veya Avrupada İş Arayanlar İçin",
+    excerpt: "Avrupa'da iş arayanlar veya iş yapanlar için önemli bilgiler.",
+    content: `Türkiye’de pek çalışan Avrupa’da iş bulma ve yaşama hayalinde. Nedenleri malum !
+
+**Peki kaç kişi gidebiliyor derseniz, Almanya için şöyle bir veri var.** 
+
+Almanya’da nitelikli işgücü göçü yasası reformunun birinci yıldönümünde 2024’te yaklaşık 200 bin nitelikli çalışma vizesi verildi. Türkiye 11 bin ile Hindistan’ın ardından ikinci durumda.
+
+En fazla göç veren ülkelerden biriyiz, görüldüğü gibi.
+
+![Almanya Transfer İstatistikleri](https://www.artemizguler.com/piyano_media/2024/12/almanya-tr-transfer-300x199.jpeg)
+**Peki Alman şirketleri ne durumda derseniz ?**
+
+Bu durumun böyle gitmeyeceği, en azından otomotiv ve ilişkili sektörlerde zorluklar yaşanacağı çok açık.
+
+![Almanya İşçi Durumu](https://www.artemizguler.com/piyano_media/2024/12/almanya-isci-durumu-300x244.jpeg)
+Bunun ilk göstergelerinden biri özellikle Avrupa pazarı için de üretim yapan otomotiv sanayi olacak. Aşağıdaki haberde Tofaş örneği var.
+
+Bursa’da yaşadığım için bilirim. “**Tofaş 1 işçi çıkarırsa, Bursa’da 5 kişi daha işsiz kalır**” derler.
+
+Tofaş, emekliliğe hak kazanan ve/veya kendi isteğiyle işten ayrılanlar ile üretim planlaması çerçevesinde iş akitleri sonlandırılan çalışanların etkisiyle; toplam çalışan sayısının, kamuya açıklanan son bilanço tarihindeki toplam çalışan sayısına göre %13 azalarak 4 bin 593 kişiye indiğini bildirdi.
+
+Tofaş, yaptığı açıklamada, “Söz konusu ayrılan çalışanlara yapılacak yasal ödeme tutarı yaklaşık 330 milyon TL olarak hesaplanmıştır.” denildi. 700 kişi zaten çıkarılmış ve çalışan sayısı 5.300’den 4.593’e inecekmiş. **TOFAŞ, artan sipariş iptalleri ve azalan üretim adetleri nedeniyle** tasarruf önlemlerinin yetersiz kaldığını, oluşan istihdam fazlasının yönetilemeyecek bir seviyeye ulaştığını belirtti.
+
+Peki diğer sektörler, diğer Avrupa ülkeleri ne olacak ?
+
+Sağlık sektöründe gereksinim devam ediyor. Ne yazık ki ülkemizin çok ihtiyacı olan o deneyimli doktorlar, hemşireler, sağlık çalışanları hala Avrupa yolunda, dil kurslarına gidiyor.
+
+Savunma sektöründe de değerli beyinler, uçmaya devam ediyor.
+
+Otomotiveki Çin etkisi maalesef, önümüzdeki yıllarda da devam edecek gibi.
+
+Bu sektörlerde isterseniz Türkiye’de iş yapın, isterseniz Avrupa’da iş yapın zor günler gelecek, gelmeye devam edecek.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2024/12/blog-gorseli.png",
+    category: "Kariyer",
+    author: {
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
+    },
+    publishDate: "Dec 13, 2024",
+    readTime: "5 min read",
+    tags: ["ALMANYA", "ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "OTOMOTİV", "SAĞLIK", "TOFAŞ"]
   }
 ];
 
