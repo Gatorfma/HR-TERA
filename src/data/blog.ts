@@ -139,6 +139,54 @@ Bu sektörlerde isterseniz Türkiye’de iş yapın, isterseniz Avrupa’da iş 
     publishDate: "Dec 13, 2024",
     readTime: "5 min read",
     tags: ["ALMANYA", "ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "OTOMOTİV", "SAĞLIK", "TOFAŞ"]
+  },
+  {
+    id: "4",
+    slug: "yapay-zekanin-gelecegi-uzerine-dusuncelerim-class-of-09",
+    title: "Yapay Zekanın Geleceği Üzerine Düşüncelerim (Class of '09)",
+    excerpt: "Yapay zekanın geleceği ve etkileri üzerine bir değerlendirme.",
+    content: `Tüm dünya yapay zeka konuşuyor.
+
+YZ çözümleri durmuyor. Sürekli yeni özellikler ekleyerek, kendilerini güçlendiriyorlar.
+
+İş dünyası, hangi meslekler bitecek diya sürekli yorum yapıyor.
+
+YZ üzerine, “polisiye” sevdiğim için yeni bir yazı yazma fikri, dün akşam aklıma düştü benim de.
+
+Dizi “Class of ’09”
+
+FBI’ya 2009’d giren bir grup ajanın YZ ile değişen iş hayatı veya dünya diyebilirim, konusuna.
+
+2009-bugün-2035 gibi 3 döneme gitgelli bir anlatımı var dizinin.
+
+IMDb puanı: 6,5 kalmış ?
+
+Peki ben neden mi bu dizi hakkında yazıyorum ?
+
+- Dizide, gelecekte FBI Direktörü olacak amca, yaşadığı ayrımcılıkları YZ’nin çözebileceğini, tarafsız olabileceğini düşünüyor.
+- İnsan kapasitesinin yetersizlikleri nedeniyle FBI binası patlatılınca da, YZ’nin tüm soruşturma ve hatta yargılama sürecine hakim olmasının yolu açılıyor.
+- İlk başta suç oranları düşse de, zamanla sadece “potansiyel”i değerlendiren YZ, herkesi içeri alıyor. Artık eyleme gerek kalmadan, sadece “düşünmeniz” yetiyor. Ve “yapma olasılığı” nedeniyle tutuklama yapabiliyor. Bir ülkeyi hatırlattı bana şimdi bu 🙂
+- Bu direktör amcanın eski eşi de henüz yayınlamayan bir kitabı nedeniyle yargılanınca, eski ekiple birleşip yapay zekaya darbe yapıyor. Bu da yine aynı ülkeyi hatırlattı yine bana 🙂
+- Ayrıca “tarafsız” olacağı söylenen YZ’ye de ayrıcalıklı sınıf, kendisi için muafiyet uyguluyor. Yani tarafsızlık nanay.
+- YZ’nin kameralarının olmadığı kırsal bölgelere gidiyor halk. Şehirleri bırakıp. Çünkü saçmasapan bir neden bulan YZ sizi tak diye içeri alıyor.
+
+Bu diziden çıkardıklarım;
+
+- YZ amaç değil araç olarak kalmalı.
+- YZ verisi, tarafsız olmalı. Veri kirli ise yapacağı işin temiz olması mümkün değil.
+- YZ size bir sonuç verse de, “insan” olarak son karar verici, değerlendirici bizler olmalıyız.
+- Ve mutlaka artık şehirlerde, şirketlerde ne bileyim okullarda, her ortamda “YZ Free” alanlar yaratılmalı.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2025/05/Ekran-Resmi-2025-05-28-08.57.35.png",
+    category: "Yapay Zeka",
+    author: {
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
+    },
+    publishDate: "May 28, 2025",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "CLASS OF '09", "DİZİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "POLİSİYE", "YAPAY ZEKA"]
   }
 ];
 
