@@ -9,9 +9,40 @@ interface ProductGalleryProps {
   videoUrl?: string;
 }
 
+const embedUrl = (url?: string) => {
+  if (!url) return undefined;
+
+  try {
+    const u = new URL(url);
+
+    // YouTube
+    if (u.hostname.includes("youtube.com")) {
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+      // already embed
+      if (u.pathname.startsWith("/embed/")) return url;
+    }
+    if (u.hostname === "youtu.be") {
+      const id = u.pathname.replace("/", "");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+
+    // Vimeo
+    if (u.hostname.includes("vimeo.com")) {
+      const id = u.pathname.split("/").filter(Boolean)[0];
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+
+    return url; // fallback (might still not be embeddable)
+  } catch {
+    return url;
+  }
+};
+
 const ProductGallery = ({ screenshots, productName, videoUrl }: ProductGalleryProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const embededUrl = embedUrl(videoUrl);
 
   if (!screenshots || screenshots.length === 0) return null;
 
@@ -35,14 +66,14 @@ const ProductGallery = ({ screenshots, productName, videoUrl }: ProductGalleryPr
         </h2>
 
         {/* Video */}
-        {videoUrl && (
+        {embededUrl && (
           <div className="mb-6 rounded-xl overflow-hidden border border-border">
             <div className="aspect-video">
               <iframe
-                src={videoUrl}
+                src={embededUrl}
                 title={`${productName} demo video`}
                 className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
               />
             </div>
