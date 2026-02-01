@@ -277,6 +277,7 @@ export interface AdminCreateProductInput {
   pricing?: string | null;
   languages?: string[] | null;
   demoLink?: string | null;
+  releaseDate?: string | null;
   listingStatus?: ListingStatus;
 }
 

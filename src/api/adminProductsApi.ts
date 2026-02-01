@@ -141,6 +141,7 @@ export async function adminCreateProduct(
     p_pricing: input.pricing ?? null,
     p_languages: input.languages ?? null,
     p_demo_link: input.demoLink ?? null,
+    p_release_date: input.releaseDate ?? null,
     p_listing_status: input.listingStatus ?? 'pending',
   });
 

@@ -2964,6 +2964,7 @@ create or replace function public.admin_create_product(
   p_pricing text default null,
   p_languages text[] default null,
   p_demo_link text default null,
+  p_release_date date default null,
   p_listing_status public.listing_status default 'pending'
 )
 returns uuid
@@ -3027,6 +3028,7 @@ begin
     pricing,
     languages,
     demo_link,
+    release_date,
     listing_status
   ) values (
     p_vendor_id,
@@ -3043,6 +3045,7 @@ begin
     nullif(p_pricing, ''),
     p_languages,
     nullif(p_demo_link, ''),
+    p_release_date,
     p_listing_status
   )
   returning product_id into new_product_id;
@@ -3051,8 +3054,8 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_create_product(uuid, text, text, text, public.product_category, text, text, public.product_category[], text[], text, text[], text, text[], text, public.listing_status) to authenticated;
-grant execute on function public.admin_create_product(uuid, text, text, text, public.product_category, text, text, public.product_category[], text[], text, text[], text, text[], text, public.listing_status) to service_role;
+grant execute on function public.admin_create_product(uuid, text, text, text, public.product_category, text, text, public.product_category[], text[], text, text[], text, text[], text, date, public.listing_status) to authenticated;
+grant execute on function public.admin_create_product(uuid, text, text, text, public.product_category, text, text, public.product_category[], text[], text, text[], text, text[], text, date, public.listing_status) to service_role;
 
 
 -- ============================================================
