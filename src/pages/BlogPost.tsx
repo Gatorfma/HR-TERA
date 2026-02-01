@@ -32,24 +32,77 @@ const BlogPost = () => {
   }
 
   // Simple markdown-like rendering for content
+  const parseInline = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
+
   const renderContent = (content: string) => {
-    return content.split("\n\n").map((paragraph, index) => {
-      if (paragraph.startsWith("## ")) {
-        return (
-          <h2
-            key={index}
-            className="text-2xl font-heading font-bold text-foreground mt-8 mb-4"
-          >
-            {paragraph.replace("## ", "")}
+    const lines = content.split('\n');
+    const elements: JSX.Element[] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i].trim();
+      if (!line) continue;
+
+      // Header
+      if (line.startsWith('## ')) {
+        elements.push(
+          <h2 key={`h2-${i}`} className="text-2xl font-heading font-bold text-foreground mt-8 mb-4">
+            {line.replace("## ", "")}
           </h2>
         );
+        continue;
       }
-      return (
-        <p key={index} className="text-muted-foreground leading-relaxed mb-4">
-          {paragraph}
+
+      // Image
+      const imgMatch = line.match(/^!\[(.*?)\]\((.*?)\)$/);
+      if (imgMatch) {
+        elements.push(
+          <div key={`img-${i}`} className="my-8 flex justify-center">
+            <img
+              src={imgMatch[2]}
+              alt={imgMatch[1]}
+              className="w-1/2 h-auto rounded-xl border border-border"
+            />
+          </div>
+        );
+        continue;
+      }
+
+      // List
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        const listItems = [];
+        while (i < lines.length && (lines[i].trim().startsWith('- ') || lines[i].trim().startsWith('* '))) {
+          listItems.push(lines[i].trim().substring(2));
+          i++;
+        }
+        i--; // Step back
+        elements.push(
+          <ul key={`list-${i}`} className="list-disc pl-6 mb-4 space-y-2 text-muted-foreground leading-relaxed">
+            {listItems.map((item, idx) => (
+              <li key={idx}>
+                {parseInline(item)}
+              </li>
+            ))}
+          </ul>
+        );
+        continue;
+      }
+
+      // Paragraph
+      elements.push(
+        <p key={`p-${i}`} className="text-muted-foreground leading-relaxed mb-4">
+          {parseInline(line)}
         </p>
       );
-    });
+    }
+    return elements;
   };
 
   return (
@@ -102,12 +155,12 @@ const BlogPost = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl overflow-hidden mb-10"
+          className="rounded-2xl overflow-hidden mb-10 flex justify-center"
         >
           <img
             src={post.thumbnail}
             alt={post.title}
-            className="w-full aspect-[2/1] object-cover"
+            className="w-1/2 h-auto rounded-2xl"
           />
         </motion.div>
 
