@@ -30,7 +30,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { adminGetProducts, adminUpdateProduct, adminSearchVendors } from "@/api/adminProductsApi";
+import { adminGetProducts, adminUpdateProduct, adminFetchVendorsForDropdown } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { AdminProductView, ListingStatus, ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -96,6 +96,7 @@ const ProductEditPage = () => {
   const [vendorSearchResults, setVendorSearchResults] = useState<VendorSearchResult[]>([]);
   const [isSearchingVendors, setIsSearchingVendors] = useState(false);
   const [selectedVendor, setSelectedVendor] = useState<VendorSearchResult | null>(null);
+  const [vendorSearchOpen, setVendorSearchOpen] = useState(false);
   const debouncedVendorSearch = useDebounce(vendorSearchInput, 300);
 
   // Fetch products
@@ -173,16 +174,16 @@ const ProductEditPage = () => {
 
   // Search vendors when input changes
   useEffect(() => {
-    if (debouncedVendorSearch.length >= 2) {
-      setIsSearchingVendors(true);
-      adminSearchVendors(debouncedVendorSearch).then((results) => {
-        setVendorSearchResults(results);
-        setIsSearchingVendors(false);
-      });
-    } else {
+    if (!vendorSearchOpen) {
       setVendorSearchResults([]);
+      return;
     }
-  }, [debouncedVendorSearch]);
+    setIsSearchingVendors(true);
+    adminFetchVendorsForDropdown(debouncedVendorSearch || null, 20).then((results) => {
+      setVendorSearchResults(results);
+      setIsSearchingVendors(false);
+    });
+  }, [vendorSearchOpen, debouncedVendorSearch]);
 
   const handleSelectProduct = (product: AdminProductView) => {
     setSelectedProduct(product);
@@ -227,7 +228,7 @@ const ProductEditPage = () => {
         listingStatus: editedListingStatus || null,
       });
 
-      const vendorMsg = vendorChanged ? " Vendor değiştirildi." : "";
+      const vendorMsg = vendorChanged ? " Şirket değiştirildi." : "";
       toast({
         title: "Ürün güncellendi",
         description: `${editedProductName} bilgileri kaydedildi.${vendorMsg}`,
@@ -527,12 +528,12 @@ const ProductEditPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Vendor Atama */}
+                {/* Şirket Atama */}
                 <Card>
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg">Vendor Atama</CardTitle>
+                      <CardTitle className="text-lg">Şirket Atama</CardTitle>
                       {selectedVendor?.vendor_id !== selectedProduct.vendor_id && (
                         <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-xs">
                           Değiştirildi
@@ -553,7 +554,7 @@ const ProductEditPage = () => {
                           </Avatar>
                           <div>
                             <p className="text-sm font-medium">
-                              {selectedVendor.company_name || "İsimsiz Vendor"}
+                              {selectedVendor.company_name || "İsimsiz Şirket"}
                             </p>
                             <div className="flex items-center gap-2">
                               <Badge
@@ -591,76 +592,77 @@ const ProductEditPage = () => {
                       </div>
                     ) : (
                       <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
-                        <p className="text-sm">Vendor bağlı değil</p>
+                        <p className="text-sm">Şirket bağlı değil</p>
                       </div>
                     )}
 
-                    {/* Vendor search */}
+                    {/* Şirket search - combobox with dropdown */}
                     <div className="space-y-2">
-                      <Label>Vendor Ara</Label>
+                      <Label>Şirket Ara</Label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                         <Input
                           placeholder="Şirket adı ile ara..."
                           value={vendorSearchInput}
                           onChange={(e) => setVendorSearchInput(e.target.value)}
+                          onFocus={() => setVendorSearchOpen(true)}
+                          onBlur={() =>
+                            setTimeout(() => setVendorSearchOpen(false), 200)
+                          }
                           className="pl-10"
                         />
+                        {/* Dropdown list */}
+                        {vendorSearchOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-1 z-50 border rounded-lg bg-popover shadow-md max-h-[220px] overflow-hidden">
+                            {isSearchingVendors ? (
+                              <div className="flex items-center justify-center p-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                              </div>
+                            ) : vendorSearchResults.length > 0 ? (
+                              <div className="max-h-[200px] overflow-y-auto p-1">
+                                {vendorSearchResults.map((vendor) => (
+                                  <button
+                                    key={vendor.vendor_id}
+                                    type="button"
+                                    className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent hover:text-accent-foreground text-left transition-colors"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      handleSelectVendor(vendor);
+                                      setVendorSearchOpen(false);
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Avatar className="h-7 w-7">
+                                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                          {vendor.company_name?.slice(0, 2).toUpperCase() || "V"}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="text-sm font-medium">
+                                          {vendor.company_name || "İsimsiz"}
+                                        </p>
+                                        <Badge
+                                          className={`text-[10px] capitalize ${getTierBadgeColor(
+                                            vendor.subscription
+                                          )}`}
+                                        >
+                                          {vendor.subscription}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                    <span className="text-xs text-muted-foreground">Seç</span>
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-4 text-center text-muted-foreground text-sm">
+                                Şirket bulunamadı
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    {/* Search results */}
-                    {isSearchingVendors && (
-                      <div className="flex items-center justify-center p-4">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-
-                    {!isSearchingVendors && vendorSearchResults.length > 0 && (
-                      <div className="space-y-1 border rounded-lg max-h-[200px] overflow-y-auto">
-                        {vendorSearchResults.map((vendor) => (
-                          <div
-                            key={vendor.vendor_id}
-                            className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                                  {vendor.company_name?.slice(0, 2).toUpperCase() || "V"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium">
-                                  {vendor.company_name || "İsimsiz"}
-                                </p>
-                                <Badge
-                                  className={`text-[10px] capitalize ${getTierBadgeColor(
-                                    vendor.subscription
-                                  )}`}
-                                >
-                                  {vendor.subscription}
-                                </Badge>
-                              </div>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleSelectVendor(vendor)}
-                            >
-                              Seç
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {!isSearchingVendors &&
-                      vendorSearchInput.length >= 2 &&
-                      vendorSearchResults.length === 0 && (
-                        <div className="p-4 text-center text-muted-foreground text-sm">
-                          Vendor bulunamadı
-                        </div>
-                      )}
                   </CardContent>
                 </Card>
 
