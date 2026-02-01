@@ -14,6 +14,7 @@ import { useAdminVendors } from "@/hooks/useAdminUsers";
 import ImageUpload from "@/components/admin/ImageUpload";
 import { AdminVendorView, UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
+import { CountrySelect } from "@/components/ui/country-select";
 
 // Debounce hook for search
 function useDebounce<T>(value: T, delay: number): T {
@@ -676,11 +677,10 @@ const UserSettingsTab = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="headquarters">Ülke</Label>
-                    <Input
-                      id="headquarters"
+                    <CountrySelect
                       value={editedHeadquarters}
-                      onChange={(e) => setEditedHeadquarters(e.target.value)}
-                      placeholder="ör: İstanbul, Türkiye"
+                      onChange={(value) => setEditedHeadquarters(value)}
+                      placeholder="Ülke seçiniz..."
                     />
                   </div>
                   <div className="space-y-2">

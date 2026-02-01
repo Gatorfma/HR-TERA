@@ -15,6 +15,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { adminCreateVendor, adminSearchUsers } from "@/api/adminUserApi";
 import { UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
+import { CountrySelect } from "@/components/ui/country-select";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -252,11 +253,10 @@ const CompanyCreatePage = () => {
                 {/* Merkez */}
                 <div className="space-y-2">
                   <Label htmlFor="headquarters">Merkez</Label>
-                  <Input
-                    id="headquarters"
+                  <CountrySelect
                     value={formData.headquarters}
-                    onChange={(e) => setFormData({ ...formData, headquarters: e.target.value })}
-                    placeholder="ör: İstanbul, Türkiye"
+                    onChange={(value) => setFormData({ ...formData, headquarters: value })}
+                    placeholder="Ülke seçiniz..."
                   />
                 </div>
 
