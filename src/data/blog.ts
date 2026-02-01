@@ -187,6 +187,46 @@ Bu diziden çıkardıklarım;
     publishDate: "May 28, 2025",
     readTime: "5 min read",
     tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "CLASS OF '09", "DİZİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "POLİSİYE", "YAPAY ZEKA"]
+  },
+  {
+    id: "5",
+    slug: "sadece-douglass-mi-cancel-edilsin",
+    title: "Sadece Douglass mı Cancel Edilsin?",
+    excerpt: "Cancel kültürü ve sosyal medya üzerine düşündürücü bir yazı.",
+    content: `Evet yine bir dizi üzerine yazıyorum.
+
+**“Douglas is cancelled”.** 
+
+4 bölümlük, mini bir dizi serisi.
+
+Çok spoiler vermeden, neden yazı yazmam gerektiğini söyleyeyim.
+
+50 yaşında bir erkeğim. Evli ve 2 kız babasıyım.
+
+Bu konuda epey yol aldığımı ne zaman düşünsem böyle bir şey geliyor ve kendime geliyorum.
+
+Ve hala bazen cinsiyetçi şakalar yapabiliyorum maalesef.
+
+Bu dizi, bir erkek olarak kadınlara çektirdiğimiz sıkıntıları bence çok güzel yansıtıyor.
+
+Her diyalog, özellikle Toby ile otel odasındaki ve röportaj provası bence harika.
+
+Ayrıca otel odasındaki Madeline’nın dile, kendini ifadeye olan yetkinliğine hayran olmamak zor.
+
+**Diziden bazı bölümlerin, kurumlardaki “cinsiyetçilik” eğitimlerine harika malzeme vereceğini, kullanılması gerektiğini düşünüyorum.** 
+
+Öneririm.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2024/12/dic-blog-yazisi-gorseli.jpeg",
+    category: "Genel",
+    author: {
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
+    },
+    publishDate: "Dec 25, 2024",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "DİZİ", "DOUGLASS IS CANCELLED", "HUMAN RESOURCES", "İNSAN KAYNAKLARI"]
   }
 ];
 
