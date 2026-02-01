@@ -624,7 +624,7 @@ const ProductDetail = () => {
                       )}
 
                       {/* Social Links */}
-                      <div className="flex items-center justify-center gap-8 mt-8">
+                      <div className="flex items-center justify-center gap-4 mt-8">
                         {(vendorDetails?.website_link || product.vendor.website) ? (
                           <a
                             href={(vendorDetails?.website_link || product.vendor.website) as string}
