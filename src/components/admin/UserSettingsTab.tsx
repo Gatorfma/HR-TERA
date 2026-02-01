@@ -95,7 +95,7 @@ const UserSettingsTab = () => {
       setEditedLogo(selectedVendor.logo ?? "");
       setEditedCompanyMotto(selectedVendor.company_motto ?? "");
       setEditedCompanyDesc(selectedVendor.company_desc ?? "");
-      setEditedFoundedAt(selectedVendor.founded_at ?? "");
+      setEditedFoundedAt(selectedVendor.founded_at ? new Date(selectedVendor.founded_at).getFullYear().toString() : "");
       setEditedTier(selectedVendor.subscription ?? "freemium");
     }
   }, [selectedVendor]);
@@ -199,7 +199,7 @@ const UserSettingsTab = () => {
       logo: editedLogo || undefined,
       companyMotto: editedCompanyMotto || undefined,
       companyDesc: editedCompanyDesc || undefined,
-      foundedAt: editedFoundedAt || undefined,
+      foundedAt: editedFoundedAt ? `${editedFoundedAt}-01-01` : undefined,
     });
 
     if (result.success) {
@@ -731,12 +731,21 @@ const UserSettingsTab = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="foundedAt">Kuruluş Yılı</Label>
-                    <Input
-                      id="foundedAt"
-                      type="date"
+                    <Select
                       value={editedFoundedAt}
-                      onChange={(e) => setEditedFoundedAt(e.target.value)}
-                    />
+                      onValueChange={(value) => setEditedFoundedAt(value)}
+                    >
+                      <SelectTrigger id="foundedAt" className="w-full">
+                        <SelectValue placeholder="Seçiniz" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {Array.from({ length: new Date().getFullYear() - 1900 + 1 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <Button

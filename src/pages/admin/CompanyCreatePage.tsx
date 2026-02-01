@@ -152,7 +152,7 @@ const CompanyCreatePage = () => {
         companyMotto: formData.companyMotto.trim() || null,
         companyDesc: formData.companyDesc.trim() || null,
         headquarters: formData.headquarters.trim() || null,
-        foundedAt: formData.foundedAt || null,
+        foundedAt: formData.foundedAt ? `${formData.foundedAt}-01-01` : null,
         websiteLink: formData.websiteLink.trim() || null,
         linkedinLink: formData.linkedinLink.trim() || null,
         instagramLink: formData.instagramLink.trim() || null,
@@ -262,13 +262,22 @@ const CompanyCreatePage = () => {
 
                 {/* Kuruluş Tarihi */}
                 <div className="space-y-2">
-                  <Label htmlFor="foundedAt">Kuruluş Tarihi</Label>
-                  <Input
-                    id="foundedAt"
-                    type="date"
+                  <Label htmlFor="foundedAt">Kuruluş Yılı</Label>
+                  <Select
                     value={formData.foundedAt}
-                    onChange={(e) => setFormData({ ...formData, foundedAt: e.target.value })}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, foundedAt: value })}
+                  >
+                    <SelectTrigger id="foundedAt" className="w-full">
+                      <SelectValue placeholder="Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {Array.from({ length: new Date().getFullYear() - 1900 + 1 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Şirket Mottosu */}
