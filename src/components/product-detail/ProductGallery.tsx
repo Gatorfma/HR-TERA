@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Images } from "lucide-react";
+import { Images } from "lucide-react";
 
 interface ProductGalleryProps {
   screenshots: string[];
@@ -20,14 +21,6 @@ const ProductGallery = ({ screenshots, productName, videoUrl }: ProductGalleryPr
   };
 
   const closeLightbox = () => setLightboxOpen(false);
-
-  const goNext = () => {
-    setActiveIndex((prev) => (prev + 1) % screenshots.length);
-  };
-
-  const goPrev = () => {
-    setActiveIndex((prev) => (prev - 1 + screenshots.length) % screenshots.length);
-  };
 
   return (
     <>
@@ -75,71 +68,33 @@ const ProductGallery = ({ screenshots, productName, videoUrl }: ProductGalleryPr
         </div>
       </motion.div>
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightboxOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm"
-            onClick={closeLightbox}
-          >
-            <button
+      {/* Lightbox - rendered via portal to ensure it covers entire screen */}
+      {createPortal(
+        <AnimatePresence>
+          {lightboxOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md"
+              style={{ top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }}
               onClick={closeLightbox}
-              className="absolute top-4 right-4 p-2 rounded-full bg-muted hover:bg-accent transition-colors"
             >
-              <X className="w-6 h-6" />
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goPrev();
-              }}
-              className="absolute left-4 p-3 rounded-full bg-muted hover:bg-accent transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            <motion.img
-              key={activeIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              src={screenshots[activeIndex]}
-              alt={`${productName} screenshot ${activeIndex + 1}`}
-              className="max-w-[90vw] max-h-[85vh] rounded-xl object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goNext();
-              }}
-              className="absolute right-4 p-3 rounded-full bg-muted hover:bg-accent transition-colors"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {screenshots.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveIndex(index);
-                  }}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === activeIndex ? "bg-primary" : "bg-muted-foreground/40"
-                  }`}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <motion.img
+                key={activeIndex}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                src={screenshots[activeIndex]}
+                alt={`${productName} screenshot ${activeIndex + 1}`}
+                className="max-w-[90vw] max-h-[85vh] rounded-xl object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </>
   );
 };

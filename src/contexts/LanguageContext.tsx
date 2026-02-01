@@ -704,8 +704,8 @@ const tr: Record<string, string> = {
   "settings.vendor.instagramPlaceholder": "https://instagram.com/sirketiniz",
   "settings.vendor.headquarters": "Merkez Ofis",
   "settings.vendor.headquartersPlaceholder": "İstanbul, Türkiye",
-  "settings.vendor.foundedAt": "Kuruluş Tarihi",
-  "settings.vendor.companySize": "Şirket Büyüklüğü",
+  "settings.vendor.foundedAt": "Kuruluş Yılı",
+  "settings.vendor.companySize": "Çalışan Sayısı",
   "settings.vendor.companySizePlaceholder": "örn. 1-10, 11-50, 51-200, 201-500, 500+",
 
   "settings.billing.title": "Faturalandırma & Paket",
