@@ -25,6 +25,7 @@ import ProductRequestsPage from "./pages/admin/ProductRequestsPage";
 import ProductTiersPage from "./pages/admin/ProductTiersPage";
 import ProductAnalyticsPage from "./pages/admin/ProductAnalyticsPage";
 import ProductBulkUploadPage from "./pages/admin/ProductBulkUploadPage";
+import CompanyEditPage from "./pages/admin/CompanyEditPage";
 import Profile from "./pages/Profile";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/admin/products/tiers" element={<ProductTiersPage />} />
                 <Route path="/admin/products/analytics" element={<ProductAnalyticsPage />} />
                 <Route path="/admin/products/bulk-upload" element={<ProductBulkUploadPage />} />
+                <Route path="/admin/companies/edit" element={<CompanyEditPage />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/products/new" element={<AddProduct />} />
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />

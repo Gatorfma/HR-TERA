@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, Package, TrendingUp, Eye } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTabs from "@/components/admin/AdminTabs";
-import UserSettingsTab from "@/components/admin/UserSettingsTab";
+import CompanySettingsLanding from "@/components/admin/CompanySettingsLanding";
 import { supabase } from "@/api/supabaseClient";
 import { toast } from "@/hooks/use-toast";
 
@@ -385,7 +385,7 @@ const Admin = () => {
             </div>
           )}
 
-          {activeTab === "users" && <UserSettingsTab />}
+          {activeTab === "users" && <CompanySettingsLanding />}
         </div>
       </div>
     </AdminLayout>
