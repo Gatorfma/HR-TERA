@@ -22,7 +22,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { adminCreateProduct, adminSearchVendors } from "@/api/adminProductsApi";
+import { adminCreateProduct, adminFetchVendorsForDropdown } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -64,6 +64,7 @@ const ProductCreatePage = () => {
   const [vendorSearchInput, setVendorSearchInput] = useState("");
   const [vendorSearchResults, setVendorSearchResults] = useState<VendorSearchResult[]>([]);
   const [isSearchingVendors, setIsSearchingVendors] = useState(false);
+  const [vendorSearchOpen, setVendorSearchOpen] = useState(false);
   const debouncedVendorSearch = useDebounce(vendorSearchInput, 300);
 
   const effectiveTier: Tier = selectedVendor?.subscription || "freemium";
@@ -75,16 +76,16 @@ const ProductCreatePage = () => {
   }, []);
 
   useEffect(() => {
-    if (debouncedVendorSearch.length >= 2) {
-      setIsSearchingVendors(true);
-      adminSearchVendors(debouncedVendorSearch).then((r) => {
-        setVendorSearchResults(r);
-        setIsSearchingVendors(false);
-      });
-    } else {
+    if (!vendorSearchOpen) {
       setVendorSearchResults([]);
+      return;
     }
-  }, [debouncedVendorSearch]);
+    setIsSearchingVendors(true);
+    adminFetchVendorsForDropdown(debouncedVendorSearch || null, 20).then((r) => {
+      setVendorSearchResults(r);
+      setIsSearchingVendors(false);
+    });
+  }, [vendorSearchOpen, debouncedVendorSearch]);
 
   const handleSelectVendor = (vendor: VendorSearchResult) => {
     setSelectedVendor(vendor);
@@ -94,7 +95,7 @@ const ProductCreatePage = () => {
 
   const validateForm = (): boolean => {
     const e: Record<string, string> = {};
-    if (!selectedVendor) e.vendorId = "Vendor seçiniz";
+    if (!selectedVendor) e.vendorId = "Şirket seçiniz";
     if (!productName.trim()) e.productName = "Ürün adı zorunludur";
     if (!shortDesc.trim()) e.shortDesc = "Kısa açıklama zorunludur";
     if (!logo.trim()) e.logo = "Logo zorunludur";
@@ -293,12 +294,12 @@ const ProductCreatePage = () => {
             </CardContent>
           </Card>
 
-          {/* Vendor Atama */}
+          {/* Şirket Atama */}
           <Card className="flex flex-col self-start">
             <CardHeader className="pb-2 pt-4">
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Vendor Atama</CardTitle>
+                <CardTitle className="text-lg">Şirket Atama</CardTitle>
               </div>
               <CardDescription>Ürünün bağlı olacağı şirket *</CardDescription>
             </CardHeader>
@@ -324,60 +325,66 @@ const ProductCreatePage = () => {
                 </div>
               ) : (
                 <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
-                  <p className="text-sm">Vendor seçilmedi</p>
+                  <p className="text-sm">Şirket seçilmedi</p>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <Label>Vendor Ara</Label>
+                <Label>Şirket Ara</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                   <Input
                     placeholder="Şirket adı ile ara..."
                     value={vendorSearchInput}
                     onChange={(e) => setVendorSearchInput(e.target.value)}
+                    onFocus={() => setVendorSearchOpen(true)}
+                    onBlur={() => setTimeout(() => setVendorSearchOpen(false), 200)}
                     className="pl-10"
                   />
+                  {/* Dropdown list */}
+                  {vendorSearchOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 z-50 border rounded-lg bg-popover shadow-md max-h-[220px] overflow-hidden">
+                      {isSearchingVendors ? (
+                        <div className="flex items-center justify-center p-4">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : vendorSearchResults.length > 0 ? (
+                        <div className="max-h-[200px] overflow-y-auto p-1">
+                          {vendorSearchResults.map((v) => (
+                            <button
+                              key={v.vendor_id}
+                              type="button"
+                              className="w-full flex items-center justify-between p-2 rounded-md hover:bg-accent hover:text-accent-foreground text-left transition-colors"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelectVendor(v);
+                                setVendorSearchOpen(false);
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-7 w-7">
+                                  <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                    {v.company_name?.slice(0, 2).toUpperCase() || "V"}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">{v.company_name || "İsimsiz"}</p>
+                                  <Badge className={`text-[10px] capitalize ${getTierBadgeColor(v.subscription)}`}>
+                                    {v.subscription}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <span className="text-xs text-muted-foreground">Seç</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 text-center text-muted-foreground text-sm">Şirket bulunamadı</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {isSearchingVendors && (
-                <div className="flex justify-center py-2">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                </div>
-              )}
-
-              {!isSearchingVendors && vendorSearchResults.length > 0 && (
-                <div className="space-y-1 border rounded-lg max-h-[180px] overflow-y-auto">
-                  {vendorSearchResults.map((v) => (
-                    <div
-                      key={v.vendor_id}
-                      className="flex items-center justify-between p-2 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7">
-                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                            {v.company_name?.slice(0, 2).toUpperCase() || "V"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{v.company_name || "İsimsiz"}</p>
-                          <Badge className={`text-[10px] capitalize ${getTierBadgeColor(v.subscription)}`}>
-                            {v.subscription}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => handleSelectVendor(v)}>
-                        Seç
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {!isSearchingVendors && vendorSearchInput.length >= 2 && vendorSearchResults.length === 0 && (
-                <div className="py-2 text-center text-muted-foreground text-sm">Vendor bulunamadı</div>
-              )}
               {errors.vendorId && <p className="text-xs text-red-500">{errors.vendorId}</p>}
             </CardContent>
           </Card>
@@ -487,7 +494,7 @@ const ProductCreatePage = () => {
             <div className="space-y-3 text-sm text-muted-foreground mb-6">
               <p className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                Ürün tier'ı seçilen vendor'ın tier'ına göre belirlenir.
+                Ürün tier'ı seçilen şirketin tier'ına göre belirlenir.
               </p>
               <p>• Oluşturulduktan sonra Ürün Düzenleme sayfasından düzenleyebilirsiniz.</p>
             </div>

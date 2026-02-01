@@ -15,6 +15,7 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import { adminCreateVendor, adminSearchUsers } from "@/api/adminUserApi";
 import { UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
+import { CountrySelect } from "@/components/ui/country-select";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -70,6 +71,7 @@ const CompanyCreatePage = () => {
   const [userSearchInput, setUserSearchInput] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<UserSearchResult[]>([]);
   const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
   const debouncedUserSearch = useDebounce(userSearchInput, 300);
 
@@ -79,8 +81,14 @@ const CompanyCreatePage = () => {
 
   // Search users when debounced input changes
   useEffect(() => {
-    if (debouncedUserSearch.length >= 2) {
+    if (!userSearchOpen) {
+      setUserSearchResults([]);
+      return;
+    }
+
+    if (userSearchOpen) {
       setIsSearchingUsers(true);
+      // Pass the query even if empty/short - API now handles it
       adminSearchUsers(debouncedUserSearch).then((result) => {
         if (result.success && result.data) {
           setUserSearchResults(result.data);
@@ -92,7 +100,7 @@ const CompanyCreatePage = () => {
     } else {
       setUserSearchResults([]);
     }
-  }, [debouncedUserSearch]);
+  }, [debouncedUserSearch, userSearchOpen]);
 
   const handleSelectUser = (user: UserSearchResult) => {
     setSelectedUser(user);
@@ -145,7 +153,7 @@ const CompanyCreatePage = () => {
         companyMotto: formData.companyMotto.trim() || null,
         companyDesc: formData.companyDesc.trim() || null,
         headquarters: formData.headquarters.trim() || null,
-        foundedAt: formData.foundedAt || null,
+        foundedAt: formData.foundedAt ? `${formData.foundedAt}-01-01` : null,
         websiteLink: formData.websiteLink.trim() || null,
         linkedinLink: formData.linkedinLink.trim() || null,
         instagramLink: formData.instagramLink.trim() || null,
@@ -245,23 +253,31 @@ const CompanyCreatePage = () => {
                 {/* Merkez */}
                 <div className="space-y-2">
                   <Label htmlFor="headquarters">Merkez</Label>
-                  <Input
-                    id="headquarters"
+                  <CountrySelect
                     value={formData.headquarters}
-                    onChange={(e) => setFormData({ ...formData, headquarters: e.target.value })}
-                    placeholder="ör: İstanbul, Türkiye"
+                    onChange={(value) => setFormData({ ...formData, headquarters: value })}
+                    placeholder="Ülke seçiniz..."
                   />
                 </div>
 
                 {/* Kuruluş Tarihi */}
                 <div className="space-y-2">
-                  <Label htmlFor="foundedAt">Kuruluş Tarihi</Label>
-                  <Input
-                    id="foundedAt"
-                    type="date"
+                  <Label htmlFor="foundedAt">Kuruluş Yılı</Label>
+                  <Select
                     value={formData.foundedAt}
-                    onChange={(e) => setFormData({ ...formData, foundedAt: e.target.value })}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, foundedAt: value })}
+                  >
+                    <SelectTrigger id="foundedAt" className="w-full">
+                      <SelectValue placeholder="Seçiniz" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {Array.from({ length: new Date().getFullYear() - 1900 + 1 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Şirket Mottosu */}
@@ -335,76 +351,74 @@ const CompanyCreatePage = () => {
                     <div className="space-y-2">
                       <Label>Kullanıcı Ara</Label>
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                         <Input
                           placeholder="E-posta ile ara..."
                           value={userSearchInput}
                           onChange={(e) => setUserSearchInput(e.target.value)}
+                          onFocus={() => setUserSearchOpen(true)}
+                          onBlur={() => setTimeout(() => setUserSearchOpen(false), 200)}
                           className="pl-10"
                         />
+
+                        {/* Dropdown list */}
+                        {userSearchOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-1 z-50 border rounded-lg bg-popover shadow-md max-h-[220px] overflow-hidden">
+                            {isSearchingUsers ? (
+                              <div className="flex items-center justify-center p-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                              </div>
+                            ) : userSearchResults.length > 0 ? (
+                              <div className="max-h-[200px] overflow-y-auto p-1">
+                                {userSearchResults.map((user) => (
+                                  <button
+                                    key={user.user_id}
+                                    type="button"
+                                    onClick={() => {
+                                      handleSelectUser(user);
+                                      setUserSearchOpen(false);
+                                    }}
+                                    disabled={!!user.assigned_vendor_id}
+                                    className={`w-full flex items-center justify-between p-2 rounded-md hover:bg-accent hover:text-accent-foreground text-left transition-colors ${user.assigned_vendor_id ? "opacity-50 cursor-not-allowed" : ""
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                      <Avatar className="h-7 w-7 flex-shrink-0">
+                                        <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                          {user.email.slice(0, 2).toUpperCase()}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate">{user.email}</p>
+                                        <div className="flex flex-wrap gap-1">
+                                          {user.full_name && (
+                                            <span className="text-xs text-muted-foreground truncate">
+                                              {user.full_name}
+                                            </span>
+                                          )}
+                                          {user.assigned_vendor_name && (
+                                            <span className="text-xs text-amber-600 truncate ml-1">
+                                              • Mevcut: {user.assigned_vendor_name}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {!user.assigned_vendor_id && (
+                                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">Seç</span>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-4 text-center text-muted-foreground text-sm">
+                                Kullanıcı bulunamadı
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    {/* Search results */}
-                    {isSearchingUsers && (
-                      <div className="flex items-center justify-center p-4">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      </div>
-                    )}
-
-                    {!isSearchingUsers && userSearchResults.length > 0 && (
-                      <div className="space-y-1 border rounded-lg max-h-[200px] overflow-y-auto">
-                        {userSearchResults.map((user) => (
-                          <div
-                            key={user.user_id}
-                            className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                                  {user.email.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-medium">{user.email}</p>
-                                {user.full_name && (
-                                  <p className="text-xs text-muted-foreground">{user.full_name}</p>
-                                )}
-                                {user.assigned_vendor_name && (
-                                  <p className="text-xs text-amber-600">
-                                    Mevcut: {user.assigned_vendor_name}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleSelectUser(user)}
-                              disabled={!!user.assigned_vendor_id}
-                            >
-                              {user.assigned_vendor_id ? "Atanmış" : "Seç"}
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {!isSearchingUsers && userSearchInput.length >= 2 && userSearchResults.length === 0 && (
-                      <div className="p-4 text-center text-muted-foreground text-sm">
-                        Kullanıcı bulunamadı
-                      </div>
-                    )}
-
-                    {userSearchInput.length > 0 && userSearchInput.length < 2 && (
-                      <p className="text-xs text-muted-foreground">En az 2 karakter girin</p>
-                    )}
-
-                    {!userSearchInput && (
-                      <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
-                        <p className="text-sm">Kullanıcı bağlı değil (opsiyonel)</p>
-                      </div>
-                    )}
                   </>
                 )}
               </CardContent>
