@@ -27,7 +27,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { supabase } from "@/api/supabaseClient";
+import { adminGetProducts, adminUpdateProduct, adminSearchVendors } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { AdminProductView, ListingStatus, ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -202,35 +202,20 @@ const ProductEditPage = () => {
     setError(null);
 
     try {
-      const { data: productsData, error: productsError } = await supabase.rpc('admin_get_products', {
-        page_num: page,
-        page_size: PRODUCTS_PER_PAGE,
-        search_query: search || null,
-        status_filter: null,
-        tier_filter: null,
+      const response = await adminGetProducts({
+        page,
+        pageSize: PRODUCTS_PER_PAGE,
+        searchQuery: search || undefined,
       });
 
-      if (productsError) throw productsError;
-
-      const { data: countData, error: countError } = await supabase.rpc('admin_get_products_count', {
-        search_query: search || null,
-        status_filter: null,
-        tier_filter: null,
-      });
-
-      if (countError) throw countError;
-
-      const count = countData ?? 0;
-      const pages = Math.ceil(count / PRODUCTS_PER_PAGE);
-
-      setProducts(productsData ?? []);
-      setTotalPages(pages);
-      setTotalCount(count);
+      setProducts(response.products);
+      setTotalPages(response.totalPages);
+      setTotalCount(response.totalCount);
       setCurrentPage(page);
 
       // Hiç ürün seçili değilse ilk ürünü otomatik seç
-      if ((productsData ?? []).length > 0 && !selectedProduct) {
-        const first = productsData[0];
+      if (response.products.length > 0 && !selectedProduct) {
+        const first = response.products[0];
         doSelectProduct(first);
       }
     } catch (err: any) {
@@ -258,26 +243,6 @@ const ProductEditPage = () => {
     }
   };
 
-  // Search vendors via RPC
-  const searchVendors = useCallback(async (query: string, limit = 30): Promise<VendorSearchResult[]> => {
-    const trimmed = query?.trim() || "";
-    const { data, error } = await supabase.rpc('admin_get_vendors', {
-      page_num: 1,
-      page_size: limit,
-      search_query: trimmed.length > 0 ? trimmed : null,
-    });
-    if (error) {
-      console.error('[searchVendors] Error:', error);
-      return [];
-    }
-    return (data || []).map((v: any) => ({
-      vendor_id: v.vendor_id,
-      company_name: v.company_name,
-      subscription: v.subscription,
-      is_verified: v.is_verified,
-      headquarters: v.headquarters,
-    }));
-  }, []);
 
   // Handle save
   const handleSave = async () => {
@@ -298,27 +263,25 @@ const ProductEditPage = () => {
       const apiValues = getApiValues();
       const vendorChanged = selectedVendor?.vendor_id !== selectedProduct.vendor_id;
 
-      const { error } = await supabase.rpc('admin_update_product', {
-        p_product_id: selectedProduct.product_id,
-        p_vendor_id: vendorChanged ? selectedVendor?.vendor_id : null,
-        p_product_name: apiValues.productName ?? null,
-        p_website_link: apiValues.websiteLink ?? null,
-        p_short_desc: apiValues.shortDesc ?? null,
-        p_long_desc: apiValues.longDesc ?? null,
-        p_main_category: apiValues.mainCategory ?? null,
-        p_categories: apiValues.categories ?? null,
-        p_features: apiValues.features ?? null,
-        p_logo: apiValues.logo ?? null,
-        p_video_url: apiValues.videoUrl ?? null,
-        p_gallery: apiValues.gallery ?? null,
-        p_pricing: apiValues.pricing ?? null,
-        p_languages: apiValues.languages ?? null,
-        p_demo_link: apiValues.demoLink ?? null,
-        p_release_date: apiValues.releaseDate ?? null,
-        p_listing_status: apiValues.listingStatus ?? null,
+      await adminUpdateProduct({
+        productId: selectedProduct.product_id,
+        vendorId: vendorChanged ? selectedVendor?.vendor_id : undefined,
+        productName: apiValues.productName,
+        websiteLink: apiValues.websiteLink || undefined,
+        shortDesc: apiValues.shortDesc,
+        longDesc: apiValues.longDesc || undefined,
+        mainCategory: apiValues.mainCategory,
+        categories: apiValues.categories || undefined,
+        features: apiValues.features || undefined,
+        logo: apiValues.logo,
+        videoUrl: apiValues.videoUrl || undefined,
+        gallery: apiValues.gallery || undefined,
+        pricing: apiValues.pricing || undefined,
+        languages: apiValues.languages || undefined,
+        demoLink: apiValues.demoLink || undefined,
+        releaseDate: apiValues.releaseDate || undefined,
+        listingStatus: apiValues.listingStatus,
       });
-
-      if (error) throw error;
 
       const vendorMsg = vendorChanged ? " Vendor değiştirildi." : "";
       toast({
@@ -591,7 +554,7 @@ const ProductEditPage = () => {
                     selectedVendor={selectedVendor}
                     onSelectVendor={handleSelectVendor}
                     onClearVendor={handleClearVendor}
-                    searchVendors={searchVendors}
+                    searchVendors={adminSearchVendors}
                     originalVendorId={selectedProduct.vendor_id}
                   />
 

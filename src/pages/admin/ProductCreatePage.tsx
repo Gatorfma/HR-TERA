@@ -15,7 +15,7 @@ import { Save, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { supabase } from "@/api/supabaseClient";
+import { adminCreateProduct, adminSearchVendors } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 import { ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
@@ -112,26 +112,6 @@ const ProductCreatePage = () => {
     getAllCategories().then(setAvailableCategories).catch(console.error);
   }, []);
 
-  // Search vendors via RPC
-  const searchVendors = useCallback(async (query: string, limit = 30): Promise<VendorSearchResult[]> => {
-    const trimmed = query?.trim() || "";
-    const { data, error } = await supabase.rpc('admin_get_vendors', {
-      page_num: 1,
-      page_size: limit,
-      search_query: trimmed.length > 0 ? trimmed : null,
-    });
-    if (error) {
-      console.error('[searchVendors] Error:', error);
-      return [];
-    }
-    return (data || []).map((v: any) => ({
-      vendor_id: v.vendor_id,
-      company_name: v.company_name,
-      subscription: v.subscription,
-      is_verified: v.is_verified,
-      headquarters: v.headquarters,
-    }));
-  }, []);
 
   // Handle vendor selection
   const handleSelectVendor = (vendor: VendorSearchResult) => {
@@ -171,33 +151,31 @@ const ProductCreatePage = () => {
     try {
       const apiValues = getApiValues();
 
-      const { error } = await supabase.rpc('admin_create_product', {
-        p_vendor_id: selectedVendor.vendor_id,
-        p_product_name: apiValues.productName,
-        p_short_desc: apiValues.shortDesc,
-        p_logo: apiValues.logo,
-        p_main_category: apiValues.mainCategory,
-        p_website_link: apiValues.websiteLink || null,
-        p_long_desc: apiValues.longDesc || null,
-        p_categories: apiValues.categories || null,
-        p_features: apiValues.features || null,
-        p_video_url: apiValues.videoUrl || null,
-        p_gallery: apiValues.gallery || null,
-        p_pricing: apiValues.pricing || null,
-        p_languages: apiValues.languages || null,
-        p_demo_link: apiValues.demoLink || null,
-        p_release_date: apiValues.releaseDate || null,
-        p_listing_status: apiValues.listingStatus || 'pending',
+      await adminCreateProduct({
+        vendorId: selectedVendor.vendor_id,
+        productName: apiValues.productName,
+        shortDesc: apiValues.shortDesc,
+        logo: apiValues.logo,
+        mainCategory: apiValues.mainCategory,
+        websiteLink: apiValues.websiteLink || undefined,
+        longDesc: apiValues.longDesc || undefined,
+        categories: apiValues.categories || undefined,
+        features: apiValues.features || undefined,
+        videoUrl: apiValues.videoUrl || undefined,
+        gallery: apiValues.gallery || undefined,
+        pricing: apiValues.pricing || undefined,
+        languages: apiValues.languages || undefined,
+        demoLink: apiValues.demoLink || undefined,
+        releaseDate: apiValues.releaseDate || undefined,
+        listingStatus: apiValues.listingStatus || 'pending',
       });
-
-      if (error) throw error;
 
       toast({
         title: "Ürün oluşturuldu",
         description: `"${apiValues.productName}" ürünü başarıyla eklendi.`,
       });
 
-      navigate("/admin/products/edit");
+      navigate("/admin/products");
     } catch (err: any) {
       toast({
         title: "Hata",
@@ -257,7 +235,7 @@ const ProductCreatePage = () => {
                   selectedVendor={selectedVendor}
                   onSelectVendor={handleSelectVendor}
                   onClearVendor={handleClearVendor}
-                  searchVendors={searchVendors}
+                  searchVendors={adminSearchVendors}
                   error={vendorError}
                 />
 

@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
-import { supabase } from "@/api/supabaseClient";
+import { adminLookupVendor, adminBulkCreateProducts } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 
 interface ParsedProduct {
@@ -83,11 +83,7 @@ const ProductBulkUploadPage = () => {
 
     setVendorStatus("loading");
     try {
-      const { data, error } = await supabase.rpc('admin_lookup_vendor', {
-        p_vendor_id: vendorId.trim(),
-      });
-      if (error) throw error;
-      const vendor = data?.length > 0 ? data[0] : null;
+      const vendor = await adminLookupVendor(vendorId.trim());
       if (vendor) {
         setVendorStatus("valid");
         setResolvedVendor(vendor);
@@ -310,12 +306,7 @@ const ProductBulkUploadPage = () => {
         short_desc: p.productName,
       }));
 
-      const { data: result, error } = await supabase.rpc('admin_bulk_create_products', {
-        p_vendor_id: vendorId.trim(),
-        p_products: productsToImport,
-      });
-
-      if (error) throw error;
+      const result = await adminBulkCreateProducts(vendorId.trim(), productsToImport);
 
       setImportResults({
         success: result.success_count,
