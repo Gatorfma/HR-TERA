@@ -1,12 +1,10 @@
 import { useState, useRef, useCallback } from "react";
-import { Upload, X, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { Upload, X, Link as LinkIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-interface ImageUploadProps {
-  value: string;
-  onChange: (value: string) => void;
+interface ImageUploadBaseProps {
   label?: string;
   className?: string;
   accept?: string;
@@ -16,39 +14,61 @@ interface ImageUploadProps {
   error?: string;
 }
 
+interface ImageUploadSingleProps extends ImageUploadBaseProps {
+  multiple?: false;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+interface ImageUploadMultipleProps extends ImageUploadBaseProps {
+  multiple: true;
+  value: string[];
+  onChange: (value: string[]) => void;
+  maxImages?: number;
+}
+
+type ImageUploadProps = ImageUploadSingleProps | ImageUploadMultipleProps;
+
 const previewSizeClasses = {
   sm: "w-16 h-16",
   md: "w-24 h-24",
   lg: "w-32 h-32",
 };
 
-const ImageUpload = ({
-  value,
-  onChange,
-  label = "Görsel",
-  className,
-  accept = "image/png,image/jpeg,image/jpg,image/webp",
-  maxSizeMB = 2,
-  previewSize = "md",
-  showUrlInput = true,
-  error,
-}: ImageUploadProps) => {
+const ImageUpload = (props: ImageUploadProps) => {
+  const {
+    label = "Görsel",
+    className,
+    accept = "image/png,image/jpeg,image/jpg,image/webp",
+    maxSizeMB = 2,
+    previewSize = "md",
+    showUrlInput = true,
+    error,
+  } = props;
+
+  const multiple = props.multiple === true;
+  const maxImages = "maxImages" in props ? (props.maxImages ?? 10) : 1;
+
+  const value = props.value;
+  const onChange = props.onChange;
+
   const [isDragging, setIsDragging] = useState(false);
   const [showUrlMode, setShowUrlMode] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const values: string[] = multiple ? (value as string[]) : value ? [value as string] : [];
+  const hasValue = multiple ? values.length > 0 : !!value;
+
   const handleFile = useCallback(
     (file: File) => {
-      // Check file size
       if (file.size > maxSizeMB * 1024 * 1024) {
         alert(`Dosya boyutu ${maxSizeMB}MB'dan küçük olmalıdır.`);
         return;
       }
 
-      // Check file type
       const validTypes = accept.split(",").map((t) => t.trim());
-      if (!validTypes.includes(file.type)) {
+      if (!validTypes.some((t) => file.type === t || t.includes("*"))) {
         alert("Geçersiz dosya türü. Lütfen PNG, JPG veya WEBP yükleyin.");
         return;
       }
@@ -56,11 +76,20 @@ const ImageUpload = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         const result = reader.result as string;
-        onChange(result);
+        if (multiple) {
+          const current = value as string[];
+          if (current.length >= maxImages) {
+            alert(`En fazla ${maxImages} görsel ekleyebilirsiniz.`);
+            return;
+          }
+          (onChange as (v: string[]) => void)([...current, result]);
+        } else {
+          (onChange as (v: string) => void)(result);
+        }
       };
       reader.readAsDataURL(file);
     },
-    [accept, maxSizeMB, onChange]
+    [accept, maxSizeMB, multiple, maxImages, value, onChange]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -81,45 +110,195 @@ const ImageUpload = ({
       e.stopPropagation();
       setIsDragging(false);
 
-      const files = e.dataTransfer.files;
-      if (files && files.length > 0) {
+      const files = Array.from(e.dataTransfer.files).filter((f) =>
+        f.type.startsWith("image/")
+      );
+
+      if (multiple) {
+        files.forEach((file) => handleFile(file));
+      } else if (files.length > 0) {
         handleFile(files[0]);
       }
     },
-    [handleFile]
+    [handleFile, multiple]
   );
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        handleFile(file);
+      const files = Array.from(e.target.files || []);
+      if (multiple) {
+        files.forEach((file) => handleFile(file));
+      } else if (files[0]) {
+        handleFile(files[0]);
       }
+      if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    [handleFile]
+    [handleFile, multiple]
   );
 
   const handleUrlSubmit = useCallback(() => {
-    if (urlInput.trim()) {
-      onChange(urlInput.trim());
-      setUrlInput("");
-      setShowUrlMode(false);
+    if (!urlInput.trim()) return;
+    if (multiple) {
+      const current = value as string[];
+      if (current.length >= maxImages) {
+        alert(`En fazla ${maxImages} görsel ekleyebilirsiniz.`);
+        return;
+      }
+      (onChange as (v: string[]) => void)([...current, urlInput.trim()]);
+    } else {
+      (onChange as (v: string) => void)(urlInput.trim());
     }
-  }, [urlInput, onChange]);
+    setUrlInput("");
+    setShowUrlMode(false);
+  }, [urlInput, multiple, maxImages, value, onChange]);
 
-  const handleRemove = useCallback(() => {
-    onChange("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }, [onChange]);
+  const handleRemove = useCallback(
+    (index?: number) => {
+      if (multiple && index !== undefined) {
+        const current = value as string[];
+        const next = current.filter((_, i) => i !== index);
+        (onChange as (v: string[]) => void)(next);
+      } else {
+        (onChange as (v: string) => void)("");
+      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    [multiple, value, onChange]
+  );
 
   const sizeClass = previewSizeClasses[previewSize];
 
+  // Multiple mode: grid of images + drop zone
+  if (multiple) {
+    return (
+      <div className={cn("space-y-3", className)}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={accept}
+          multiple
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+
+        {values.length > 0 && (
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+            {values.map((img, index) => (
+              <div
+                key={index}
+                className="relative group aspect-square rounded-lg border overflow-hidden bg-muted"
+              >
+                <img
+                  src={img}
+                  alt={`Galeri ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "";
+                    e.currentTarget.alt = "Yüklenemedi";
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  className="absolute top-1 right-1 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded text-[10px] bg-black/50 text-white">
+                  {index + 1}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {values.length < maxImages && (
+          <>
+            {showUrlMode ? (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    placeholder="https://example.com/image.png"
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), handleUrlSubmit())
+                    }
+                  />
+                  <Button type="button" onClick={handleUrlSubmit} size="sm">
+                    Ekle
+                  </Button>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowUrlMode(false)}
+                  className="text-muted-foreground"
+                >
+                  ← Dosya yüklemeye dön
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed rounded-lg cursor-pointer transition-all",
+                    isDragging
+                      ? "border-primary bg-primary/5"
+                      : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
+                    error && "border-red-500"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "p-3 rounded-full transition-colors",
+                      isDragging ? "bg-primary/10" : "bg-muted"
+                    )}
+                  >
+                    <Plus
+                      className={cn(
+                        "h-6 w-6",
+                        isDragging ? "text-primary" : "text-muted-foreground"
+                      )}
+                    />
+                  </div>
+                  <p className="text-sm font-medium text-foreground">
+                    {isDragging ? "Bırakın" : "Sürükle & bırak veya tıklayın"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {values.length}/{maxImages} görsel • Maks. {maxSizeMB}MB
+                  </p>
+                </div>
+                {showUrlInput && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowUrlMode(true)}
+                    className="w-full text-muted-foreground"
+                  >
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    URL ile ekle
+                  </Button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+        {error && <p className="text-xs text-red-500">{error}</p>}
+      </div>
+    );
+  }
+
+  // Single mode (logo)
   return (
     <div className={cn("space-y-2", className)}>
-      {value ? (
-        // Preview mode
+      {hasValue ? (
         <div className="flex items-start gap-4">
           <div className="relative group">
             <div
@@ -129,7 +308,7 @@ const ImageUpload = ({
               )}
             >
               <img
-                src={value}
+                src={value as string}
                 alt="Preview"
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -140,7 +319,7 @@ const ImageUpload = ({
             </div>
             <button
               type="button"
-              onClick={handleRemove}
+              onClick={() => handleRemove()}
               className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <X className="w-3 h-3" />
@@ -148,25 +327,21 @@ const ImageUpload = ({
           </div>
           <div className="flex flex-col gap-2 text-sm text-muted-foreground">
             <p>Görsel yüklendi</p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleRemove}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => handleRemove()}>
               Değiştir
             </Button>
           </div>
         </div>
       ) : showUrlMode ? (
-        // URL input mode
         <div className="space-y-3">
           <div className="flex gap-2">
             <Input
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               placeholder="https://example.com/image.png"
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleUrlSubmit())}
+              onKeyDown={(e) =>
+                e.key === "Enter" && (e.preventDefault(), handleUrlSubmit())
+              }
             />
             <Button type="button" onClick={handleUrlSubmit} size="sm">
               Ekle
@@ -183,7 +358,6 @@ const ImageUpload = ({
           </Button>
         </div>
       ) : (
-        // Upload mode
         <div className="space-y-3">
           <div
             onDragOver={handleDragOver}
@@ -198,23 +372,25 @@ const ImageUpload = ({
               error && "border-red-500"
             )}
           >
-            <div className={cn(
-              "p-3 rounded-full transition-colors",
-              isDragging ? "bg-primary/10" : "bg-muted"
-            )}>
-              <Upload className={cn(
-                "h-6 w-6",
-                isDragging ? "text-primary" : "text-muted-foreground"
-              )} />
+            <div
+              className={cn(
+                "p-3 rounded-full transition-colors",
+                isDragging ? "bg-primary/10" : "bg-muted"
+              )}
+            >
+              <Upload
+                className={cn(
+                  "h-6 w-6",
+                  isDragging ? "text-primary" : "text-muted-foreground"
+                )}
+              />
             </div>
-            <div className="text-center">
-              <p className="text-sm font-medium text-foreground">
-                {isDragging ? "Bırakın" : "Sürükle & bırak"}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                veya dosya seçmek için tıklayın
-              </p>
-            </div>
+            <p className="text-sm font-medium text-foreground">
+              {isDragging ? "Bırakın" : "Sürükle & bırak"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              veya dosya seçmek için tıklayın
+            </p>
             <p className="text-xs text-muted-foreground">
               PNG, JPG, WEBP • Maks. {maxSizeMB}MB
             </p>

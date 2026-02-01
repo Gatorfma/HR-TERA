@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,189 +9,247 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Package, Building2, Eye, Layers, Image as ImageIcon, ExternalLink, ArrowLeft, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Search,
+  Package,
+  Building2,
+  Link as LinkIcon,
+  Tag,
+  Eye,
+  Calendar,
+  Clock,
+  AlertCircle,
+  ArrowLeft,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  X,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ImageUpload from "@/components/admin/ImageUpload";
-import { adminGetProducts, adminUpdateProduct } from "@/api/adminProductsApi";
+import { adminGetProducts, adminUpdateProduct, adminSearchVendors } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
-import { AdminProductView, ListingStatus, ProductCategory } from "@/lib/admin-types";
+import { AdminProductView, ListingStatus, ProductCategory, VendorSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 
-const PRODUCTS_PER_PAGE = 10;
+const PRODUCTS_PER_PAGE = 20;
+
+// Debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 const ProductEditPage = () => {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [tierFilter, setTierFilter] = useState<"all" | Tier>("all");
-  
+
+  // Search state
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 300);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  
+
   // Products state
   const [products, setProducts] = useState<AdminProductView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Selected product state
   const [selectedProduct, setSelectedProduct] = useState<AdminProductView | null>(null);
-  const [editedProduct, setEditedProduct] = useState<AdminProductView | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [availableCategories, setAvailableCategories] = useState<ProductCategory[]>([]);
 
-  // Fetch products from database
-  const fetchProducts = async (page: number = currentPage) => {
+  // Edited form fields
+  const [editedProductName, setEditedProductName] = useState("");
+  const [editedWebsiteLink, setEditedWebsiteLink] = useState("");
+  const [editedShortDesc, setEditedShortDesc] = useState("");
+  const [editedLongDesc, setEditedLongDesc] = useState("");
+  const [editedMainCategory, setEditedMainCategory] = useState<ProductCategory | "">("");
+  const [editedCategories, setEditedCategories] = useState<ProductCategory[]>([]);
+  const [editedFeatures, setEditedFeatures] = useState("");
+  const [editedLogo, setEditedLogo] = useState("");
+  const [editedVideoUrl, setEditedVideoUrl] = useState("");
+  const [editedGallery, setEditedGallery] = useState<string[]>([]);
+  const [editedPricing, setEditedPricing] = useState("");
+  const [editedLanguages, setEditedLanguages] = useState("");
+  const [editedDemoLink, setEditedDemoLink] = useState("");
+  const [editedReleaseDate, setEditedReleaseDate] = useState("");
+  const [editedListingStatus, setEditedListingStatus] = useState<ListingStatus>("pending");
+
+  // Vendor search state
+  const [vendorSearchInput, setVendorSearchInput] = useState("");
+  const [vendorSearchResults, setVendorSearchResults] = useState<VendorSearchResult[]>([]);
+  const [isSearchingVendors, setIsSearchingVendors] = useState(false);
+  const [selectedVendor, setSelectedVendor] = useState<VendorSearchResult | null>(null);
+  const debouncedVendorSearch = useDebounce(vendorSearchInput, 300);
+
+  // Fetch products
+  const fetchProducts = useCallback(async (page: number = 1, search: string = "") => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await adminGetProducts({
         page,
         pageSize: PRODUCTS_PER_PAGE,
-        searchQuery: searchQuery || null,
+        searchQuery: search || null,
         statusFilter: null,
-        tierFilter: tierFilter === "all" ? null : tierFilter,
+        tierFilter: null,
       });
-      
+
       setProducts(response.products);
       setTotalPages(response.totalPages);
       setTotalCount(response.totalCount);
       setCurrentPage(page);
-      
-      // Auto-select first product if none selected or if selected product is not in list
-      if (response.products.length > 0) {
-        const selectedStillExists = response.products.some(p => p.product_id === selectedProduct?.product_id);
-        if (!selectedProduct || !selectedStillExists) {
-          setSelectedProduct(response.products[0]);
-          setEditedProduct({ ...response.products[0] });
-        }
+
+      // Auto-select first product if none selected
+      if (response.products.length > 0 && !selectedProduct) {
+        const first = response.products[0];
+        setSelectedProduct(first);
+        syncFormFields(first);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ürünler yüklenirken hata oluştu");
-      console.error("Error fetching products:", err);
     } finally {
       setIsLoading(false);
     }
+  }, [selectedProduct]);
+
+  // Sync form fields from selected product
+  const syncFormFields = (product: AdminProductView) => {
+    setEditedProductName(product.product_name || "");
+    setEditedWebsiteLink(product.website_link || "");
+    setEditedShortDesc(product.short_desc || "");
+    setEditedLongDesc(product.long_desc || "");
+    setEditedMainCategory(product.main_category || "");
+    setEditedCategories(product.categories || []);
+    setEditedFeatures((product.features || []).join(", "));
+    setEditedLogo(product.logo || "");
+    setEditedVideoUrl(product.video_url || "");
+    setEditedGallery(product.gallery || []);
+    setEditedPricing(product.pricing || "");
+    setEditedLanguages((product.languages || []).join(", "));
+    setEditedDemoLink(product.demo_link || "");
+    setEditedReleaseDate(product.release_date || "");
+    setEditedListingStatus(product.listing_status || "pending");
+    // Set current vendor info
+    setSelectedVendor({
+      vendor_id: product.vendor_id,
+      company_name: product.company_name,
+      subscription: product.subscription,
+      is_verified: product.is_verified,
+      headquarters: null,
+    });
+    setVendorSearchInput("");
+    setVendorSearchResults([]);
   };
 
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchProducts(1);
-    // Fetch categories from database
-    const fetchCategories = async () => {
-      try {
-        const categories = await getAllCategories();
-        setAvailableCategories(categories);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-    fetchCategories();
+    // Fetch categories
+    getAllCategories().then(setAvailableCategories).catch(console.error);
   }, []);
 
-  // Refetch when filters change (with debounce for search), reset to page 1
+  // Refetch when search changes
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      fetchProducts(1);
-    }, 300);
-    
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery, tierFilter]);
+    fetchProducts(1, debouncedSearch);
+  }, [debouncedSearch]);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      fetchProducts(newPage);
+  // Search vendors when input changes
+  useEffect(() => {
+    if (debouncedVendorSearch.length >= 2) {
+      setIsSearchingVendors(true);
+      adminSearchVendors(debouncedVendorSearch).then((results) => {
+        setVendorSearchResults(results);
+        setIsSearchingVendors(false);
+      });
+    } else {
+      setVendorSearchResults([]);
     }
-  };
+  }, [debouncedVendorSearch]);
 
   const handleSelectProduct = (product: AdminProductView) => {
     setSelectedProduct(product);
-    setEditedProduct({ ...product });
+    syncFormFields(product);
   };
 
-  const handleSaveBasicInfo = async () => {
-    if (!editedProduct) return;
-    
-    setIsSaving(true);
-    try {
-      await adminUpdateProduct({
-        productId: editedProduct.product_id,
-        productName: editedProduct.product_name,
-        websiteLink: editedProduct.website_link,
-        shortDesc: editedProduct.short_desc,
-        mainCategory: editedProduct.main_category,
-        categories: editedProduct.categories,
-        features: editedProduct.features,
-        logo: editedProduct.logo,
-      });
-      
-      toast({
-        title: "Temel bilgiler güncellendi",
-        description: `${editedProduct.product_name} için bilgiler kaydedildi.`,
-      });
-      
-      // Refresh products list
-      await fetchProducts();
-    } catch (err) {
-      toast({
-        title: "Hata",
-        description: err instanceof Error ? err.message : "Kaydetme başarısız oldu",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSelectVendor = (vendor: VendorSearchResult) => {
+    setSelectedVendor(vendor);
+    setVendorSearchInput("");
+    setVendorSearchResults([]);
   };
 
-  const handleSaveVisibility = async () => {
-    if (!editedProduct) return;
-    
-    setIsSaving(true);
-    try {
-      await adminUpdateProduct({
-        productId: editedProduct.product_id,
-        listingStatus: editedProduct.listing_status,
-      });
-      
-      toast({
-        title: "Görünürlük güncellendi",
-        description: `${editedProduct.product_name} için durum ayarları kaydedildi.`,
-      });
-      
-      // Refresh products list
-      await fetchProducts();
-    } catch (err) {
-      toast({
-        title: "Hata",
-        description: err instanceof Error ? err.message : "Kaydetme başarısız oldu",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const handleSave = async () => {
+    if (!selectedProduct) return;
 
-  const handleSaveContent = async () => {
-    if (!editedProduct) return;
-    
     setIsSaving(true);
     try {
+      // Parse arrays
+      const featuresArray = editedFeatures.split(",").map((f) => f.trim()).filter((f) => f);
+      const languagesArray = editedLanguages.split(",").map((l) => l.trim()).filter((l) => l);
+
+      // Check if vendor changed
+      const vendorChanged = selectedVendor?.vendor_id !== selectedProduct.vendor_id;
+
       await adminUpdateProduct({
-        productId: editedProduct.product_id,
-        longDesc: editedProduct.long_desc,
-        videoUrl: editedProduct.video_url,
-        gallery: editedProduct.gallery,
+        productId: selectedProduct.product_id,
+        vendorId: vendorChanged ? selectedVendor?.vendor_id : null,
+        productName: editedProductName || null,
+        websiteLink: editedWebsiteLink || null,
+        shortDesc: editedShortDesc || null,
+        longDesc: editedLongDesc || null,
+        mainCategory: editedMainCategory || null,
+        categories: editedCategories.length > 0 ? editedCategories : null,
+        features: featuresArray.length > 0 ? featuresArray : null,
+        logo: editedLogo || null,
+        videoUrl: editedVideoUrl || null,
+        gallery: editedGallery.length > 0 ? editedGallery : null,
+        pricing: editedPricing || null,
+        languages: languagesArray.length > 0 ? languagesArray : null,
+        demoLink: editedDemoLink || null,
+        releaseDate: editedReleaseDate || null,
+        listingStatus: editedListingStatus || null,
       });
-      
+
+      const vendorMsg = vendorChanged ? " Vendor değiştirildi." : "";
       toast({
-        title: "İçerik güncellendi",
-        description: `${editedProduct.product_name} için içerik ve medya kaydedildi.`,
+        title: "Ürün güncellendi",
+        description: `${editedProductName} bilgileri kaydedildi.${vendorMsg}`,
       });
+
+      // Refresh list and update selected product
+      await fetchProducts(currentPage, debouncedSearch);
       
-      // Refresh products list
-      await fetchProducts();
+      // Update selectedProduct with new vendor info
+      if (vendorChanged && selectedVendor) {
+        setSelectedProduct((prev) =>
+          prev
+            ? {
+                ...prev,
+                vendor_id: selectedVendor.vendor_id,
+                company_name: selectedVendor.company_name,
+                subscription: selectedVendor.subscription,
+                is_verified: selectedVendor.is_verified,
+              }
+            : null
+        );
+      }
     } catch (err) {
       toast({
         title: "Hata",
@@ -229,44 +287,61 @@ const ProductEditPage = () => {
 
   const getStatusLabel = (status: ListingStatus) => {
     switch (status) {
-      case "approved": return "Onaylandı";
-      case "pending": return "Beklemede";
-      case "rejected": return "Reddedildi";
-      default: return status;
+      case "approved":
+        return "Onaylandı";
+      case "pending":
+        return "Beklemede";
+      case "rejected":
+        return "Reddedildi";
+      default:
+        return status;
     }
   };
 
-  const handleCategoryToggle = (category: ProductCategory) => {
-    if (!editedProduct) return;
-    const currentCategories = editedProduct.categories || [editedProduct.main_category];
-    const maxCategories = editedProduct.subscription === "freemium" ? 1 : 3;
-    
-    if (currentCategories.includes(category)) {
-      if (currentCategories.length > 1) {
-        setEditedProduct({
-          ...editedProduct,
-          categories: currentCategories.filter(c => c !== category),
-          main_category: currentCategories.filter(c => c !== category)[0]
-        });
-      }
-    } else if (currentCategories.length < maxCategories) {
-      setEditedProduct({
-        ...editedProduct,
-        categories: [...currentCategories, category],
-        main_category: currentCategories[0]
-      });
-    }
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return "—";
+    return new Date(dateStr).toLocaleDateString("tr-TR");
   };
 
-  const handleFeatureChange = (value: string) => {
-    if (!editedProduct) return;
-    // Split by comma and trim
-    const features = value.split(',').map(f => f.trim()).filter(f => f.length > 0);
-    setEditedProduct({
-      ...editedProduct,
-      features: features.length > 0 ? features : null
-    });
-  };
+  // Effective tier from selected vendor
+  const effectiveTier = selectedVendor?.subscription || "freemium";
+  const maxCategories = effectiveTier === "freemium" ? 1 : 3;
+
+  // Loading skeleton
+  const ProductListSkeleton = () => (
+    <div className="space-y-2 p-2">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center gap-3 p-3">
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <Skeleton className="h-5 w-16 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+
+  // Error state
+  if (error && !isLoading && products.length === 0) {
+    return (
+      <AdminLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Card className="p-8">
+            <div className="flex flex-col items-center justify-center text-center gap-4">
+              <AlertCircle className="h-12 w-12 text-destructive" />
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">Hata</h3>
+                <p className="text-muted-foreground mt-1">{error}</p>
+              </div>
+              <Button onClick={() => fetchProducts(1)}>Tekrar Dene</Button>
+            </div>
+          </Card>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -282,511 +357,537 @@ const ProductEditPage = () => {
         </Button>
 
         <h1 className="text-3xl font-bold text-foreground">Ürün Düzenleme</h1>
-        <p className="text-muted-foreground mt-2 mb-8">Sistemdeki ürün kayıtlarını görüntüleyin ve düzenleyin.</p>
-        
+        <p className="text-muted-foreground mt-2 mb-8">
+          Sistemdeki ürün kayıtlarını görüntüleyin ve düzenleyin.
+        </p>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Side - Product List */}
-          <Card className="lg:col-span-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Ürünler</CardTitle>
-                <CardDescription>Sistemdeki ürün kayıtlarını yönetin</CardDescription>
-                <div className="relative mt-2">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Ürün adı, tedarikçi veya kategori ara…"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                {/* Filters */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <Select value={tierFilter} onValueChange={(v) => setTierFilter(v as typeof tierFilter)}>
-                    <SelectTrigger className="w-[130px] h-8 text-xs">
-                      <SelectValue placeholder="Tier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tüm tierler</SelectItem>
-                      <SelectItem value="freemium">Freemium</SelectItem>
-                      <SelectItem value="plus">Plus</SelectItem>
-                      <SelectItem value="premium">Premium</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <span className="text-xs text-muted-foreground self-center ml-auto">
-                    {totalCount} ürün
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[600px]">
-                  {isLoading ? (
-                    <div className="flex items-center justify-center h-40">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                  ) : error ? (
-                    <div className="p-4 text-center text-red-500">
-                      <p>{error}</p>
-                      <Button variant="outline" size="sm" onClick={() => fetchProducts()} className="mt-2">
-                        Tekrar Dene
-                      </Button>
-                    </div>
-                  ) : products.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      Ürün bulunamadı
-                    </div>
-                  ) : (
-                    <div className="space-y-1 p-2">
-                      {products.map((product) => (
-                        <button
-                          key={product.product_id}
-                          onClick={() => handleSelectProduct(product)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                            selectedProduct?.product_id === product.product_id
-                              ? "bg-primary/10 border border-primary/20"
-                              : "hover:bg-muted"
-                          }`}
-                        >
-                          <Avatar className="h-10 w-10 rounded-lg">
-                            <AvatarImage src={product.logo} className="object-cover" />
-                            <AvatarFallback className="bg-primary/20 text-primary text-sm rounded-lg">
-                              {product.product_name.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-foreground truncate">{product.product_name}</p>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {product.company_name || "Sahipsiz / Doğrulanmamış"}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1 items-end">
-                            <Badge className={`text-[10px] px-1.5 py-0 capitalize ${getTierBadgeColor(product.subscription)}`}>
-                              {product.subscription}
-                            </Badge>
-                            <Badge className={`text-[10px] px-1.5 py-0 ${getStatusBadgeColor(product.listing_status)}`}>
-                              {getStatusLabel(product.listing_status)}
-                            </Badge>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between p-3 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1 || isLoading}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm text-muted-foreground">
-                      Sayfa {currentPage} / {totalPages}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages || isLoading}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+          <Card className="lg:col-span-1 flex flex-col max-h-[80vh]">
+            <CardHeader className="pb-3 flex-shrink-0">
+              <CardTitle className="text-lg">Ürünler</CardTitle>
+              <CardDescription>
+                Sistemdeki ürünleri yönetin ({totalCount} ürün)
+              </CardDescription>
+              <div className="relative mt-2">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Ürün adı ara…"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 flex-1 min-h-0 flex flex-col">
+              <ScrollArea className="flex-1">
+                {isLoading ? (
+                  <ProductListSkeleton />
+                ) : products.length === 0 ? (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <p>Ürün bulunamadı.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1 p-2">
+                    {products.map((product) => (
+                      <button
+                        key={product.product_id}
+                        onClick={() => handleSelectProduct(product)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                          selectedProduct?.product_id === product.product_id
+                            ? "bg-primary/10 border border-primary/20"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <Avatar className="h-10 w-10 rounded-lg">
+                          <AvatarImage src={product.logo} className="object-cover" />
+                          <AvatarFallback className="bg-primary/20 text-primary text-sm rounded-lg">
+                            {product.product_name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm text-foreground truncate">
+                            {product.product_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {product.company_name || "Sahipsiz"}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1 items-end">
+                          <Badge
+                            className={`text-[10px] px-1.5 py-0 capitalize ${getTierBadgeColor(
+                              product.subscription
+                            )}`}
+                          >
+                            {product.subscription}
+                          </Badge>
+                          <Badge
+                            className={`text-[10px] px-1.5 py-0 ${getStatusBadgeColor(
+                              product.listing_status
+                            )}`}
+                          >
+                            {getStatusLabel(product.listing_status)}
+                          </Badge>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </ScrollArea>
 
-            {/* Right Side - Product Details */}
-            <div className="lg:col-span-2 space-y-4">
-              {editedProduct ? (
-                <>
-                  {/* Product Title Header */}
-                  <div className="flex items-center gap-3 pb-2 border-b">
-                    <Avatar className="h-12 w-12 rounded-lg">
-                      <AvatarImage src={editedProduct.logo} className="object-cover" />
-                      <AvatarFallback className="bg-primary/20 text-primary rounded-lg">
-                        {editedProduct.product_name.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h2 className="text-xl font-semibold text-foreground">{editedProduct.product_name}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {editedProduct.company_name || "Sahipsiz"} • {editedProduct.main_category}
-                      </p>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between p-3 border-t flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchProducts(currentPage - 1, debouncedSearch)}
+                    disabled={currentPage <= 1 || isLoading}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-muted-foreground">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchProducts(currentPage + 1, debouncedSearch)}
+                    disabled={currentPage >= totalPages || isLoading}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Right Side - Product Details */}
+          <div className="lg:col-span-2 space-y-4">
+            {selectedProduct ? (
+              <>
+                {/* Ürün Bilgileri (readonly) */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-lg">Ürün Bilgileri</CardTitle>
                     </div>
-                    <Badge className={`ml-auto capitalize ${getTierBadgeColor(editedProduct.subscription)}`}>
-                      {editedProduct.subscription}
-                    </Badge>
-                  </div>
-
-                  {/* Temel Bilgiler */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">Temel Bilgiler</CardTitle>
-                      </div>
-                      <CardDescription>Paket kısıtlarını aşmadan temel ürün bilgilerini düzenleyin.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="productName">Ürün Adı *</Label>
-                          <Input
-                            id="productName"
-                            value={editedProduct.product_name}
-                            onChange={(e) => setEditedProduct({ ...editedProduct, product_name: e.target.value })}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="websiteUrl">Web Sitesi</Label>
-                          <Input
-                            id="websiteUrl"
-                            value={editedProduct.website_link || ""}
-                            onChange={(e) => setEditedProduct({ ...editedProduct, website_link: e.target.value })}
-                            placeholder="https://"
-                          />
-                        </div>
-                      </div>
-                      
+                    <CardDescription>Ürün detayları (salt okunur)</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="description">Kısa Açıklama *</Label>
-                        <Textarea
-                          id="description"
-                          value={editedProduct.short_desc}
-                          onChange={(e) => setEditedProduct({ ...editedProduct, short_desc: e.target.value })}
-                          rows={2}
+                        <Label className="flex items-center gap-2 text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          Oluşturulma Tarihi
+                        </Label>
+                        <Input
+                          value={formatDate(selectedProduct.product_created_at)}
+                          disabled
+                          className="bg-muted"
                         />
                       </div>
-
                       <div className="space-y-2">
-                        <Label>Logo</Label>
-                        <ImageUpload
-                          value={editedProduct.logo}
-                          onChange={(value) => setEditedProduct({ ...editedProduct, logo: value })}
-                          previewSize="sm"
+                        <Label className="flex items-center gap-2 text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          Son Güncelleme
+                        </Label>
+                        <Input
+                          value={formatDate(selectedProduct.product_updated_at)}
+                          disabled
+                          className="bg-muted"
                         />
                       </div>
-
-                      {/* Main Category */}
                       <div className="space-y-2">
-                        <Label>Ana Kategori *</Label>
+                        <Label>Yayın Durumu</Label>
                         <Select
-                          value={editedProduct.main_category}
-                          onValueChange={(value: ProductCategory) =>
-                            setEditedProduct({ ...editedProduct, main_category: value })
-                          }
+                          value={editedListingStatus}
+                          onValueChange={(value: ListingStatus) => setEditedListingStatus(value)}
                         >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {availableCategories.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
+                            <SelectItem value="pending">Beklemede</SelectItem>
+                            <SelectItem value="approved">Onaylandı</SelectItem>
+                            <SelectItem value="rejected">Reddedildi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Rating</Label>
+                        <Input
+                          value={selectedProduct.rating?.toFixed(1) || "N/A"}
+                          disabled
+                          className="bg-muted"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Vendor Atama */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-lg">Vendor Atama</CardTitle>
+                      {selectedVendor?.vendor_id !== selectedProduct.vendor_id && (
+                        <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-xs">
+                          Değiştirildi
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription>Ürünün bağlı olduğu şirket</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Current vendor */}
+                    {selectedVendor ? (
+                      <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                              {selectedVendor.company_name?.slice(0, 2).toUpperCase() || "V"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {selectedVendor.company_name || "İsimsiz Vendor"}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                className={`text-[10px] capitalize ${getTierBadgeColor(
+                                  selectedVendor.subscription
+                                )}`}
+                              >
+                                {selectedVendor.subscription}
+                              </Badge>
+                              {selectedVendor.is_verified && (
+                                <CheckCircle className="h-3 w-3 text-green-500" />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {selectedVendor.vendor_id !== selectedProduct.vendor_id && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              // Reset to original vendor
+                              setSelectedVendor({
+                                vendor_id: selectedProduct.vendor_id,
+                                company_name: selectedProduct.company_name,
+                                subscription: selectedProduct.subscription,
+                                is_verified: selectedProduct.is_verified,
+                                headquarters: null,
+                              });
+                            }}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
+                        <p className="text-sm">Vendor bağlı değil</p>
+                      </div>
+                    )}
+
+                    {/* Vendor search */}
+                    <div className="space-y-2">
+                      <Label>Vendor Ara</Label>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Şirket adı ile ara..."
+                          value={vendorSearchInput}
+                          onChange={(e) => setVendorSearchInput(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Search results */}
+                    {isSearchingVendors && (
+                      <div className="flex items-center justify-center p-4">
+                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+
+                    {!isSearchingVendors && vendorSearchResults.length > 0 && (
+                      <div className="space-y-1 border rounded-lg max-h-[200px] overflow-y-auto">
+                        {vendorSearchResults.map((vendor) => (
+                          <div
+                            key={vendor.vendor_id}
+                            className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                  {vendor.company_name?.slice(0, 2).toUpperCase() || "V"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-medium">
+                                  {vendor.company_name || "İsimsiz"}
+                                </p>
+                                <Badge
+                                  className={`text-[10px] capitalize ${getTierBadgeColor(
+                                    vendor.subscription
+                                  )}`}
+                                >
+                                  {vendor.subscription}
+                                </Badge>
+                              </div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleSelectVendor(vendor)}
+                            >
+                              Seç
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {!isSearchingVendors &&
+                      vendorSearchInput.length >= 2 &&
+                      vendorSearchResults.length === 0 && (
+                        <div className="p-4 text-center text-muted-foreground text-sm">
+                          Vendor bulunamadı
+                        </div>
+                      )}
+                  </CardContent>
+                </Card>
+
+                {/* Temel Bilgiler */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-lg">Temel Bilgiler</CardTitle>
+                    </div>
+                    <CardDescription>Ürün bilgilerini düzenleyin</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="productName">Ürün Adı *</Label>
+                        <Input
+                          id="productName"
+                          value={editedProductName}
+                          onChange={(e) => setEditedProductName(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="websiteLink">Web Sitesi</Label>
+                        <Input
+                          id="websiteLink"
+                          value={editedWebsiteLink}
+                          onChange={(e) => setEditedWebsiteLink(e.target.value)}
+                          placeholder="https://"
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="shortDesc">Kısa Açıklama *</Label>
+                        <Textarea
+                          id="shortDesc"
+                          value={editedShortDesc}
+                          onChange={(e) => setEditedShortDesc(e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="longDesc">Detaylı Açıklama</Label>
+                        <Textarea
+                          id="longDesc"
+                          value={editedLongDesc}
+                          onChange={(e) => setEditedLongDesc(e.target.value)}
+                          rows={4}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Ana Kategori *</Label>
+                        <Select
+                          value={editedMainCategory}
+                          onValueChange={(value: ProductCategory) => setEditedMainCategory(value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Kategori seçin" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableCategories.map((cat) => (
+                              <SelectItem key={cat} value={cat}>
+                                {cat}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
-
-                      {/* Categories */}
                       <div className="space-y-2">
                         <Label>
-                          Ek Kategoriler ({(editedProduct.categories || []).length}/{editedProduct.subscription === "freemium" ? 1 : 3})
+                          Ek Kategoriler ({editedCategories.length}/{maxCategories})
                         </Label>
-                        <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
-                          {availableCategories.map((category) => {
-                            const isSelected = (editedProduct.categories || []).includes(category);
-                            return (
+                        <Select
+                          value=""
+                          onValueChange={(value: ProductCategory) => {
+                            if (!editedCategories.includes(value) && editedCategories.length < maxCategories) {
+                              setEditedCategories([...editedCategories, value]);
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Kategori ekle..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableCategories
+                              .filter((c) => !editedCategories.includes(c))
+                              .map((cat) => (
+                                <SelectItem key={cat} value={cat}>
+                                  {cat}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        {editedCategories.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {editedCategories.map((cat) => (
                               <Badge
-                                key={category}
-                                variant={isSelected ? "default" : "outline"}
-                                className={`cursor-pointer text-xs ${isSelected ? "bg-primary text-primary-foreground" : ""}`}
-                                onClick={() => handleCategoryToggle(category)}
+                                key={cat}
+                                variant="secondary"
+                                className="cursor-pointer"
+                                onClick={() =>
+                                  setEditedCategories(editedCategories.filter((c) => c !== cat))
+                                }
                               >
-                                {category}
+                                {cat} <X className="h-3 w-3 ml-1" />
                               </Badge>
-                            );
-                          })}
-                        </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-
-                      {/* Features */}
-                      <div className="space-y-2">
+                      <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="features">Özellikler (virgülle ayırın)</Label>
                         <Textarea
                           id="features"
-                          value={(editedProduct.features || []).join(', ')}
-                          onChange={(e) => handleFeatureChange(e.target.value)}
+                          value={editedFeatures}
+                          onChange={(e) => setEditedFeatures(e.target.value)}
                           placeholder="AI Asistan, Raporlama, Entegrasyonlar..."
                           rows={2}
                         />
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                      <Button 
-                        onClick={handleSaveBasicInfo} 
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                        disabled={isSaving}
-                      >
-                        {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        Kaydet
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Tier & Vendor */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center gap-2">
-                        <Layers className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">Tier & Vendor</CardTitle>
-                      </div>
-                      <CardDescription>Ürünün paketini ve sahipliğini görüntüleyin.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Tier (Vendor'dan devralınır)</Label>
-                          <div className="flex items-center gap-2">
-                            <Badge className={`${getTierBadgeColor(editedProduct.subscription)} capitalize`}>
-                              {editedProduct.subscription}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              Vendor ayarlarından değiştirilebilir
-                            </span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Vendor</Label>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={editedProduct.company_name || "Sahipsiz"}
-                              disabled
-                              className="bg-muted flex-1"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {editedProduct.is_verified ? "Doğrulanmış vendor" : "Sahipsiz / Doğrulanmamış"}
-                        </span>
-                        <Badge className={editedProduct.is_verified ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}>
-                          {editedProduct.is_verified ? "Doğrulanmış" : "Sahipsiz"}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Görünürlük & Durum */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">Görünürlük & Durum</CardTitle>
-                      </div>
-                      <CardDescription>Ürünün listelerde nasıl göründüğünü yönetin.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="status">Yayın Durumu</Label>
-                          <Select
-                            value={editedProduct.listing_status}
-                            onValueChange={(value: ListingStatus) =>
-                              setEditedProduct({ ...editedProduct, listing_status: value })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Beklemede</SelectItem>
-                              <SelectItem value="approved">Onaylandı</SelectItem>
-                              <SelectItem value="rejected">Reddedildi</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Rating</Label>
-                          <Input
-                            value={editedProduct.rating?.toFixed(1) || "N/A"}
-                            disabled
-                            className="bg-muted"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Oluşturulma Tarihi</Label>
-                          <Input
-                            value={new Date(editedProduct.product_created_at).toLocaleDateString('tr-TR')}
-                            disabled
-                            className="bg-muted"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Son Güncelleme</Label>
-                          <Input
-                            value={new Date(editedProduct.product_updated_at).toLocaleDateString('tr-TR')}
-                            disabled
-                            className="bg-muted"
-                          />
-                        </div>
-                      </div>
-
-                      <Button 
-                        onClick={handleSaveVisibility} 
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                        disabled={isSaving}
-                      >
-                        {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        Kaydet
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* İçerik & Medya */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">İçerik & Medya</CardTitle>
-                      </div>
-                      <CardDescription>Açıklamalar, galeri ve ileri seviye içerikleri düzenleyin.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                {/* Bağlantılar & Medya */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-lg">Bağlantılar & Medya</CardTitle>
+                    </div>
+                    <CardDescription>Logo, video ve galeri</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="fullDescription">Detaylı Açıklama</Label>
-                        <Textarea
-                          id="fullDescription"
-                          value={editedProduct.long_desc || ""}
-                          onChange={(e) => setEditedProduct({ ...editedProduct, long_desc: e.target.value })}
-                          rows={4}
+                        <Label>Logo *</Label>
+                        <ImageUpload
+                          value={editedLogo}
+                          onChange={(value) => setEditedLogo(value)}
+                          previewSize="sm"
                         />
                       </div>
-
-                      {/* Video URL */}
-                      <div className="space-y-2">
-                        <Label htmlFor="videoUrl">
-                          Video URL
-                          {editedProduct.subscription !== "premium" && (
-                            <span className="text-xs text-muted-foreground ml-2">(Sadece Premium için)</span>
-                          )}
-                        </Label>
-                        <Input
-                          id="videoUrl"
-                          value={editedProduct.video_url || ""}
-                          onChange={(e) => setEditedProduct({ ...editedProduct, video_url: e.target.value })}
-                          disabled={editedProduct.subscription !== "premium"}
-                          placeholder="https://youtube.com/..."
-                          className={editedProduct.subscription !== "premium" ? "bg-muted" : ""}
-                        />
-                      </div>
-
-                      {/* Demo Link */}
                       <div className="space-y-2">
                         <Label htmlFor="demoLink">Demo Link</Label>
                         <Input
                           id="demoLink"
-                          value={editedProduct.demo_link || ""}
-                          onChange={(e) => setEditedProduct({ ...editedProduct, demo_link: e.target.value })}
-                          placeholder="https://..."
+                          value={editedDemoLink}
+                          onChange={(e) => setEditedDemoLink(e.target.value)}
+                          placeholder="https://calendly.com/..."
                         />
                       </div>
-
-                      {/* Pricing */}
+                      <div className="space-y-2">
+                        <Label htmlFor="videoUrl">Video URL</Label>
+                        <Input
+                          id="videoUrl"
+                          value={editedVideoUrl}
+                          onChange={(e) => setEditedVideoUrl(e.target.value)}
+                          placeholder="https://youtube.com/..."
+                        />
+                      </div>
                       <div className="space-y-2">
                         <Label htmlFor="pricing">Fiyatlandırma</Label>
                         <Input
                           id="pricing"
-                          value={editedProduct.pricing || ""}
-                          onChange={(e) => setEditedProduct({ ...editedProduct, pricing: e.target.value })}
+                          value={editedPricing}
+                          onChange={(e) => setEditedPricing(e.target.value)}
                           placeholder="Free, $99/ay, vb."
                         />
                       </div>
-
-                      {/* Languages */}
                       <div className="space-y-2">
-                        <Label htmlFor="languages">Desteklenen Diller (virgülle ayırın)</Label>
+                        <Label htmlFor="languages">Desteklenen Diller (virgülle)</Label>
                         <Input
                           id="languages"
-                          value={(editedProduct.languages || []).join(', ')}
-                          onChange={(e) => setEditedProduct({ 
-                            ...editedProduct, 
-                            languages: e.target.value.split(',').map(l => l.trim()).filter(l => l.length > 0) 
-                          })}
-                          placeholder="Türkçe, English, Deutsch..."
+                          value={editedLanguages}
+                          onChange={(e) => setEditedLanguages(e.target.value)}
+                          placeholder="Türkçe, English..."
                         />
                       </div>
-
-                      <Button 
-                        onClick={handleSaveContent} 
-                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                        disabled={isSaving}
-                      >
-                        {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        Kaydet
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Quick Links */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center gap-2">
-                        <ExternalLink className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-lg">Hızlı Erişim</CardTitle>
+                      <div className="space-y-2">
+                        <Label htmlFor="releaseDate">Yayınlanma Tarihi</Label>
+                        <Input
+                          id="releaseDate"
+                          type="date"
+                          value={editedReleaseDate}
+                          onChange={(e) => setEditedReleaseDate(e.target.value)}
+                        />
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-3">
-                        {editedProduct.website_link && (
-                          <Button
-                            variant="outline"
-                            onClick={() => window.open(editedProduct.website_link!, "_blank")}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Ürün web sitesine git
-                          </Button>
-                        )}
-                        {editedProduct.demo_link && (
-                          <Button
-                            variant="outline"
-                            onClick={() => window.open(editedProduct.demo_link!, "_blank")}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Demo sayfasına git
-                          </Button>
-                        )}
-                        <div className="w-full text-xs text-muted-foreground mt-2">
-                          <span className="font-medium">Product ID:</span> {editedProduct.product_id}
-                        </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label>Galeri</Label>
+                        <ImageUpload
+                          multiple
+                          value={editedGallery}
+                          onChange={(value) => setEditedGallery(value)}
+                          maxImages={10}
+                          showUrlInput={true}
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                </>
-              ) : (
-                <Card>
-                  <CardContent className="flex items-center justify-center h-[400px]">
-                    {isLoading ? (
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    ) : (
-                      <p className="text-muted-foreground">Detayları görmek için bir ürün seçin</p>
-                    )}
+                    </div>
+                    <Button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Kaydet
+                    </Button>
                   </CardContent>
                 </Card>
-              )}
-            </div>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="flex items-center justify-center h-[400px]">
+                  {isLoading ? (
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Detayları görmek için bir ürün seçin
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
-      </AdminLayout>
-    );
+      </div>
+    </AdminLayout>
+  );
 };
 
 export default ProductEditPage;

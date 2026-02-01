@@ -1527,6 +1527,62 @@ grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to auth
 grant execute on function public.admin_assign_user_to_vendor(uuid, uuid) to service_role;
 
 
+-- ============================================================
+-- RPC: admin_search_vendors
+-- Purpose: Search vendors by company name for admin assignment
+-- Parameters:
+--   search_query : Company name search term (partial match)
+--   result_limit : Max results to return (default 10)
+-- Returns: List of vendors with basic info
+-- Errors: P0403 if caller is not admin
+-- ============================================================
+create or replace function public.admin_search_vendors(
+  search_query text,
+  result_limit integer default 10
+)
+returns table (
+  vendor_id uuid,
+  company_name text,
+  subscription public.tier,
+  is_verified boolean,
+  headquarters text
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Validate search query
+  if search_query is null or length(trim(search_query)) < 2 then
+    raise exception 'Search query must be at least 2 characters'
+      using errcode = 'P0400';
+  end if;
+
+  return query
+  select
+    v.vendor_id,
+    v.company_name,
+    v.subscription,
+    v.is_verified,
+    v.headquarters
+  from public.vendors v
+  where v.company_name ilike '%' || trim(search_query) || '%'
+  order by v.company_name asc
+  limit greatest(result_limit, 1);
+end;
+$$;
+
+grant execute on function public.admin_search_vendors(text, integer) to authenticated;
+grant execute on function public.admin_search_vendors(text, integer) to service_role;
+
+
 -- ############################################################
 -- ADMIN PRODUCT/OWNERSHIP REQUEST FUNCTIONS
 -- ############################################################
@@ -3519,6 +3575,7 @@ grant execute on function public.admin_get_products_count(text, public.listing_s
 --
 -- Parameters:
 --   p_product_id   : UUID of the product to update
+ --   p_vendor_id    : New vendor ID (null = no change)
 --   p_product_name : New product name (null = no change)
 --   p_website_link : New website URL (null = no change)
 --   p_short_desc   : New short description (null = no change)
@@ -3537,10 +3594,11 @@ grant execute on function public.admin_get_products_count(text, public.listing_s
 -- Returns: Boolean (true if update succeeded)
 -- Errors:
 --   P0403 if caller is not admin
---   P0404 if product not found
+--   P0404 if product or vendor not found
 -- ============================================================
 create or replace function public.admin_update_product(
   p_product_id uuid,
+  p_vendor_id uuid default null,
   p_product_name text default null,
   p_website_link text default null,
   p_short_desc text default null,
@@ -3554,6 +3612,7 @@ create or replace function public.admin_update_product(
   p_pricing text default null,
   p_languages text[] default null,
   p_demo_link text default null,
+  p_release_date date default null,
   p_listing_status public.listing_status default null
 )
 returns boolean
@@ -3575,6 +3634,14 @@ begin
   if not exists (select 1 from public.products where product_id = p_product_id) then
     raise exception 'Product not found: %', p_product_id
       using errcode = 'P0404';
+  end if;
+
+  -- Validate vendor exists if provided
+  if p_vendor_id is not null then
+    if not exists (select 1 from public.vendors where vendor_id = p_vendor_id) then
+      raise exception 'Vendor not found: %', p_vendor_id
+        using errcode = 'P0404';
+    end if;
   end if;
 
   -- Validate website URL format if provided
@@ -3604,6 +3671,7 @@ begin
   -- Update fields (only non-null values)
   update public.products
   set 
+    vendor_id = coalesce(p_vendor_id, vendor_id),
     product_name = coalesce(nullif(p_product_name, ''), product_name),
     website_link = case 
       when p_website_link is not null then nullif(p_website_link, '')
@@ -3632,6 +3700,7 @@ begin
       when p_demo_link is not null then nullif(p_demo_link, '')
       else demo_link 
     end,
+    release_date = coalesce(p_release_date, release_date),
     listing_status = coalesce(p_listing_status, listing_status),
     updated_at = now()
   where product_id = p_product_id;
@@ -3642,5 +3711,5 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_product(uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, public.listing_status) to authenticated;
-grant execute on function public.admin_update_product(uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, public.listing_status) to service_role;
+grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status) to authenticated;
+grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status) to service_role;

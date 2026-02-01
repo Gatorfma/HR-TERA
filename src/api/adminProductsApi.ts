@@ -6,6 +6,7 @@ import {
   AdminUpdateProductInput,
   AdminCreateProductInput,
   AdminVendorLookup,
+  VendorSearchResult,
   BulkProductInput,
   BulkImportResult,
   ListingStatus,
@@ -72,6 +73,7 @@ export async function adminUpdateProduct(
 ): Promise<boolean> {
   const { data, error } = await supabase.rpc('admin_update_product', {
     p_product_id: input.productId,
+    p_vendor_id: input.vendorId ?? null,
     p_product_name: input.productName ?? null,
     p_website_link: input.websiteLink ?? null,
     p_short_desc: input.shortDesc ?? null,
@@ -85,6 +87,7 @@ export async function adminUpdateProduct(
     p_pricing: input.pricing ?? null,
     p_languages: input.languages ?? null,
     p_demo_link: input.demoLink ?? null,
+    p_release_date: input.releaseDate ?? null,
     p_listing_status: input.listingStatus ?? null,
   });
 
@@ -164,6 +167,30 @@ export async function adminLookupVendor(
 
   const vendors = data as AdminVendorLookup[];
   return vendors.length > 0 ? vendors[0] : null;
+}
+
+/**
+ * Search vendors by company name for admin product assignment
+ */
+export async function adminSearchVendors(
+  searchQuery: string,
+  limit: number = 10
+): Promise<VendorSearchResult[]> {
+  if (!searchQuery || searchQuery.trim().length < 2) {
+    return [];
+  }
+
+  const { data, error } = await supabase.rpc('admin_search_vendors', {
+    search_query: searchQuery.trim(),
+    result_limit: limit,
+  });
+
+  if (error) {
+    console.error('[adminSearchVendors] Error:', error);
+    return [];
+  }
+
+  return (data as VendorSearchResult[]) || [];
 }
 
 /**

@@ -241,6 +241,7 @@ export interface AdminProductsResponse {
  */
 export interface AdminUpdateProductInput {
   productId: string;
+  vendorId?: string | null;
   productName?: string | null;
   websiteLink?: string | null;
   shortDesc?: string | null;
@@ -254,6 +255,7 @@ export interface AdminUpdateProductInput {
   pricing?: string | null;
   languages?: string[] | null;
   demoLink?: string | null;
+  releaseDate?: string | null;
   listingStatus?: ListingStatus | null;
 }
 
@@ -286,6 +288,17 @@ export interface AdminVendorLookup {
   company_name: string | null;
   subscription: Tier;
   is_verified: boolean;
+}
+
+/**
+ * Vendor search result for admin product assignment
+ */
+export interface VendorSearchResult {
+  vendor_id: string;
+  company_name: string | null;
+  subscription: Tier;
+  is_verified: boolean;
+  headquarters: string | null;
 }
 
 /**
