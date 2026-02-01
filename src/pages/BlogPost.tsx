@@ -33,10 +33,13 @@ const BlogPost = () => {
 
   // Simple markdown-like rendering for content
   const parseInline = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
+    const parts = text.split(/(\*\*.*?\*\*|_.*?_)/g);
     return parts.map((part, index) => {
       if (part.startsWith('**') && part.endsWith('**')) {
         return <strong key={index} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith('_') && part.endsWith('_')) {
+        return <em key={index} className="italic text-muted-foreground">{part.slice(1, -1)}</em>;
       }
       return part;
     });
