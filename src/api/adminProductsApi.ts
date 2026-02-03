@@ -89,6 +89,7 @@ export async function adminUpdateProduct(
     p_demo_link: input.demoLink ?? null,
     p_release_date: input.releaseDate ?? null,
     p_listing_status: input.listingStatus ?? null,
+    p_rating: input.rating ?? null,
   });
 
   if (error) {

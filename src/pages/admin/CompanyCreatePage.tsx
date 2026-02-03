@@ -120,8 +120,8 @@ const CompanyCreatePage = () => {
     }
 
     // Validate company size format if provided
-    if (formData.companySize.trim() && !/^[0-9]+-[0-9]+$/.test(formData.companySize.trim())) {
-      newErrors.companySize = 'Geçersiz format. Örnek: "1-10" veya "50-100"';
+    if (formData.companySize.trim() && !/^[0-9]+(-[0-9]+)?$/.test(formData.companySize.trim())) {
+      newErrors.companySize = 'Geçersiz format. Örnek: "50", "1-10" veya "50-100"';
     }
 
     // Validate website URL if provided

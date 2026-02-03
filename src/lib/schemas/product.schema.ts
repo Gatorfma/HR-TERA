@@ -78,6 +78,7 @@ export const productFormSchema = z.object({
 
   // Status (admin only)
   listingStatus: z.enum(["pending", "approved", "rejected"]).default("pending"),
+  rating: z.coerce.number().min(0).max(5).optional(),
 });
 
 // Type for the form values
@@ -100,6 +101,7 @@ export const defaultProductFormValues: ProductFormValues = {
   languages: [],
   releaseDate: "",
   listingStatus: "pending",
+  rating: undefined,
 };
 
 // Helper function to create tier-aware validation
@@ -131,6 +133,7 @@ export function apiProductToFormValues(product: {
   languages?: string[] | null;
   release_date?: string | null;
   listing_status?: ListingStatus;
+  rating?: number | null;
 }): ProductFormValues {
   return {
     productName: product.product_name || "",
@@ -148,6 +151,7 @@ export function apiProductToFormValues(product: {
     languages: product.languages || [],
     releaseDate: product.release_date || "",
     listingStatus: product.listing_status || "pending",
+    rating: product.rating || undefined,
   };
 }
 
@@ -169,6 +173,7 @@ export function formValuesToApiProduct(values: ProductFormValues) {
     languages: values.languages.length > 0 ? values.languages : null,
     releaseDate: values.releaseDate || null,
     listingStatus: values.listingStatus,
+    rating: values.rating,
   };
 }
 

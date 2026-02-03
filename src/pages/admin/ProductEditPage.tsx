@@ -172,6 +172,7 @@ const ProductEditPage = () => {
       languages: product.languages,
       release_date: product.release_date,
       listing_status: product.listing_status,
+      rating: product.rating,
     });
 
     // Vendor bilgilerini ayarla
@@ -281,6 +282,7 @@ const ProductEditPage = () => {
         demoLink: apiValues.demoLink || undefined,
         releaseDate: apiValues.releaseDate || undefined,
         listingStatus: apiValues.listingStatus,
+        rating: apiValues.rating,
       });
 
       const vendorMsg = vendorChanged ? " Şirket değiştirildi." : "";
@@ -300,12 +302,12 @@ const ProductEditPage = () => {
         setSelectedProduct((prev) =>
           prev
             ? {
-                ...prev,
-                vendor_id: selectedVendor.vendor_id,
-                company_name: selectedVendor.company_name,
-                subscription: selectedVendor.subscription,
-                is_verified: selectedVendor.is_verified,
-              }
+              ...prev,
+              vendor_id: selectedVendor.vendor_id,
+              company_name: selectedVendor.company_name,
+              subscription: selectedVendor.subscription,
+              is_verified: selectedVendor.is_verified,
+            }
             : null
         );
       }
@@ -461,11 +463,10 @@ const ProductEditPage = () => {
                         <button
                           key={product.product_id}
                           onClick={() => handleSelectProduct(product)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                            selectedProduct?.product_id === product.product_id
-                              ? "bg-primary/10 border border-primary/20"
-                              : "hover:bg-muted"
-                          }`}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${selectedProduct?.product_id === product.product_id
+                            ? "bg-primary/10 border border-primary/20"
+                            : "hover:bg-muted"
+                            }`}
                         >
                           <Avatar className="h-10 w-10 rounded-lg">
                             <AvatarImage src={product.logo} className="object-cover" />
