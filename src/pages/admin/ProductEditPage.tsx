@@ -598,6 +598,7 @@ const ProductEditPage = () => {
                     canUseDemo={canUseDemo}
                     addLanguage={addLanguage}
                     removeLanguage={removeLanguage}
+                    mode="edit"
                   />
 
                   {/* Actions */}

@@ -166,7 +166,6 @@ const ProductCreatePage = () => {
         pricing: apiValues.pricing || undefined,
         languages: apiValues.languages || undefined,
         demoLink: apiValues.demoLink || undefined,
-        releaseDate: apiValues.releaseDate || undefined,
         listingStatus: apiValues.listingStatus || 'pending',
       });
 
@@ -278,6 +277,7 @@ const ProductCreatePage = () => {
                   canUseDemo={canUseDemo}
                   addLanguage={addLanguage}
                   removeLanguage={removeLanguage}
+                  mode="create"
                 />
 
                 {/* Status */}
@@ -315,7 +315,7 @@ const ProductCreatePage = () => {
                   completionPercentage={Math.round(
                     ((completedFields + (selectedVendor ? 1 : 0)) /
                       (totalRequiredFields + 1)) *
-                      100
+                    100
                   )}
                 />
 

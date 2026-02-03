@@ -3045,7 +3045,7 @@ begin
     nullif(p_pricing, ''),
     p_languages,
     nullif(p_demo_link, ''),
-    p_release_date,
+    CURRENT_DATE,
     p_listing_status
   )
   returning product_id into new_product_id;
@@ -3704,7 +3704,6 @@ begin
       when p_demo_link is not null then nullif(p_demo_link, '')
       else demo_link 
     end,
-    release_date = coalesce(p_release_date, release_date),
     listing_status = coalesce(p_listing_status, listing_status),
     rating = coalesce(p_rating, rating),
     updated_at = now()

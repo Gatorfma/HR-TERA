@@ -21,6 +21,7 @@ interface LinksSectionProps {
   canUseDemo: boolean;
   addLanguage: (language: string) => void;
   removeLanguage: (language: string) => void;
+  mode: "create" | "edit";
 }
 
 export function LinksSection({
@@ -29,6 +30,7 @@ export function LinksSection({
   canUseDemo,
   addLanguage,
   removeLanguage,
+  mode,
 }: LinksSectionProps) {
   const languages = form.watch("languages");
 
@@ -102,23 +104,25 @@ export function LinksSection({
             )}
           />
 
-          {/* Release Date */}
-          <FormField
-            control={form.control}
-            name="releaseDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Yayınlanma Tarihi
-                </FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Release Date - Only show in edit mode */}
+          {mode === "edit" && (
+            <FormField
+              control={form.control}
+              name="releaseDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Yayınlanma Tarihi
+                  </FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} disabled />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </FieldGrid>
 
         {/* Languages */}
