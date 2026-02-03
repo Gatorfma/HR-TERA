@@ -23,6 +23,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -417,6 +418,16 @@ const ProductEditPage = () => {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/admin/products")}
+            className="-ml-2 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Geri Dön
+          </Button>
 
           <h1 className="text-3xl font-bold text-foreground">Ürün Düzenleme</h1>
           <p className="text-muted-foreground mt-2 mb-8">
