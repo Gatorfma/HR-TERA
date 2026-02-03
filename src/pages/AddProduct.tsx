@@ -149,7 +149,7 @@ const AddProduct = () => {
 
       toast({
         title: "Başvuru Gönderildi",
-        description: "Ürün başvurunuz alındı. İnceleme sonrası size bilgi vereceğiz.",
+        description: "Çözüm başvurunuz alındı. İnceleme sonrası size bilgi vereceğiz.",
       });
 
       navigate("/profile?tab=applications");

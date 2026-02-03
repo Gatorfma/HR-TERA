@@ -51,7 +51,7 @@ function parseSupabaseError(error: { code?: string; message?: string }): {
   message: string;
 } {
   const msg = error.message || 'Unknown error';
-  
+
   // Map Postgres error codes to our error codes
   if (msg.includes('Unauthorized') || error.code === 'P0403') {
     return { code: AdminErrorCodes.NOT_ADMIN, message: 'Admin access required' };
@@ -62,7 +62,7 @@ function parseSupabaseError(error: { code?: string; message?: string }): {
   if (msg.includes('Invalid') || error.code === 'P0400') {
     return { code: AdminErrorCodes.VALIDATION_ERROR, message: msg };
   }
-  
+
   return { code: AdminErrorCodes.DATABASE_ERROR, message: msg };
 }
 
@@ -162,24 +162,24 @@ export async function adminUpdateVendorTier(
     console.error('[adminUpdateVendorTier] vendorId is empty or undefined:', vendorId);
     return {
       success: false,
-      error: { 
-        code: AdminErrorCodes.VALIDATION_ERROR, 
-        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}` 
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}`
       },
     };
   }
-  
+
   if (!isValidUUID(vendorId)) {
     console.error('[adminUpdateVendorTier] vendorId is not a valid UUID:', vendorId);
     return {
       success: false,
-      error: { 
-        code: AdminErrorCodes.VALIDATION_ERROR, 
-        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"` 
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"`
       },
     };
   }
-  
+
   if (!isValidTier(newTier)) {
     return {
       success: false,
@@ -192,7 +192,7 @@ export async function adminUpdateVendorTier(
 
   try {
     console.log('[adminUpdateVendorTier] Calling RPC with:', { p_vendor_id: vendorId, p_new_tier: newTier });
-    
+
     const { data, error } = await supabase.rpc('admin_update_vendor_tier', {
       p_vendor_id: vendorId,
       p_new_tier: newTier,
@@ -234,24 +234,24 @@ export async function adminUpdateVendorProfile(
     console.error('[adminUpdateVendorProfile] vendorId is empty or undefined:', vendorId);
     return {
       success: false,
-      error: { 
-        code: AdminErrorCodes.VALIDATION_ERROR, 
-        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}` 
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}`
       },
     };
   }
-  
+
   if (!isValidUUID(vendorId)) {
     console.error('[adminUpdateVendorProfile] vendorId is not a valid UUID:', vendorId);
     return {
       success: false,
-      error: { 
-        code: AdminErrorCodes.VALIDATION_ERROR, 
-        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"` 
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"`
       },
     };
   }
-  
+
   if (companyWebsite && companyWebsite.trim() !== '' && !isValidUrl(companyWebsite)) {
     return {
       success: false,
@@ -272,8 +272,8 @@ export async function adminUpdateVendorProfile(
   }
 
   try {
-    console.log('[adminUpdateVendorProfile] Calling RPC with:', { 
-      p_vendor_id: vendorId, 
+    console.log('[adminUpdateVendorProfile] Calling RPC with:', {
+      p_vendor_id: vendorId,
       p_company_name: companyName ?? null,
       p_company_website: companyWebsite ?? null,
       p_company_size: companySize ?? null,
@@ -285,7 +285,7 @@ export async function adminUpdateVendorProfile(
       p_company_desc: companyDesc ?? null,
       p_founded_at: foundedAt ?? null,
     });
-    
+
     const { data, error } = await supabase.rpc('admin_update_vendor_profile', {
       p_vendor_id: vendorId,
       p_company_name: companyName ?? null,
@@ -305,7 +305,7 @@ export async function adminUpdateVendorProfile(
       const parsed = parseSupabaseError(error);
       return { success: false, error: parsed };
     }
-    
+
     console.log('[adminUpdateVendorProfile] Success:', data);
 
     return { success: true, data: data ?? false };
@@ -336,20 +336,20 @@ export async function adminUpdateVendorVerification(
     console.error('[adminUpdateVendorVerification] vendorId is empty or undefined:', vendorId);
     return {
       success: false,
-      error: { 
-        code: AdminErrorCodes.VALIDATION_ERROR, 
-        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}` 
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: `Vendor ID is required. Received: ${vendorId === null ? 'null' : vendorId === undefined ? 'undefined' : `"${vendorId}"`}`
       },
     };
   }
-  
+
   if (!isValidUUID(vendorId)) {
     console.error('[adminUpdateVendorVerification] vendorId is not a valid UUID:', vendorId);
     return {
       success: false,
-      error: { 
-        code: AdminErrorCodes.VALIDATION_ERROR, 
-        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"` 
+      error: {
+        code: AdminErrorCodes.VALIDATION_ERROR,
+        message: `Invalid vendor ID format. Expected UUID, received: "${vendorId}"`
       },
     };
   }
@@ -366,7 +366,7 @@ export async function adminUpdateVendorVerification(
 
   try {
     console.log('[adminUpdateVendorVerification] Calling RPC with:', { p_vendor_id: vendorId, p_is_verified: isVerified });
-    
+
     const { data, error } = await supabase.rpc('admin_update_vendor_verification', {
       p_vendor_id: vendorId,
       p_is_verified: isVerified,
@@ -401,22 +401,14 @@ export async function adminSearchUsers(
   searchQuery: string,
   limit: number = 10
 ): Promise<ApiResponse<UserSearchResult[]>> {
-  // Validate search query
-  if (!searchQuery || searchQuery.trim().length < 2) {
-    return {
-      success: false,
-      error: {
-        code: AdminErrorCodes.VALIDATION_ERROR,
-        message: 'Search query must be at least 2 characters',
-      },
-    };
-  }
+  // Allow empty search query to fetch default list
+  const query = searchQuery?.trim() || null;
 
   try {
-    console.log('[adminSearchUsers] Calling RPC with:', { search_query: searchQuery, result_limit: limit });
-    
+    console.log('[adminSearchUsers] Calling RPC with:', { search_query: query, result_limit: limit });
+
     const { data, error } = await supabase.rpc('admin_search_users', {
-      search_query: searchQuery.trim(),
+      search_query: query,
       result_limit: limit,
     });
 
@@ -476,7 +468,7 @@ export async function adminAssignUserToVendor(
 
   try {
     console.log('[adminAssignUserToVendor] Calling RPC with:', { p_vendor_id: vendorId, p_user_id: userId });
-    
+
     const { data, error } = await supabase.rpc('admin_assign_user_to_vendor', {
       p_vendor_id: vendorId,
       p_user_id: userId,
@@ -563,7 +555,7 @@ export async function adminCreateVendor(
 
   try {
     console.log('[adminCreateVendor] Calling RPC');
-    
+
     const { data, error } = await supabase.rpc('admin_create_vendor', {
       p_company_name: companyName ?? null,
       p_user_id: userId ?? null,

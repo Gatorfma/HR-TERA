@@ -82,7 +82,7 @@ const ProductAnalyticsPage = () => {
           productName: row.product_name,
           description: row.short_desc ?? "",
           categories: Array.from(categorySet),
-          vendorName: row.vendor_name ?? "Bilinmeyen Vendor",
+          vendorName: row.vendor_name ?? "Bilinmeyen Şirket",
           tier: row.subscription ?? "freemium",
           visits: Number(row.visits ?? 0),
           rating: row.rating ?? null,
@@ -230,10 +230,10 @@ const ProductAnalyticsPage = () => {
           </button>
           <span>/</span>
           <button onClick={() => navigate("/admin/products")} className="hover:text-foreground transition-colors">
-            Ürün Ayarları
+            Çözüm Ayarları
           </button>
           <span>/</span>
-          <span className="text-foreground">Ürün Analitiği</span>
+          <span className="text-foreground">Çözüm Analitiği</span>
         </div>
 
         {/* Header */}
@@ -243,7 +243,7 @@ const ProductAnalyticsPage = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Geri Dön
             </Button>
-            <h1 className="text-3xl font-bold text-foreground">Ürün Performansı</h1>
+            <h1 className="text-3xl font-bold text-foreground">Çözüm Performansı</h1>
             <p className="text-muted-foreground mt-2">Ziyaret ve puan metriklerini inceleyin.</p>
           </div>
           <Button
@@ -311,8 +311,8 @@ const ProductAnalyticsPage = () => {
                   <BarChart3 className="h-6 w-6 text-emerald-500" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">İzlenen Ürün</p>
-                  <p className="text-xs text-muted-foreground/70">Analitiği olan ürün sayısı</p>
+                  <p className="text-sm text-muted-foreground">İzlenen Çözüm</p>
+                  <p className="text-xs text-muted-foreground/70">Analitiği olan çözüm sayısı</p>
                   <p className="text-3xl font-bold text-foreground mt-1">
                     {loading ? "—" : trackedProducts}
                   </p>
@@ -327,10 +327,10 @@ const ProductAnalyticsPage = () => {
           <CardHeader>
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <CardTitle>Ürün Bazlı Analitik</CardTitle>
+                <CardTitle>Çözüm Bazlı Analitik</CardTitle>
                 <CardDescription>
                   Ziyaret ve rating listesi •{" "}
-                  {loading ? "Yükleniyor..." : `${filteredAndSortedAnalytics.length} ürün izleniyor`}
+                  {loading ? "Yükleniyor..." : `${filteredAndSortedAnalytics.length} çözüm izleniyor`}
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -375,7 +375,7 @@ const ProductAnalyticsPage = () => {
                         className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                         onClick={() => handleSort("name")}
                       >
-                        Ürün
+                        Çözüm
                         <SortIcon field="name" />
                       </button>
                     </th>
@@ -413,7 +413,7 @@ const ProductAnalyticsPage = () => {
                     <tr>
                       <td colSpan={5} className="text-center py-12 text-muted-foreground">
                         <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                        <p>Filtrelerinize uygun ürün bulunamadı.</p>
+                        <p>Filtrelerinize uygun çözüm bulunamadı.</p>
                       </td>
                     </tr>
                   ) : (

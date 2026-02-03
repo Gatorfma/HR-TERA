@@ -49,6 +49,7 @@ export interface Product {
     description: string;
     website?: string;
     location?: string;
+    founded_at?: string;
   } | null;
   isVendorClaimed?: boolean; // If false or vendor is null, product is unclaimed
   vendorTier: Tier;
@@ -68,6 +69,7 @@ export interface Product {
   featuredContent?: FeaturedContent[];
   campaigns?: { title: string; description: string; validUntil?: string }[];
   externalWebsite?: string;
+  demo_link?: string;
 }
 
 export const products: Product[] = [

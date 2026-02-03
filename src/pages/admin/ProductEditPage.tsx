@@ -283,7 +283,7 @@ const ProductEditPage = () => {
         listingStatus: apiValues.listingStatus,
       });
 
-      const vendorMsg = vendorChanged ? " Vendor değiştirildi." : "";
+      const vendorMsg = vendorChanged ? " Şirket değiştirildi." : "";
       toast({
         title: "Ürün güncellendi",
         description: `${apiValues.productName} bilgileri kaydedildi.${vendorMsg}`,

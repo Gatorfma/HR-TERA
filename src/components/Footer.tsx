@@ -50,7 +50,7 @@ const Footer = () => {
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-6">
               <img
-                src={`${import.meta.env.BASE_URL}hrtera-icon.png`}
+                src={`${import.meta.env.BASE_URL}hrtera-nobg-icon.png`}
                 alt="HRTera logo"
                 className="w-6 h-6 object-contain"
               />

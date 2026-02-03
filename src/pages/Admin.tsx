@@ -190,7 +190,7 @@ const Admin = () => {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Ürün</CardTitle>
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Toplam Çözüm</CardTitle>
                     <Package className="h-4 w-4 text-primary" />
                   </CardHeader>
                   <CardContent>
@@ -227,7 +227,7 @@ const Admin = () => {
                     <div className="text-2xl font-bold text-foreground">
                       {loading || !kpis ? "—" : `${kpis.conversion_rate.toFixed(1)}%`}
                     </div>
-                    <p className="text-xs text-muted-foreground">Son 30 gün ürün CTA / ürün görüntüleme</p>
+                    <p className="text-xs text-muted-foreground">Son 30 gün çözüm CTA / çözüm görüntüleme</p>
                   </CardContent>
                 </Card>
               </div>
@@ -260,8 +260,8 @@ const Admin = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Aylık Ürün Ekleme</CardTitle>
-                    <CardDescription>Son 6 ayda eklenen ürünler</CardDescription>
+                    <CardTitle>Aylık Çözüm Ekleme</CardTitle>
+                    <CardDescription>Son 6 ayda eklenen çözümler</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
@@ -322,7 +322,7 @@ const Admin = () => {
                                   const percent = categorySummary.total
                                     ? ((Number(value) / categorySummary.total) * 100).toFixed(1)
                                     : "0.0";
-                                  return [`${value} ürün • %${percent}`, name];
+                                  return [`${value} çözüm • %${percent}`, name];
                                 }}
                                 contentStyle={{
                                   backgroundColor: "hsl(var(--card))",
@@ -336,7 +336,7 @@ const Admin = () => {
                             <span className="text-3xl font-bold text-foreground">
                               {categorySummary.total.toLocaleString("tr-TR")}
                             </span>
-                            <span className="text-xs text-muted-foreground">Toplam Ürün</span>
+                            <span className="text-xs text-muted-foreground">Toplam Çözüm</span>
                           </div>
                         </div>
 

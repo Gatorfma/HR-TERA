@@ -9,15 +9,15 @@ export interface AdminProductSection {
 export const adminProductSections: AdminProductSection[] = [
   {
     id: "product-editing",
-    title: "Ürün Düzenleme",
-    description: "Mevcut ürünleri arayıp güncelleyin.",
+    title: "Çözüm Düzenleme",
+    description: "Mevcut çözümleri arayıp güncelleyin.",
     path: "/admin/products/edit",
     icon: "cube",
   },
   {
     id: "product-create",
-    title: "Yeni Ürün Oluştur",
-    description: "Ürünü hızlıca ekleyin veya güncelleyin.",
+    title: "Yeni Çözüm Oluştur",
+    description: "Çözümü hızlıca ekleyin veya güncelleyin.",
     path: "/admin/products/new",
     icon: "plus",
   },
@@ -37,7 +37,7 @@ export const adminProductSections: AdminProductSection[] = [
   },
   {
     id: "product-analytics",
-    title: "Ürün Analitiği",
+    title: "Çözüm Analitiği",
     description: "Ziyaret ve rating performansını inceleyin.",
     path: "/admin/products/analytics",
     icon: "chart",
@@ -45,7 +45,7 @@ export const adminProductSections: AdminProductSection[] = [
   {
     id: "bulk-upload",
     title: "Excel ile Toplu Ekle",
-    description: "Excel dosyasından birden fazla ürün ekleyin.",
+    description: "Excel dosyasından birden fazla çözüm ekleyin.",
     path: "/admin/products/bulk-upload",
     icon: "table",
   },

@@ -88,9 +88,9 @@ const ProductApplicationsTab = () => {
           </div>
           <h3 className="font-heading font-semibold text-foreground mb-2">Henüz başvuru yok</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            İlk ürün başvurunuzu oluşturarak başlayın.
+            İlk çözüm başvurunuzu oluşturarak başlayın.
           </p>
-          <Button onClick={() => navigate("/profile/products/new")}>Yeni Ürün Ekle</Button>
+          <Button onClick={() => navigate("/profile/products/new")}>Yeni Çözüm Ekle</Button>
         </CardContent>
       </Card>
     );
@@ -102,8 +102,8 @@ const ProductApplicationsTab = () => {
       <Card className="bg-muted/30 border-border">
         <CardContent className="py-4">
           <p className="text-sm text-muted-foreground">
-            Ürün başvurularınız burada listelenir. Onaylanan ürünler otomatik olarak{" "}
-            <span className="font-medium text-foreground">Ürünlerim</span> sekmesine taşınır ve
+            Çözüm başvurularınız burada listelenir. Onaylanan çözümler otomatik olarak{" "}
+            <span className="font-medium text-foreground">Çözümlerim</span> sekmesine taşınır ve
             kamuya açık hale gelir.
           </p>
         </CardContent>
@@ -115,7 +115,7 @@ const ProductApplicationsTab = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[300px]">Ürün</TableHead>
+                <TableHead className="w-[300px]">Çözüm</TableHead>
                 <TableHead>Kategori</TableHead>
                 <TableHead>Paket</TableHead>
                 <TableHead>Başvuru Tarihi</TableHead>
@@ -209,7 +209,7 @@ const ProductApplicationsTab = () => {
                                 <ExternalLink className="w-4 h-4" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Ürünü görüntüle</TooltipContent>
+                            <TooltipContent>Çözümü görüntüle</TooltipContent>
                           </Tooltip>
                         )}
                         {app.status === "changes_requested" && (

@@ -140,7 +140,7 @@ const ProductRequestsPage = () => {
       return {
         id: row.product_id,
         vendorId: row.vendor_id,
-        vendorName: row.company_name ?? "Bilinmeyen Vendor",
+        vendorName: row.company_name ?? "Bilinmeyen Şirket",
         vendorMotto: row.company_motto ?? undefined,
         name: row.product_name,
         shortDescription: row.short_desc ?? "",
@@ -176,9 +176,9 @@ const ProductRequestsPage = () => {
     const mapped = ((data ?? []) as OwnershipRow[]).map((row) => ({
       id: row.id,
       claimedVendorId: row.claimed_vendor_id,
-      claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Vendor",
-      claimerVendorId: row.claimer_vendor_id,
-      claimerVendorName: row.claimer_vendor_name ?? "Bilinmeyen Vendor",
+claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
+        claimerVendorId: row.claimer_vendor_id,
+        claimerVendorName: row.claimer_vendor_name ?? "Bilinmeyen Şirket",
       claimerUserId: row.claimer_user_id ?? undefined,
       claimerUserEmail: row.user_email ?? undefined,
       claimerUserFullName: row.user_full_name ?? undefined,
@@ -266,7 +266,7 @@ const ProductRequestsPage = () => {
 
     toast({
       title: "Başvuru Onaylandı",
-      description: "Liste başvurusu onaylandı ve ürün yayına alındı.",
+      description: "Liste başvurusu onaylandı ve çözüm yayına alındı.",
     });
     loadListingRequests();
   };
@@ -329,7 +329,7 @@ const ProductRequestsPage = () => {
     const request = ownershipRequests.find((r) => r.id === id);
     toast({
       title: "Sahiplik Onaylandı",
-      description: `${request?.claimerVendorName ?? "Vendor"} -> ${request?.claimedVendorName ?? "Vendor"} birleştirildi.`,
+      description: `${request?.claimerVendorName ?? "Şirket"} -> ${request?.claimedVendorName ?? "Şirket"} birleştirildi.`,
     });
     loadOwnershipRequests();
   };
@@ -419,7 +419,7 @@ const ProductRequestsPage = () => {
           </button>
           <span>/</span>
           <button onClick={() => navigate("/admin/products")} className="hover:text-foreground transition-colors">
-            Ürün Ayarları
+            Çözüm Ayarları
           </button>
           <span>/</span>
           <span className="text-foreground">Talepler</span>
@@ -748,11 +748,11 @@ const ProductRequestsPage = () => {
                 
                 <div className="space-y-2 text-sm">
                   <div>
-                    <span className="font-medium text-muted-foreground">Talep Eden Vendor:</span>
+                    <span className="font-medium text-muted-foreground">Talep Eden Şirket:</span>
                     <p className="text-foreground">{selectedOwnership.claimerVendorName}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-muted-foreground">Talep Edilen Vendor:</span>
+                    <span className="font-medium text-muted-foreground">Talep Edilen Şirket:</span>
                     <p className="text-foreground">{selectedOwnership.claimedVendorName}</p>
                   </div>
                   <div>

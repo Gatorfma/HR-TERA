@@ -38,7 +38,7 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 flex-shrink-0">
               <img
-                src={`${import.meta.env.BASE_URL}hrtera-icon.png`}
+                src={`${import.meta.env.BASE_URL}hrtera-nobg-icon.png`}
                 alt="HRTera logo"
                 className="w-6 h-6 object-contain"
               />

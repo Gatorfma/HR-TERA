@@ -223,12 +223,12 @@ const VendorDetail = () => {
                 className="bg-card rounded-2xl border border-border p-6"
               >
                 <h2 className="font-heading font-bold text-xl text-foreground mb-4">
-                  Ürünler ({products.length})
+                  Çözümler ({products.length})
                 </h2>
                 
                 {products.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    Bu tedarikçinin henüz onaylanmış ürünü yok.
+                    Bu tedarikçinin henüz onaylanmış çözümü yok.
                   </p>
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-4">

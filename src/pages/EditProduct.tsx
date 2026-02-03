@@ -158,7 +158,7 @@ const EditProduct = () => {
         if (!product) {
           toast({
             title: "Hata",
-            description: "Ürün bulunamadı veya erişim yetkiniz yok.",
+            description: "Çözüm bulunamadı veya erişim yetkiniz yok.",
             variant: "destructive",
           });
           navigate("/profile?tab=products");
@@ -189,7 +189,7 @@ const EditProduct = () => {
         console.error("[EditProduct] Failed to load product:", err);
         toast({
           title: "Hata",
-          description: "Ürün bilgileri yüklenirken bir hata oluştu.",
+          description: "Çözüm bilgileri yüklenirken bir hata oluştu.",
           variant: "destructive",
         });
         navigate("/profile?tab=products");
@@ -239,7 +239,7 @@ const EditProduct = () => {
 
       toast({
         title: "Başarılı",
-        description: "Ürün bilgileri güncellendi.",
+        description: "Çözüm bilgileri güncellendi.",
       });
 
       // Reset form dirty state
@@ -279,7 +279,7 @@ const EditProduct = () => {
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground">Ürün bilgileri yükleniyor...</p>
+                <p className="text-muted-foreground">Çözüm bilgileri yükleniyor...</p>
               </div>
             </div>
           </div>

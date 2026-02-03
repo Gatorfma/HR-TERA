@@ -102,10 +102,10 @@ const INITIAL_FEATURES: TierFeatures[] = [
     slug: "freemium",
     headline: "Hızlı başlangıç için ideal.",
     features: [
-      { id: "f1", title: "Ürün adı, logo ve kısa açıklama", description: "Temel ürün bilgileri", isIncluded: true },
+      { id: "f1", title: "Çözüm adı, logo ve kısa açıklama", description: "Temel çözüm bilgileri", isIncluded: true },
       { id: "f2", title: "1 kategori", description: "Tek kategoride listeleme", isIncluded: true },
       { id: "f3", title: "3 özellik etiketi", description: "Öne çıkan özellikler", isIncluded: true },
-      { id: "f4", title: "Website linki", description: "Ürün web sitesi bağlantısı", isIncluded: true },
+      { id: "f4", title: "Website linki", description: "Çözüm web sitesi bağlantısı", isIncluded: true },
       { id: "f5", title: "Temel görünürlük", description: "Listeleme ve arama sonuçları", isIncluded: true },
       { id: "f6", title: "Ücretsiz başlangıç", description: "Kredi kartı gerektirmez", isIncluded: true, badge: "Ücretsiz" },
     ],
@@ -115,9 +115,9 @@ const INITIAL_FEATURES: TierFeatures[] = [
     headline: "Büyüyen ekipler için daha fazla görünürlük.",
     features: [
       { id: "s1", title: "Freemium'daki her şey", description: "Tüm temel özellikler dahil", isIncluded: true },
-      { id: "s2", title: "Genişletilmiş ürün sayfası", description: "Uzun açıklama ve daha fazla alan", isIncluded: true },
+      { id: "s2", title: "Genişletilmiş çözüm sayfası", description: "Uzun açıklama ve daha fazla alan", isIncluded: true },
       { id: "s3", title: "3 kategori", description: "Birden fazla kategoride listeleme", isIncluded: true },
-      { id: "s4", title: "Galeri görselleri", description: "Ürün ekran görüntüleri ve medya", isIncluded: true },
+      { id: "s4", title: "Galeri görselleri", description: "Çözüm ekran görüntüleri ve medya", isIncluded: true },
       { id: "s5", title: "Entegrasyon alanları", description: "Uyumluluk ve entegrasyon bilgileri", isIncluded: true },
       { id: "s6", title: "Temel performans analitiği", description: "Görüntülenme istatistikleri", isIncluded: true, badge: "Yeni" },
       { id: "s7", title: "Öne çıkarma", description: "Liste ve kategori sayfalarında öne çıkma", isIncluded: true },
@@ -395,7 +395,7 @@ const ProductTiersPage = () => {
           </button>
           <span>/</span>
           <button onClick={() => navigate("/admin/products")} className="hover:text-foreground transition-colors">
-            Ürün Ayarları
+            Çözüm Ayarları
           </button>
           <span>/</span>
           <span className="text-foreground">Tier Fiyatları</span>
@@ -682,7 +682,7 @@ const ProductTiersPage = () => {
         <Card>
           <CardHeader>
             <CardTitle>Fiyatlandırma Önizleme</CardTitle>
-            <CardDescription>Fiyatlandırma kartlarının vendor'lara nasıl görüneceği.</CardDescription>
+            <CardDescription>Fiyatlandırma kartlarının şirketlere nasıl görüneceği.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

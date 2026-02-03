@@ -166,11 +166,11 @@ const VendorApply = () => {
                   Tedarikçi Olmak için Başvurun
                 </h1>
                 <p className="text-muted-foreground">
-                  Şirket bilgilerinizi paylaşın, paketinizi seçin ve doğrulanmış satıcı olun.
+                  Şirket bilgilerinizi paylaşın, paketinizi seçin ve doğrulanmış şirket olun.
                 </p>
                 {productSlug && (
                   <Badge variant="secondary" className="mt-2">
-                    Ürün: {productSlug}
+                    Çözüm: {productSlug}
                   </Badge>
                 )}
               </div>
@@ -374,7 +374,7 @@ const VendorApply = () => {
                       <FileText className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                       <Textarea
                         id="notes"
-                        placeholder="Ek belge, referans veya ürün linkleri"
+                        placeholder="Ek belge, referans veya çözüm linkleri"
                         value={formData.notes}
                         onChange={(e) => handleInputChange("notes", e.target.value)}
                         className="pl-10 bg-background min-h-[100px]"

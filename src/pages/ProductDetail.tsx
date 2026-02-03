@@ -72,6 +72,7 @@ interface ApiProduct {
   headquarters: string | null;
   vendor_website: string | null;
   subscription: string;
+  founded_at: string;
 }
 
 // Interface for similar product from API
@@ -123,7 +124,7 @@ const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Pr
     slug: apiProduct.product_id,
     image: apiProduct.logo || "/placeholder.svg",
     category: apiProduct.main_category,
-    categories: apiProduct.categories || [apiProduct.main_category],
+    categories: apiProduct.categories || [],
     name: apiProduct.product_name,
     price: apiProduct.pricing || t("productDetail.contact"),
     description: apiProduct.short_desc,
@@ -138,6 +139,7 @@ const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Pr
       description: apiProduct.company_desc || "",
       website: apiProduct.vendor_website || undefined,
       location: apiProduct.headquarters || undefined,
+      founded_at: apiProduct.founded_at
     },
     isVendorClaimed,
     vendorTier,
@@ -149,6 +151,7 @@ const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Pr
     languages: apiProduct.languages || [],
     compliance: [],
     externalWebsite: apiProduct.product_website || undefined,
+    demo_link: apiProduct.demo_link
   };
 };
 
@@ -226,7 +229,7 @@ const ProductDetail = () => {
               slug: p.product_id,
               image: p.logo || "/placeholder.svg",
               category: p.main_category,
-              categories: p.categories || [p.main_category],
+              categories: p.categories || [],
               name: p.product_name,
               price: p.pricing || t("productDetail.contact"),
               description: p.short_desc,
@@ -347,6 +350,7 @@ const ProductDetail = () => {
   const vendorLogo = vendorDetails?.logo || product.vendor?.logo;
   const vendorHQ = vendorDetails?.headquarters || product.vendor?.location;
   const vendorSize = vendorDetails?.company_size || null;
+  const vendorFoundedAt = vendorDetails?.founded_at || null;
   const vendorLinkedIn = vendorDetails?.linkedin_link || null;
   const vendorMotto = vendorDetails?.company_motto || null;
 
@@ -412,7 +416,7 @@ const ProductDetail = () => {
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-16 h-16 rounded-xl object-cover border border-border shrink-0"
+                        className="w-16 h-16 rounded-xl object-fill border border-border shrink-0"
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center border border-border shrink-0">
@@ -452,12 +456,20 @@ const ProductDetail = () => {
                           className="bg-primary text-primary-foreground hover:bg-primary/90"
                           size="lg"
                           onClick={() => handleProductCtaClick("request_demo")}
+                          asChild
                         >
-                          <Play className="w-4 h-4 mr-2" />
-                          {t("productDetail.requestDemo")}
+                          <a          
+                            href={product.demo_link || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => handleProductCtaClick("request_demo")}
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {t("productDetail.requestDemo")}
+                          </a>
                         </Button>
 
-                        <Button variant="outline" size="lg" asChild>
+                        <Button variant="outline" size="lg" className="hover:bg-transparent hover:text-foreground" asChild>
                           <a
                             href={product.externalWebsite || "#"}
                             target="_blank"
@@ -471,7 +483,7 @@ const ProductDetail = () => {
                       </>
                     ) : isPlusOrPremium ? (
                       <>
-                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg" asChild>
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary" size="lg" asChild>
                           <a
                             href={product.vendor?.website || "#"}
                             target="_blank"
@@ -489,7 +501,7 @@ const ProductDetail = () => {
                         </Button>
                       </>
                     ) : (
-                      <Button className="bg-primary text-primary-foreground hover:bg-primary/90" size="lg" asChild>
+                      <Button className="bg-primary text-primary-foreground hover:bg-primary" size="lg" asChild>
                         <a
                           href={product.vendor?.website || "#"}
                           target="_blank"
@@ -505,14 +517,17 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Hero Image (Plus/Premium only) */}
-                {isPlusOrPremium && product.screenshots && product.screenshots.length > 0 && (
+                {isPlusOrPremium && product.screenshots?.length > 0 && (
                   <div className="lg:w-[45%] min-w-0">
-                    <div className="rounded-xl overflow-hidden border border-border">
-                      <img
-                        src={product.screenshots[activeScreenshot]}
-                        alt={product.name}
-                        className="w-full aspect-video object-cover"
-                      />
+                    {/* Active screenshot: no crop, proportional, container = image size */}
+                    <div className="w-full flex justify-center">
+                      <div className="w-fit rounded-xl overflow-hidden border border-border">
+                        <img
+                          src={product.screenshots[activeScreenshot]}
+                          alt={product.name}
+                          className="block max-w-full max-h-[46vh] w-auto h-auto"
+                        />
+                      </div>
                     </div>
 
                     {product.screenshots.length > 1 && (
@@ -526,7 +541,12 @@ const ProductDetail = () => {
                               activeScreenshot === i ? "border-primary" : "border-border"
                             }`}
                           >
-                            <img src={ss} alt="" className="w-full aspect-video object-cover" />
+                            {/* Thumbnails: unchanged — cropped & covered */}
+                            <img
+                              src={ss}
+                              alt=""
+                              className="w-full aspect-video object-cover"
+                            />
                           </button>
                         ))}
                       </div>
@@ -566,7 +586,7 @@ const ProductDetail = () => {
                         <img
                           src={vendorLogo || "/placeholder.svg"}
                           alt={product.vendor.name}
-                          className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
+                          className="w-12 h-12 rounded-xl object-fill border border-border shrink-0"
                         />
                         <div className="min-w-0">
                           <span className="font-semibold text-foreground block truncate">
@@ -580,24 +600,31 @@ const ProductDetail = () => {
                       )}
 
                       {(vendorHQ || vendorSize) && (
-                        <div className="mt-4 grid grid-cols-2 gap-2">
+                        <div className="mt-6 grid grid-cols-2 gap-2">
                           {vendorHQ && (
                             <div className="rounded-xl border border-border bg-muted/30 p-3">
                               <p className="text-xs text-muted-foreground">{t("productDetail.headquarters")}</p>
-                              <p className="text-sm font-medium text-foreground break-words">{vendorHQ}</p>
+                              <p className="text-sm font-medium text-foreground break-words mt-1">{vendorHQ}</p>
                             </div>
                           )}
                           {vendorSize && (
                             <div className="rounded-xl border border-border bg-muted/30 p-3">
                               <p className="text-xs text-muted-foreground">{t("productDetail.companySize")}</p>
-                              <p className="text-sm font-medium text-foreground break-words">{vendorSize}</p>
+                              <p className="text-sm font-medium text-foreground break-words mt-1">{vendorSize}</p>
                             </div>
                           )}
                         </div>
                       )}
 
+                      {(vendorFoundedAt) && (
+                        <div className="text-center mt-8">
+                          <p className="text-sm mb-1">{t("settings.vendor.foundedAt")}</p>
+                          <p className="text-sm font-bold">{new Date(vendorFoundedAt).getFullYear()}</p>
+                        </div>
+                      )}
+
                       {/* Social Links */}
-                      <div className="flex items-center justify-around mt-4">
+                      <div className="flex items-center justify-center gap-4 mt-8">
                         {(vendorDetails?.website_link || product.vendor.website) ? (
                           <a
                             href={(vendorDetails?.website_link || product.vendor.website) as string}
