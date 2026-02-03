@@ -21,8 +21,12 @@ const Blog = () => {
 
   // Filter posts by category
   const filteredPosts = useMemo(() => {
-    if (!selectedCategory) return blogPosts;
-    return blogPosts.filter((post) => post.category === selectedCategory);
+    let posts = blogPosts;
+    if (selectedCategory) {
+      posts = blogPosts.filter((post) => post.category === selectedCategory);
+    }
+    // Sort by date descending (newest first)
+    return [...posts].sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
   }, [selectedCategory]);
 
   // Pagination
@@ -66,11 +70,10 @@ const Blog = () => {
           <div className="flex flex-wrap gap-2 justify-center">
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
-              className={`rounded-full ${
-                selectedCategory === null
+              className={`rounded-full ${selectedCategory === null
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "border-border text-foreground hover:bg-muted"
-              }`}
+                }`}
               onClick={() => handleCategoryChange(null)}
             >
               All Posts
@@ -80,11 +83,10 @@ const Blog = () => {
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
-                className={`rounded-full ${
-                  selectedCategory === category
+                className={`rounded-full ${selectedCategory === category
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "border-border text-foreground hover:bg-muted"
-                }`}
+                  }`}
                 onClick={() => handleCategoryChange(category)}
               >
                 {category}
@@ -170,11 +172,10 @@ const Blog = () => {
                     <Button
                       key={page}
                       variant={currentPage === page ? "default" : "outline"}
-                      className={`rounded-full w-10 h-10 ${
-                        currentPage === page
+                      className={`rounded-full w-10 h-10 ${currentPage === page
                           ? "bg-primary text-primary-foreground"
                           : "border-border text-foreground hover:bg-muted"
-                      }`}
+                        }`}
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}

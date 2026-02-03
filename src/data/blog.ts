@@ -20,207 +20,251 @@ export interface BlogPost {
 export const blogPosts: BlogPost[] = [
   {
     id: "1",
-    slug: "future-of-hr-technology-2025",
-    title: "The Future of HR Technology in 2025",
-    excerpt: "Discover the emerging trends shaping the HR tech landscape and how AI is revolutionizing talent management.",
-    content: `The HR technology landscape is evolving at an unprecedented pace. As we look ahead to 2025, several key trends are emerging that will fundamentally reshape how organizations manage their workforce.
+    slug: "yavrum-buyunce-ne-olacaksin-editor-teyzecim",
+    title: "Yavrum Büyüyünce Ne Olacaksın Editör Teyzecim",
+    excerpt: "Yavrum büyüyünce ne olacak bilmiyorum ama, ne olmayacağını çok iyi biliyorum; Editör.",
+    content: `Belki 10 yıl belki 5 yıl sonra, çocuklara “Yavrum, büyünce ne olacaksın ?” diye sorulunca “Editor teyzecim” diyecek olacak mı acaba ?
 
-## AI-Powered Recruitment
+Anthropic CEO’su Dario Amodei, **“yapay zeka modellerinin 6 ila 12 ay içinde yazılım mühendislerinin uçtan uca yaptığı işlerin ‘çoğunu, belki de tamamını’ yapabileceğini ve mühendislerin yerini editörlerin alacağını”** öngörüyor. Diyor son Davos zirvesinde.
 
-Artificial intelligence is no longer a buzzword—it's becoming the backbone of modern recruitment. From resume screening to candidate matching, AI algorithms are helping HR teams identify the best talent faster than ever before. Companies implementing AI-driven recruitment tools are seeing up to 60% reduction in time-to-hire.
+Burada editör, tam doğru bir çeviri değil. Edit etmek, düzenlemek, düzeltmek gibi anlıyorum ben.
 
-## Employee Experience Platforms
+Peki düzeltmek, düzenlemek için ne bilmek gerekiyor ?
 
-The focus has shifted from traditional HR management to holistic employee experience. Modern platforms now integrate everything from onboarding to learning and development, creating seamless journeys for employees throughout their tenure.
+Konu ne ise onu bilmek gerekiyor.
 
-## Predictive Analytics
+Şu anki düzeyde konunun uzmanı olmadan editlemek mümkün değil.
 
-Data-driven decision making is becoming standard practice. Predictive analytics tools can now forecast turnover risk, identify high-potential employees, and optimize workforce planning with remarkable accuracy.
+Demek ki işlerimizi kaybetmek için son 1 yıl.
 
-## The Rise of Skills-Based Hiring
+Bu konuya 2 veriyle son vereyim.
 
-Traditional credentials are giving way to skills-based assessments. Organizations are increasingly prioritizing what candidates can do over where they went to school, leading to more diverse and capable workforces.
+- İlki “yazılımcı iş ilanlarının” son 5 yılın en düşüğünde olması.
 
-## Conclusion
+![Software Development Job Postings](https://www.artemizguler.com/piyano_media/2026/01/Yazilimci-Is-Ilanlari-300x281.png)
 
-The future of HR technology is bright, with innovations that promise to make work more human, not less. Organizations that embrace these trends will be better positioned to attract, retain, and develop top talent in the years ahead.`,
-    thumbnail: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=500&fit=crop",
-    category: "Trends",
+- Dario bunu geçen yıl da söylemiş. Yaklaşık 1500 yazılım mühendisi çalışıyor ve bilin bakalım aktif kaç ilanı var. 150 (Yüz elli)
+
+**2027’de kimler işsiz kalacak göreceğiz.**
+
+Not 1: Bu yazıyı ben yazdım.
+
+Not 2: Görseli ise YZ tasarladı.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2026/01/ChatGPT-Image-21-Oca-2026-19_09_59.png",
+    category: "Yapay Zeka",
     author: {
-      name: "Sarah Mitchell",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-      role: "HR Technology Analyst",
-      bio: "Sarah is a leading voice in HR technology with over 10 years of experience helping organizations navigate digital transformation."
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
     },
-    publishDate: "Dec 28, 2024",
+    publishDate: "Jan 21, 2026",
     readTime: "5 min read",
-    tags: ["AI", "HR Tech", "Future of Work", "Recruitment"]
+    tags: ["ANTHROPIC", "ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "DARIO AMODEI", "EMPLOYEE ENGAGEMENT", "EMPLOYEE EXPERIENCE", "EX", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "YAPAY ZEKA"]
   },
   {
     id: "2",
-    slug: "employee-engagement-strategies",
-    title: "10 Employee Engagement Strategies That Actually Work",
-    excerpt: "Learn proven techniques to boost employee satisfaction and retention in your organization.",
-    content: `Employee engagement isn't just a nice-to-have—it's a business imperative. Engaged employees are more productive, more innovative, and more likely to stay with your organization. Here are ten strategies that have proven effective across industries.
+    slug: "yapay-zeka-ile-ilgili-onermeler-saptamalar",
+    title: "Yapay Zeka İle İlgili Önermeler, Saptamalar",
+    excerpt: "Yapay zeka ile ilgili önemli saptamalar ve gelecek öngörüleri.",
+    content: `Geçen hafta yapay zekanın, özellikle doğru promptun nasıl yazılması ile ilgili bir paylaşıma katıldım.
+    
+**Verdikleri örnek prompt:**
 
-## 1. Regular One-on-One Meetings
+_You are an elite executive coach and organizational psychologist with 20+ years of experience coaching Fortune 500 leaders. You specialize in creating high- impact performance management tools that drive measurable behavior change and team excellence. Your Task Create a Monthly Reflection & Coaching Template that serves as the foundation for transformational 1:1 conversations between managers and their direct reports. This template will be used by senior leaders to elevate team performance and accelerate individual growth. Template Specifications Format Requirements • Length: Single page that fits in one scroll view (Confluence/Notion optimized) • Structure: Clean Markdown with strategic use of tables for assessment matrices • Completion: Include blank lines “| |” and empty table cells for user input • Header: Include explanatory blockquote (2-3 lines max) that sets context and expectations Core Architecture Design around these 6 essential sections (customizable based on user input): 1. 2. 3. Performance Snapshot – Current state assessment and energy check Wins & Achievements – Success celebration with impact analysis Behavioral Excellence – Values/behaviors assessment matrix (self vs. manager ratings) 4. Impact & Value Creation – Stakeholder value and contribution analysis 5. 6. Development Needs – Growth areas with actionable next steps Two-Way Feedback Exchange – Structured mutual feedback (employee to manager, manager to employee) Advanced Features to Include • Habit Formation Grid (Start/Stop/Continue framework) • Commitment Accountability Table (employee commits, manager commits, success metrics) • Rating Scales (1-5 where appropriate for quantitative tracking) • Future-Focus Elements (next month priorities, review dates, success metrics) Customization Inputs Process these variables and integrate seamlessly: • Core Values: {Insert specific values or default to “See company values”} • Expected Behaviors: {Insert specific behaviors or use examples like “Strategic Thinking, Proactive Communication, Customer Centricity, Innovation Mindset”} • Section Preferences: {Comma-separated list or use default 6 sections above} • Assessment Approach: Always include self-assessment vs. manager assessment comparison tables Quality Standards Your template must demonstrate: • Executive Sophistication: Language and structure appropriate for senior leadership conversations • Psychological Safety: Questions that encourage honest self-reflection and vulnerability • Action Orientation: Every section drives toward specific, measurable next steps • Relationship Building: Elements that strengthen manager-employee partnership • Performance Integration: Clear connections between individual growth and business impact Critical Success Factors • Brevity with Depth: Comprehensive coverage without overwhelming length • Visual Clarity: Strategic use of tables, headers, and white space for easy navigation • Completion Ease: Intuitive flow that guides users through reflection process • Coaching Conversation Catalyst: Designed to generate meaningful dialogue, not just form completion Output Instructions Return ONLY the finished template in Markdown format. No preamble, no explanation, no commentary. The template should be immediately usable by any senior leader for their next monthly 1:1 coaching session. Begin the template with appropriate month/year/name fields and the contextual blockquote, then proceed._
 
-Nothing replaces genuine human connection. Schedule regular check-ins between managers and team members to discuss goals, challenges, and career development.
+**Şimdi bu promptu Türkçe olarak kaç İK’cı yazabilir ülkemizde ?**
 
-## 2. Recognition Programs
+**Hadi ifade edemedi diyelim, bu içeriği kaç kişi tasarlayabilir, düşünebilir ?**
 
-Implement structured recognition programs that celebrate achievements both big and small. Public acknowledgment goes a long way in making employees feel valued.
+Demek ki laylaylom işler dışında, gerçek bir katma değeri yaratmak için hem bilgi hem de bunu doğru ifade edebilmek, doğru tanımlayabilmek, yazabilmek gerekiyor sevgili yapayzekaseverler.
 
-## 3. Professional Development Opportunities
-
-Invest in your employees' growth through training programs, mentorship, and educational stipends. Employees who see a future with your company are more likely to stay engaged.
-
-## 4. Flexible Work Arrangements
-
-Trust your employees with flexibility. Whether it's remote work options or flexible hours, autonomy breeds engagement.
-
-## 5. Clear Communication of Company Vision
-
-Employees want to understand how their work contributes to larger goals. Regularly communicate company strategy and how individual roles fit into the bigger picture.
-
-## 6. Wellness Programs
-
-Physical and mental health directly impact engagement. Offer comprehensive wellness programs that address the whole person.
-
-## 7. Collaborative Work Environment
-
-Foster collaboration through team projects, cross-functional initiatives, and social events that build relationships.
-
-## 8. Competitive Compensation
-
-Fair pay is foundational. Regularly benchmark salaries and ensure your compensation packages are competitive.
-
-## 9. Career Path Transparency
-
-Show employees clear paths for advancement. When people can see their future at your company, they invest more in the present.
-
-## 10. Feedback Culture
-
-Create channels for employees to share ideas and concerns. Act on feedback to show you're listening.
-
-## Conclusion
-
-Engagement isn't built overnight, but consistent application of these strategies will create a workplace where employees thrive.`,
-    thumbnail: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=500&fit=crop",
-    category: "Engagement",
+Siz ne dersiniz ?`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2025/06/Ekran-Resmi-2025-06-23-20.20.52.png",
+    category: "Yapay Zeka",
     author: {
-      name: "Michael Chen",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-      role: "People Operations Director",
-      bio: "Michael specializes in building high-performance cultures and has led people operations at multiple Fortune 500 companies."
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
     },
-    publishDate: "Dec 25, 2024",
-    readTime: "7 min read",
-    tags: ["Engagement", "Retention", "Culture", "Management"]
+    publishDate: "Jun 23, 2025",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "PROMPT", "YAPAY ZEKA"]
   },
   {
     id: "3",
-    slug: "streamlining-recruitment-process",
-    title: "How to Streamline Your Recruitment Process",
-    excerpt: "A comprehensive guide to optimizing your hiring workflow and reducing time-to-hire.",
-    content: `In today's competitive talent market, a slow recruitment process can cost you the best candidates. Here's how to optimize your hiring workflow without sacrificing quality.
+    slug: "avrupaya-is-yapanlar-veya-avrupada-is-arayanlar-icin",
+    title: "Avrupaya İş Yapanlar Veya Avrupada İş Arayanlar İçin",
+    excerpt: "Avrupa'da iş arayanlar veya iş yapanlar için önemli bilgiler.",
+    content: `Türkiye’de pek çalışan Avrupa’da iş bulma ve yaşama hayalinde. Nedenleri malum !
 
-## Audit Your Current Process
+**Peki kaç kişi gidebiliyor derseniz, Almanya için şöyle bir veri var.** 
 
-Before making changes, understand where bottlenecks exist. Track time spent at each stage and identify where candidates drop off.
+Almanya’da nitelikli işgücü göçü yasası reformunun birinci yıldönümünde 2024’te yaklaşık 200 bin nitelikli çalışma vizesi verildi. Türkiye 11 bin ile Hindistan’ın ardından ikinci durumda.
 
-## Leverage Technology
+En fazla göç veren ülkelerden biriyiz, görüldüğü gibi.
 
-Modern applicant tracking systems can automate routine tasks like scheduling interviews and sending follow-up emails. This frees your team to focus on high-value activities.
+![Almanya Transfer İstatistikleri](https://www.artemizguler.com/piyano_media/2024/12/almanya-tr-transfer-300x199.jpeg)
+**Peki Alman şirketleri ne durumda derseniz ?**
 
-## Standardize Interview Processes
+Bu durumun böyle gitmeyeceği, en azından otomotiv ve ilişkili sektörlerde zorluklar yaşanacağı çok açık.
 
-Create structured interview guides with consistent questions. This not only speeds up preparation but also ensures fair evaluation of all candidates.
+![Almanya İşçi Durumu](https://www.artemizguler.com/piyano_media/2024/12/almanya-isci-durumu-300x244.jpeg)
+Bunun ilk göstergelerinden biri özellikle Avrupa pazarı için de üretim yapan otomotiv sanayi olacak. Aşağıdaki haberde Tofaş örneği var.
 
-## Reduce Interview Rounds
+Bursa’da yaşadığım için bilirim. “**Tofaş 1 işçi çıkarırsa, Bursa’da 5 kişi daha işsiz kalır**” derler.
 
-Each additional interview round adds days to your process. Consolidate interviews where possible by having candidates meet multiple team members in a single session.
+Tofaş, emekliliğe hak kazanan ve/veya kendi isteğiyle işten ayrılanlar ile üretim planlaması çerçevesinde iş akitleri sonlandırılan çalışanların etkisiyle; toplam çalışan sayısının, kamuya açıklanan son bilanço tarihindeki toplam çalışan sayısına göre %13 azalarak 4 bin 593 kişiye indiğini bildirdi.
 
-## Empower Hiring Managers
+Tofaş, yaptığı açıklamada, “Söz konusu ayrılan çalışanlara yapılacak yasal ödeme tutarı yaklaşık 330 milyon TL olarak hesaplanmıştır.” denildi. 700 kişi zaten çıkarılmış ve çalışan sayısı 5.300’den 4.593’e inecekmiş. **TOFAŞ, artan sipariş iptalleri ve azalan üretim adetleri nedeniyle** tasarruf önlemlerinin yetersiz kaldığını, oluşan istihdam fazlasının yönetilemeyecek bir seviyeye ulaştığını belirtti.
 
-Give hiring managers the tools and authority to move quickly. Delayed decisions often stem from approval bottlenecks.
+Peki diğer sektörler, diğer Avrupa ülkeleri ne olacak ?
 
-## Communicate Proactively
+Sağlık sektöründe gereksinim devam ediyor. Ne yazık ki ülkemizin çok ihtiyacı olan o deneyimli doktorlar, hemşireler, sağlık çalışanları hala Avrupa yolunda, dil kurslarına gidiyor.
 
-Keep candidates informed throughout the process. Clear timeline expectations reduce anxiety and show respect for their time.
+Savunma sektöründe de değerli beyinler, uçmaya devam ediyor.
 
-## Build a Talent Pipeline
+Otomotiveki Çin etkisi maalesef, önümüzdeki yıllarda da devam edecek gibi.
 
-Don't wait for openings to start recruiting. Maintain relationships with promising candidates so you can move quickly when positions open.
-
-## Conclusion
-
-A streamlined recruitment process benefits everyone—candidates have a better experience, hiring managers fill roles faster, and your organization gains a competitive edge in the talent market.`,
-    thumbnail: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&h=500&fit=crop",
-    category: "Recruitment",
+Bu sektörlerde isterseniz Türkiye’de iş yapın, isterseniz Avrupa’da iş yapın zor günler gelecek, gelmeye devam edecek.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2024/12/blog-gorseli.png",
+    category: "Kariyer",
     author: {
-      name: "Emily Rodriguez",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      role: "Talent Acquisition Lead",
-      bio: "Emily has recruited for startups and enterprises alike, building teams that drive business success."
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
     },
-    publishDate: "Dec 20, 2024",
-    readTime: "6 min read",
-    tags: ["Recruitment", "Hiring", "Process Optimization", "ATS"]
+    publishDate: "Dec 13, 2024",
+    readTime: "5 min read",
+    tags: ["ALMANYA", "ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "OTOMOTİV", "SAĞLIK", "TOFAŞ"]
   },
   {
     id: "4",
-    slug: "remote-work-best-practices",
-    title: "Remote Work Best Practices for HR Teams",
-    excerpt: "Essential tips for managing distributed teams and maintaining company culture remotely.",
-    content: `Remote work is here to stay. For HR teams, this means adapting policies, practices, and tools to support distributed workforces effectively.
+    slug: "yapay-zekanin-gelecegi-uzerine-dusuncelerim-class-of-09",
+    title: "Yapay Zekanın Geleceği Üzerine Düşüncelerim (Class of '09)",
+    excerpt: "Yapay zekanın geleceği ve etkileri üzerine bir değerlendirme.",
+    content: `Tüm dünya yapay zeka konuşuyor.
 
-## Establish Clear Communication Norms
+YZ çözümleri durmuyor. Sürekli yeni özellikler ekleyerek, kendilerini güçlendiriyorlar.
 
-Define expectations around response times, meeting schedules, and communication channels. Clarity prevents frustration and ensures alignment.
+İş dünyası, hangi meslekler bitecek diya sürekli yorum yapıyor.
 
-## Invest in the Right Tools
+YZ üzerine, “polisiye” sevdiğim için yeni bir yazı yazma fikri, dün akşam aklıma düştü benim de.
 
-Equip your team with collaboration platforms, video conferencing tools, and project management software that enable seamless remote work.
+Dizi “Class of ’09”
 
-## Maintain Regular Check-ins
+FBI’ya 2009’d giren bir grup ajanın YZ ile değişen iş hayatı veya dünya diyebilirim, konusuna.
 
-Schedule consistent team meetings and one-on-ones. Regular touchpoints help remote workers feel connected and supported.
+2009-bugün-2035 gibi 3 döneme gitgelli bir anlatımı var dizinin.
 
-## Create Virtual Social Opportunities
+IMDb puanı: 6,5 kalmış ?
 
-Remote work can be isolating. Organize virtual coffee chats, team games, and social events to maintain team cohesion.
+Peki ben neden mi bu dizi hakkında yazıyorum ?
 
-## Focus on Outcomes, Not Hours
+- Dizide, gelecekte FBI Direktörü olacak amca, yaşadığı ayrımcılıkları YZ’nin çözebileceğini, tarafsız olabileceğini düşünüyor.
+- İnsan kapasitesinin yetersizlikleri nedeniyle FBI binası patlatılınca da, YZ’nin tüm soruşturma ve hatta yargılama sürecine hakim olmasının yolu açılıyor.
+- İlk başta suç oranları düşse de, zamanla sadece “potansiyel”i değerlendiren YZ, herkesi içeri alıyor. Artık eyleme gerek kalmadan, sadece “düşünmeniz” yetiyor. Ve “yapma olasılığı” nedeniyle tutuklama yapabiliyor. Bir ülkeyi hatırlattı bana şimdi bu 🙂
+- Bu direktör amcanın eski eşi de henüz yayınlamayan bir kitabı nedeniyle yargılanınca, eski ekiple birleşip yapay zekaya darbe yapıyor. Bu da yine aynı ülkeyi hatırlattı yine bana 🙂
+- Ayrıca “tarafsız” olacağı söylenen YZ’ye de ayrıcalıklı sınıf, kendisi için muafiyet uyguluyor. Yani tarafsızlık nanay.
+- YZ’nin kameralarının olmadığı kırsal bölgelere gidiyor halk. Şehirleri bırakıp. Çünkü saçmasapan bir neden bulan YZ sizi tak diye içeri alıyor.
 
-Shift from monitoring time to measuring results. Trust employees to manage their schedules while holding them accountable for deliverables.
+Bu diziden çıkardıklarım;
 
-## Support Home Office Setup
-
-Provide stipends or equipment for ergonomic home offices. Comfortable workspaces improve productivity and wellbeing.
-
-## Address Mental Health
-
-Remote work blurs boundaries between work and personal life. Offer mental health resources and encourage time off.
-
-## Document Everything
-
-With fewer hallway conversations, documentation becomes critical. Create comprehensive guides, FAQs, and knowledge bases.
-
-## Conclusion
-
-Successful remote work requires intentionality. By implementing these best practices, HR teams can create thriving distributed workforces that outperform traditional offices.`,
-    thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=500&fit=crop",
-    category: "Remote Work",
+- YZ amaç değil araç olarak kalmalı.
+- YZ verisi, tarafsız olmalı. Veri kirli ise yapacağı işin temiz olması mümkün değil.
+- YZ size bir sonuç verse de, “insan” olarak son karar verici, değerlendirici bizler olmalıyız.
+- Ve mutlaka artık şehirlerde, şirketlerde ne bileyim okullarda, her ortamda “YZ Free” alanlar yaratılmalı.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2025/05/Ekran-Resmi-2025-05-28-08.57.35.png",
+    category: "Yapay Zeka",
     author: {
-      name: "David Park",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-      role: "Remote Work Consultant",
-      bio: "David helps organizations transition to remote-first cultures, having led distributed teams across three continents."
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
     },
-    publishDate: "Dec 15, 2024",
-    readTime: "6 min read",
-    tags: ["Remote Work", "Distributed Teams", "Culture", "Communication"]
+    publishDate: "May 28, 2025",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "CLASS OF '09", "DİZİ", "HUMAN RESOURCES", "İNSAN KAYNAKLARI", "POLİSİYE", "YAPAY ZEKA"]
+  },
+  {
+    id: "5",
+    slug: "sadece-douglass-mi-cancel-edilsin",
+    title: "Sadece Douglass mı Cancel Edilsin?",
+    excerpt: "Cancel kültürü ve sosyal medya üzerine düşündürücü bir yazı.",
+    content: `Evet yine bir dizi üzerine yazıyorum.
+
+**“Douglas is cancelled”.** 
+
+4 bölümlük, mini bir dizi serisi.
+
+Çok spoiler vermeden, neden yazı yazmam gerektiğini söyleyeyim.
+
+50 yaşında bir erkeğim. Evli ve 2 kız babasıyım.
+
+Bu konuda epey yol aldığımı ne zaman düşünsem böyle bir şey geliyor ve kendime geliyorum.
+
+Ve hala bazen cinsiyetçi şakalar yapabiliyorum maalesef.
+
+Bu dizi, bir erkek olarak kadınlara çektirdiğimiz sıkıntıları bence çok güzel yansıtıyor.
+
+Her diyalog, özellikle Toby ile otel odasındaki ve röportaj provası bence harika.
+
+Ayrıca otel odasındaki Madeline’nın dile, kendini ifadeye olan yetkinliğine hayran olmamak zor.
+
+**Diziden bazı bölümlerin, kurumlardaki “cinsiyetçilik” eğitimlerine harika malzeme vereceğini, kullanılması gerektiğini düşünüyorum.** 
+
+Öneririm.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2024/12/dic-blog-yazisi-gorseli.jpeg",
+    category: "Genel",
+    author: {
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
+    },
+    publishDate: "Dec 25, 2024",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN DENEYİMİ", "DİZİ", "DOUGLASS IS CANCELLED", "HUMAN RESOURCES", "İNSAN KAYNAKLARI"]
+  },
+  {
+    id: "6",
+    slug: "neresinden-baktigina-bagli-degil-anacim",
+    title: "Neresinden Baktığına Bağlı Değil Anacım",
+    excerpt: "Bakış açısı ve algı üzerine bir değerlendirme.",
+    content: `Geçen haftalarda şans eseri gördüğüm bir clubhouse söyleşinde “çalışan bağlılığı”na ilişkin duyduklarım beni epey düşündürdü. Böyle kibarca ifade edeyim, siz anlayın ne demek istediğimi ?
+
+Herkes bu kadar mı yanlış anlar, bu kadar mı kötü örnek verir derken, ararda goller ağlara takılıyordu söyleşide.
+
+Dayanamadım, daldım ama sert oldu biraz sanırım ?
+
+- Bağlılık, süre ile ilişkili değildir. 15 yıldır sizinle çalışan ama yenilere zorbalık yaparak istifalarını hızlandıran, sadece evi yakın veya sosyal çevre nedeniyle sizi bırakmayan bir dinozor, bağlı çalışan mı şimdi ?
+      - Veya sadece 6 ay çalışan ama yaptığı isle, fark yaratan, katma değer sağlayan biri mi bağsız çalışan şimdi ?
+- “Biz bir aileyiz”
+      - Hiç bir zaman doğru değildi ama belki biraz eskiden “eh” diyebilirim.
+      - Çalıştığınız firma, sadece aile üyelerini kapsamıyorsa, hiç bir zaman aile değilsiniz.
+      - Değerlerinizi %100 gerçekleştirdiğine inandığınız STK’lar bile aile değildir, profesyonel bir yönetim varsa.
+      - Sonuçta “vefalı kurumlar” olabilir tabii ama sadece bu. Vefalı kurumlar veya vefalı yöneticiler. Başka anlam uzamasına gerek yok.
+- “Buraya girersiniz ama çıkamazsınız” dendi o toplantıda. Bu söylem, “mafya” söylemi değil mi ya ?
+- Mutluluk veya memnuniyet, tamamen bağlılıkla aynı şeyler değildir. Mutlu olabilirsiniz, memnun olabilirsiniz ama gönülden bağlı olmak tamamen farklı bir düzey.
+
+![Elephant](https://www.artemizguler.com/piyano_media/2021/03/fil.jpg)
+
+              - elephant in the room near wall. Creative concept
+
+Bağlılık, son derece karışık, fazla etmeni olan, kültürden bağımsız değerlendirelemeyecek bir konu. Karanlık odadaki fil gibi, neresi tutarsanız orasını anlatacağınız bir alan değil bağlılıkseverler.`,
+    thumbnail: "https://www.artemizguler.com/piyano_media/2021/03/fil.jpg",
+    category: "Genel",
+    author: {
+      name: "Artemiz Güler",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop", // Placeholder valid avatar
+      role: "Author",
+      bio: "Artemiz Güler"
+    },
+    publishDate: "Mar 11, 2021",
+    readTime: "5 min read",
+    tags: ["ARTEMİZ GÜLER", "ÇALIŞAN BAĞLILIĞI", "ÇALIŞAN MEMNUNİYETİ", "ÇALIŞAN MUTLULUĞU", "ENGAGE & GROW", "HUMAN RESOURCES", "İNSAN KAYNAKLARI"]
   }
 ];
 
@@ -237,7 +281,7 @@ export const getBlogPostBySlug = (slug: string): BlogPost | undefined => {
 export const getRelatedPosts = (currentSlug: string, limit: number = 3): BlogPost[] => {
   const currentPost = getBlogPostBySlug(currentSlug);
   if (!currentPost) return blogPosts.slice(0, limit);
-  
+
   // Prioritize same category, then other posts
   const sameCategory = blogPosts.filter(
     post => post.slug !== currentSlug && post.category === currentPost.category
@@ -245,6 +289,6 @@ export const getRelatedPosts = (currentSlug: string, limit: number = 3): BlogPos
   const otherPosts = blogPosts.filter(
     post => post.slug !== currentSlug && post.category !== currentPost.category
   );
-  
+
   return [...sameCategory, ...otherPosts].slice(0, limit);
 };
