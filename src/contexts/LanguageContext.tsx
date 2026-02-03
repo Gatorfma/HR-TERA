@@ -282,6 +282,7 @@ const en: Record<string, string> = {
   "productTabs.getStarted": "Get Started",
   "productTabs.contactForPricing": "Contact for Pricing",
   "productTabs.customizedPricing": "Pricing is customized based on your needs.",
+  "productTabs.gallery": "Gallery",
 
   // Settings Tab
   "settings.nav.account": "Account",
@@ -657,6 +658,7 @@ const tr: Record<string, string> = {
   "productTabs.getStarted": "Başlayın",
   "productTabs.contactForPricing": "Fiyatlandırma İçin İletişime Geçin",
   "productTabs.customizedPricing": "Fiyatlandırma ihtiyaçlarınıza göre özelleştirilir.",
+  "productTabs.gallery": "Galeri",
 
   // Settings Tab
   "settings.nav.account": "Hesap",

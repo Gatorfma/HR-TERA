@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Images } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ProductGalleryProps {
   screenshots: string[];
@@ -40,6 +41,8 @@ const embedUrl = (url?: string) => {
 };
 
 const ProductGallery = ({ screenshots, productName, videoUrl }: ProductGalleryProps) => {
+  const { t } = useLanguage();
+  
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const embededUrl = embedUrl(videoUrl);
@@ -62,7 +65,7 @@ const ProductGallery = ({ screenshots, productName, videoUrl }: ProductGalleryPr
       >
         <h2 className="text-2xl font-heading font-bold text-foreground mb-4 flex items-center gap-2">
           <Images className="w-5 h-5 text-primary" />
-          Product Gallery
+          {t("productTabs.gallery")}
         </h2>
 
         {/* Video */}

@@ -311,17 +311,17 @@ const ProductBulkUploadPage = () => {
       setImportResults({
         success: result.success_count,
         failed: result.error_count,
-        errors: result.errors.map((e) => ({ name: e.product_name, message: e.error })),
+        errors: result.errors.map((e: any) => ({ name: e.product_name, message: e.error })),
       });
 
       toast({
         title: "İçe aktarma tamamlandı",
         description: `${result.success_count} başarılı, ${result.error_count} başarısız.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Hata",
-        description: error instanceof Error ? error.message : "İçe aktarma başarısız oldu.",
+        description: error?.message || "İçe aktarma başarısız oldu.",
         variant: "destructive",
       });
     } finally {

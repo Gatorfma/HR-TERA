@@ -171,8 +171,39 @@ export async function adminLookupVendor(
 }
 
 /**
+ * Get vendors for admin product assignment (with optional search)
+ * Uses admin_get_vendors which supports empty search query to list all vendors
+ */
+export async function adminGetVendors(
+  searchQuery: string = '',
+  limit: number = 30
+): Promise<VendorSearchResult[]> {
+  const trimmed = searchQuery?.trim() || '';
+
+  const { data, error } = await supabase.rpc('admin_get_vendors', {
+    page_num: 1,
+    page_size: limit,
+    search_query: trimmed.length > 0 ? trimmed : null,
+  });
+
+  if (error) {
+    console.error('[adminGetVendors] Error:', error);
+    return [];
+  }
+
+  // Map the full vendor data to VendorSearchResult format
+  return (data || []).map((v: any) => ({
+    vendor_id: v.vendor_id,
+    company_name: v.company_name,
+    subscription: v.subscription,
+    is_verified: v.is_verified,
+    headquarters: v.headquarters,
+  }));
+}
+
+/**
  * Search vendors by company name for admin product assignment
- * Returns empty array if query is null/empty (use adminFetchVendorsForDropdown for full list)
+ * @deprecated Use adminGetVendors instead which supports empty queries
  */
 export async function adminSearchVendors(
   searchQuery: string,
