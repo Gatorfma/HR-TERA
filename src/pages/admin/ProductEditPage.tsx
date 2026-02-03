@@ -233,15 +233,7 @@ const ProductEditPage = () => {
 
   // Clear vendor (reset to original)
   const handleClearVendor = () => {
-    if (selectedProduct) {
-      setSelectedVendor({
-        vendor_id: selectedProduct.vendor_id,
-        company_name: selectedProduct.company_name,
-        subscription: selectedProduct.subscription,
-        is_verified: selectedProduct.is_verified,
-        headquarters: null,
-      });
-    }
+    setSelectedVendor(null);
   };
 
 

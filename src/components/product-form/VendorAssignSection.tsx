@@ -141,16 +141,14 @@ export function VendorAssignSection({
                 </div>
               </div>
             </div>
-            {vendorChanged && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClearVendor}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearVendor}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         ) : (
           <div className="p-3 rounded-lg border border-dashed text-center text-muted-foreground">
@@ -158,87 +156,89 @@ export function VendorAssignSection({
           </div>
         )}
 
-        {/* Vendor arama */}
-        <div className="space-y-2 relative">
-          <Label>Şirket Ara</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Şirket adı ile ara veya tıklayarak listele..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="pl-10"
-            />
-            {isLoading && (
-              <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-            )}
-          </div>
-
-          {/* Vendor listesi / arama sonuçları */}
-          {showDropdown && (
-            <div className="absolute z-50 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-[300px] overflow-y-auto">
-              {isLoading && vendors.length === 0 ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                  <span className="ml-2 text-sm text-muted-foreground">Yükleniyor...</span>
-                </div>
-              ) : vendors.length > 0 ? (
-                <div className="py-1">
-                  {vendors.map((vendor) => (
-                    <button
-                      key={vendor.vendor_id}
-                      type="button"
-                      className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors text-left cursor-pointer"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleSelectVendor(vendor);
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
-                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                            {vendor.company_name?.slice(0, 2).toUpperCase() || "V"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="space-y-0.5">
-                          <p className="text-sm font-medium">
-                            {vendor.company_name || "İsimsiz"}
-                          </p>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge
-                              className={cn(
-                                "text-[10px] capitalize",
-                                getTierBadgeColor(vendor.subscription)
-                              )}
-                            >
-                              {vendor.subscription}
-                            </Badge>
-                            {vendor.is_verified && (
-                              <CheckCircle className="h-3 w-3 text-green-500" />
-                            )}
-                          </div>
-                          {vendor.headquarters && (
-                            <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              {vendor.headquarters}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-xs text-primary font-medium shrink-0">Seç</span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-4 text-center text-muted-foreground text-sm">
-                  {searchInput.length > 0 ? "Şirket bulunamadı" : "Henüz şirket yok"}
-                </div>
+        {/* Vendor arama - Sadece vendor seçili değilse göster */}
+        {!selectedVendor && (
+          <div className="space-y-2 relative">
+            <Label>Şirket Ara</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Şirket adı ile ara veya tıklayarak listele..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                className="pl-10"
+              />
+              {isLoading && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
               )}
             </div>
-          )}
-        </div>
+
+            {/* Vendor listesi / arama sonuçları */}
+            {showDropdown && (
+              <div className="absolute z-50 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-[300px] overflow-y-auto">
+                {isLoading && vendors.length === 0 ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-sm text-muted-foreground">Yükleniyor...</span>
+                  </div>
+                ) : vendors.length > 0 ? (
+                  <div className="py-1">
+                    {vendors.map((vendor) => (
+                      <button
+                        key={vendor.vendor_id}
+                        type="button"
+                        className="w-full flex items-center justify-between p-3 hover:bg-muted/50 transition-colors text-left cursor-pointer"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectVendor(vendor);
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                              {vendor.company_name?.slice(0, 2).toUpperCase() || "V"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="space-y-0.5">
+                            <p className="text-sm font-medium">
+                              {vendor.company_name || "İsimsiz"}
+                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge
+                                className={cn(
+                                  "text-[10px] capitalize",
+                                  getTierBadgeColor(vendor.subscription)
+                                )}
+                              >
+                                {vendor.subscription}
+                              </Badge>
+                              {vendor.is_verified && (
+                                <CheckCircle className="h-3 w-3 text-green-500" />
+                              )}
+                            </div>
+                            {vendor.headquarters && (
+                              <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                                <MapPin className="h-3 w-3" />
+                                {vendor.headquarters}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-xs text-primary font-medium shrink-0">Seç</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    {searchInput.length > 0 ? "Şirket bulunamadı" : "Henüz şirket yok"}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {error && <p className="text-xs text-destructive mt-2">{error}</p>}
       </SectionContent>
