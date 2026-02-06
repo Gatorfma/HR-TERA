@@ -550,87 +550,89 @@ const UserSettingsTab = () => {
                   )}
                 </div>
 
-                {/* User search */}
-                <div className="space-y-2">
-                  <Label>Yeni Kullanıcı Ara</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                    <Input
-                      placeholder="E-posta ile ara..."
-                      value={userSearchInput}
-                      onChange={(e) => setUserSearchInput(e.target.value)}
-                      onFocus={() => setUserSearchOpen(true)}
-                      onBlur={() => setTimeout(() => setUserSearchOpen(false), 200)}
-                      className="pl-10"
-                    />
+                {/* User search - Only show if no user is assigned */}
+                {!selectedVendor.user_id && (
+                  <div className="space-y-2">
+                    <Label>Yeni Kullanıcı Ara</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                      <Input
+                        placeholder="E-posta ile ara..."
+                        value={userSearchInput}
+                        onChange={(e) => setUserSearchInput(e.target.value)}
+                        onFocus={() => setUserSearchOpen(true)}
+                        onBlur={() => setTimeout(() => setUserSearchOpen(false), 200)}
+                        className="pl-10"
+                      />
 
-                    {/* Dropdown list */}
-                    {userSearchOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-1 z-50 border rounded-lg bg-popover shadow-md max-h-[220px] overflow-hidden">
-                        {isSearchingUsers ? (
-                          <div className="flex items-center justify-center p-4">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                          </div>
-                        ) : userSearchResults.length > 0 ? (
-                          <div className="max-h-[200px] overflow-y-auto p-1">
-                            {userSearchResults.map((user) => (
-                              <button
-                                key={user.user_id}
-                                type="button"
-                                onClick={() => {
-                                  handleAssignUser(user.user_id);
-                                  setUserSearchOpen(false);
-                                }}
-                                disabled={isAssigningUser || !!user.assigned_vendor_id}
-                                className={`w-full flex items-center justify-between p-2 rounded-md hover:bg-accent hover:text-accent-foreground text-left transition-colors ${user.assigned_vendor_id ? "opacity-50 cursor-not-allowed" : ""
-                                  }`}
-                              >
-                                <div className="flex items-center gap-2 overflow-hidden">
-                                  <Avatar className="h-7 w-7 flex-shrink-0">
-                                    <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                                      {user.email.slice(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{user.email}</p>
-                                    <div className="flex flex-wrap gap-1">
-                                      {user.full_name && (
-                                        <span className="text-xs text-muted-foreground truncate">
-                                          {user.full_name}
-                                        </span>
-                                      )}
-                                      {user.assigned_vendor_name && (
-                                        <span className="text-xs text-amber-600 truncate ml-1">
-                                          • Mevcut: {user.assigned_vendor_name}
-                                        </span>
-                                      )}
+                      {/* Dropdown list */}
+                      {userSearchOpen && (
+                        <div className="absolute top-full left-0 right-0 mt-1 z-50 border rounded-lg bg-popover shadow-md max-h-[220px] overflow-hidden">
+                          {isSearchingUsers ? (
+                            <div className="flex items-center justify-center p-4">
+                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            </div>
+                          ) : userSearchResults.length > 0 ? (
+                            <div className="max-h-[200px] overflow-y-auto p-1">
+                              {userSearchResults.map((user) => (
+                                <button
+                                  key={user.user_id}
+                                  type="button"
+                                  onClick={() => {
+                                    handleAssignUser(user.user_id);
+                                    setUserSearchOpen(false);
+                                  }}
+                                  disabled={isAssigningUser || !!user.assigned_vendor_id}
+                                  className={`w-full flex items-center justify-between p-2 rounded-md hover:bg-accent hover:text-accent-foreground text-left transition-colors ${user.assigned_vendor_id ? "opacity-50 cursor-not-allowed" : ""
+                                    }`}
+                                >
+                                  <div className="flex items-center gap-2 overflow-hidden">
+                                    <Avatar className="h-7 w-7 flex-shrink-0">
+                                      <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                                        {user.email.slice(0, 2).toUpperCase()}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium truncate">{user.email}</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {user.full_name && (
+                                          <span className="text-xs text-muted-foreground truncate">
+                                            {user.full_name}
+                                          </span>
+                                        )}
+                                        {user.assigned_vendor_name && (
+                                          <span className="text-xs text-amber-600 truncate ml-1">
+                                            • Mevcut: {user.assigned_vendor_name}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {isAssigningUser && user.user_id === selectedVendor?.user_id ? ( // This logic for spinner on specific item is tricky since selectedVendor might not match yet
-                                    // Actually handleAssignUser is blocking toast so spinner is general?
-                                    // "isAssigningUser" is global for the hook.
-                                    // I'll just show text or general spinner if needed, but button disabled is enough.
-                                    null
-                                  ) : !user.assigned_vendor_id ? (
-                                    <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">Bağla</span>
-                                  ) : (
-                                    <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">Bağlı</span>
-                                  )}
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-4 text-center text-muted-foreground text-sm">
-                            Kullanıcı bulunamadı
-                          </div>
-                        )}
-                      </div>
-                    )}
+                                  <div className="flex items-center gap-2">
+                                    {isAssigningUser && user.user_id === selectedVendor?.user_id ? ( // This logic for spinner on specific item is tricky since selectedVendor might not match yet
+                                      // Actually handleAssignUser is blocking toast so spinner is general?
+                                      // "isAssigningUser" is global for the hook.
+                                      // I'll just show text or general spinner if needed, but button disabled is enough.
+                                      null
+                                    ) : !user.assigned_vendor_id ? (
+                                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">Bağla</span>
+                                    ) : (
+                                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">Bağlı</span>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-4 text-center text-muted-foreground text-sm">
+                              Kullanıcı bulunamadı
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Removed logic for displaying results inline below */}
               </CardContent>

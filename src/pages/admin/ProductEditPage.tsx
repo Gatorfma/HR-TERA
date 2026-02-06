@@ -23,6 +23,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -172,6 +173,7 @@ const ProductEditPage = () => {
       languages: product.languages,
       release_date: product.release_date,
       listing_status: product.listing_status,
+      rating: product.rating,
     });
 
     // Vendor bilgilerini ayarla
@@ -232,15 +234,7 @@ const ProductEditPage = () => {
 
   // Clear vendor (reset to original)
   const handleClearVendor = () => {
-    if (selectedProduct) {
-      setSelectedVendor({
-        vendor_id: selectedProduct.vendor_id,
-        company_name: selectedProduct.company_name,
-        subscription: selectedProduct.subscription,
-        is_verified: selectedProduct.is_verified,
-        headquarters: null,
-      });
-    }
+    setSelectedVendor(null);
   };
 
 
@@ -281,6 +275,7 @@ const ProductEditPage = () => {
         demoLink: apiValues.demoLink || undefined,
         releaseDate: apiValues.releaseDate || undefined,
         listingStatus: apiValues.listingStatus,
+        rating: apiValues.rating,
       });
 
       const vendorMsg = vendorChanged ? " Şirket değiştirildi." : "";
@@ -300,12 +295,12 @@ const ProductEditPage = () => {
         setSelectedProduct((prev) =>
           prev
             ? {
-                ...prev,
-                vendor_id: selectedVendor.vendor_id,
-                company_name: selectedVendor.company_name,
-                subscription: selectedVendor.subscription,
-                is_verified: selectedVendor.is_verified,
-              }
+              ...prev,
+              vendor_id: selectedVendor.vendor_id,
+              company_name: selectedVendor.company_name,
+              subscription: selectedVendor.subscription,
+              is_verified: selectedVendor.is_verified,
+            }
             : null
         );
       }
@@ -424,6 +419,16 @@ const ProductEditPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
 
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/admin/products")}
+            className="-ml-2 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Geri Dön
+          </Button>
+
           <h1 className="text-3xl font-bold text-foreground">Ürün Düzenleme</h1>
           <p className="text-muted-foreground mt-2 mb-8">
             Sistemdeki ürün kayıtlarını görüntüleyip düzenleyin.
@@ -461,11 +466,10 @@ const ProductEditPage = () => {
                         <button
                           key={product.product_id}
                           onClick={() => handleSelectProduct(product)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                            selectedProduct?.product_id === product.product_id
-                              ? "bg-primary/10 border border-primary/20"
-                              : "hover:bg-muted"
-                          }`}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${selectedProduct?.product_id === product.product_id
+                            ? "bg-primary/10 border border-primary/20"
+                            : "hover:bg-muted"
+                            }`}
                         >
                           <Avatar className="h-10 w-10 rounded-lg">
                             <AvatarImage src={product.logo} className="object-cover" />
@@ -597,6 +601,7 @@ const ProductEditPage = () => {
                     canUseDemo={canUseDemo}
                     addLanguage={addLanguage}
                     removeLanguage={removeLanguage}
+                    mode="edit"
                   />
 
                   {/* Actions */}

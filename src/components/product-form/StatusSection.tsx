@@ -83,20 +83,31 @@ export function StatusSection({
             )}
           />
 
-          {/* Rating (read-only) */}
-          {rating !== undefined && (
-            <div className="space-y-2">
-              <FormLabel className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Rating
-              </FormLabel>
-              <Input
-                value={rating?.toFixed(1) || "N/A"}
-                disabled
-                className="bg-muted"
-              />
-            </div>
-          )}
+          {/* Rating (Editable) */}
+          <FormField
+            control={form.control}
+            name="rating"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Rating (0-5)
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    placeholder="4.5"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Created At (read-only) */}
           {createdAt !== undefined && (

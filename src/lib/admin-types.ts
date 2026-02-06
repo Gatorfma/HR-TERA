@@ -257,6 +257,7 @@ export interface AdminUpdateProductInput {
   demoLink?: string | null;
   releaseDate?: string | null;
   listingStatus?: ListingStatus | null;
+  rating?: number | null;
 }
 
 /**

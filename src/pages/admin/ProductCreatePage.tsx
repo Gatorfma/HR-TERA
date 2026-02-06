@@ -11,7 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -166,7 +166,6 @@ const ProductCreatePage = () => {
         pricing: apiValues.pricing || undefined,
         languages: apiValues.languages || undefined,
         demoLink: apiValues.demoLink || undefined,
-        releaseDate: apiValues.releaseDate || undefined,
         listingStatus: apiValues.listingStatus || 'pending',
       });
 
@@ -221,6 +220,16 @@ const ProductCreatePage = () => {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/admin/products")}
+            className="-ml-2 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Geri Dön
+          </Button>
 
           <h1 className="text-3xl font-bold text-foreground">Yeni Ürün Oluştur</h1>
           <p className="text-muted-foreground mt-2 mb-8">
@@ -278,6 +287,7 @@ const ProductCreatePage = () => {
                   canUseDemo={canUseDemo}
                   addLanguage={addLanguage}
                   removeLanguage={removeLanguage}
+                  mode="create"
                 />
 
                 {/* Status */}
@@ -315,7 +325,7 @@ const ProductCreatePage = () => {
                   completionPercentage={Math.round(
                     ((completedFields + (selectedVendor ? 1 : 0)) /
                       (totalRequiredFields + 1)) *
-                      100
+                    100
                   )}
                 />
 

@@ -3045,7 +3045,7 @@ begin
     nullif(p_pricing, ''),
     p_languages,
     nullif(p_demo_link, ''),
-    p_release_date,
+    CURRENT_DATE,
     p_listing_status
   )
   returning product_id into new_product_id;
@@ -3616,7 +3616,8 @@ create or replace function public.admin_update_product(
   p_languages text[] default null,
   p_demo_link text default null,
   p_release_date date default null,
-  p_listing_status public.listing_status default null
+  p_listing_status public.listing_status default null,
+  p_rating double precision default null
 )
 returns boolean
 language plpgsql
@@ -3703,8 +3704,8 @@ begin
       when p_demo_link is not null then nullif(p_demo_link, '')
       else demo_link 
     end,
-    release_date = coalesce(p_release_date, release_date),
     listing_status = coalesce(p_listing_status, listing_status),
+    rating = coalesce(p_rating, rating),
     updated_at = now()
   where product_id = p_product_id;
 
@@ -3714,5 +3715,5 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status) to authenticated;
-grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status) to service_role;
+grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status, double precision) to authenticated;
+grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status, double precision) to service_role;
