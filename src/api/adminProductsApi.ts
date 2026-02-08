@@ -271,20 +271,23 @@ export async function adminFetchVendorsForDropdown(
 
 /**
  * Bulk create products (admin only)
+ * Uses company_name to lookup vendor_id internally
  */
 export async function adminBulkCreateProducts(
-  vendorId: string,
   products: BulkProductInput[]
 ): Promise<BulkImportResult> {
+  console.log('[adminBulkCreateProducts] Importing', products.length, 'products');
+
   const { data, error } = await supabase.rpc('admin_bulk_create_products', {
-    p_vendor_id: vendorId,
     p_products: products,
   });
 
   if (error) {
+    console.error('[adminBulkCreateProducts] RPC error:', error);
     throw new Error(error.message);
   }
 
+  console.log('[adminBulkCreateProducts] Result:', data);
   return data as BulkImportResult;
 }
 

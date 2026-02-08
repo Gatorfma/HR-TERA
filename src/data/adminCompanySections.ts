@@ -3,7 +3,7 @@ export interface AdminCompanySection {
   title: string;
   description: string;
   path: string;
-  icon: "building" | "plus" | "edit";
+  icon: "building" | "plus" | "edit" | "table";
 }
 
 export const adminCompanySections: AdminCompanySection[] = [
@@ -20,5 +20,12 @@ export const adminCompanySections: AdminCompanySection[] = [
     description: "Yeni bir şirket (vendor) kaydı oluşturun.",
     path: "/admin/companies/new",
     icon: "plus",
+  },
+  {
+    id: "bulk-upload",
+    title: "Excel ile Toplu Ekle",
+    description: "Excel dosyasından birden fazla şirket ekleyin.",
+    path: "/admin/companies/bulk-upload",
+    icon: "table",
   },
 ];

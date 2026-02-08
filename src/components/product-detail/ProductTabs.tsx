@@ -30,7 +30,7 @@ type TabValue = "overview" | "features" | "media" | "reviews" | "pricing" | "ven
 const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
   const location = useLocation();
   const { t } = useLanguage();
-  
+
   // Force freemium tier for unclaimed products
   const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
   const tier = effectiveTier;
@@ -171,8 +171,8 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
             {/* Media Tab */}
             <TabsContent value="media" className="mt-0">
               {hasMedia && (
-                <ProductGallery 
-                  screenshots={product.screenshots} 
+                <ProductGallery
+                  screenshots={product.screenshots}
                   productName={product.name}
                   videoUrl={isPremium ? product.videoUrl : undefined}
                 />
@@ -200,7 +200,7 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                 className="space-y-6"
               >
                 <h2 className="text-2xl font-heading font-bold text-foreground mb-6">{t("productTabs.pricing")}</h2>
-                
+
                 {hasPricing ? (
                   <div className="bg-card rounded-xl border border-border p-8">
                     <div className="flex items-baseline gap-2 mb-4">
@@ -208,7 +208,7 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                       <span className="text-muted-foreground">{t("productTabs.perMonth")}</span>
                     </div>
                     <p className="text-muted-foreground mb-6">
-                      {isPremium 
+                      {isPremium
                         ? t("productTabs.enterprisePricing")
                         : t("productTabs.flexiblePricing")}
                     </p>

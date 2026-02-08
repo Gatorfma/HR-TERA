@@ -14,6 +14,8 @@ import {
   UserSearchResult,
   AssignUserToVendorInput,
   CreateVendorInput,
+  BulkVendorInput,
+  BulkVendorImportResult,
   ApiResponse,
   AdminErrorCodes,
 } from '@/lib/admin-types';
@@ -590,5 +592,32 @@ export async function adminCreateVendor(
       },
     };
   }
+}
+
+
+// ============================================================
+// Admin: Bulk Create Vendors
+// ============================================================
+
+/**
+ * Bulk create vendors from Excel import
+ * @requires Admin role
+ */
+export async function adminBulkCreateVendors(
+  vendors: BulkVendorInput[]
+): Promise<BulkVendorImportResult> {
+  console.log('[adminBulkCreateVendors] Importing', vendors.length, 'vendors');
+
+  const { data, error } = await supabase.rpc('admin_bulk_create_vendors', {
+    p_vendors: vendors,
+  });
+
+  if (error) {
+    console.error('[adminBulkCreateVendors] RPC error:', error);
+    throw new Error(error.message);
+  }
+
+  console.log('[adminBulkCreateVendors] Result:', data);
+  return data as BulkVendorImportResult;
 }
 
