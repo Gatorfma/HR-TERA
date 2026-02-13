@@ -3358,9 +3358,9 @@ stable
 security definer
 set search_path = public
 as $$
-  select array_agg(distinct country order by country)
+  select array_agg(distinct normalized_country order by normalized_country)
   from (
-    select trim(substring(v.headquarters from '([^,]+)$')) as country
+    select initcap(trim(substring(v.headquarters from '([^,]+)$'))) as normalized_country
     from public.vendors v
     where v.headquarters is not null
       and v.headquarters != ''
@@ -3370,7 +3370,7 @@ as $$
           and p.listing_status = 'approved'
       )
   ) as countries
-  where country is not null and country != '';
+  where normalized_country is not null and normalized_country != '';
 $$;
 
 grant execute on function public.get_all_countries() to anon, authenticated, service_role;
@@ -3717,3 +3717,106 @@ $$;
 
 grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status, double precision) to authenticated;
 grant execute on function public.admin_update_product(uuid, uuid, text, text, text, text, public.product_category, public.product_category[], text[], text, text, text[], text, text[], text, date, public.listing_status, double precision) to service_role;
+
+-- ============================================================
+-- RPC: get_trending_products
+-- Purpose: Get trending products based on analytics engagement
+-- Parameters:
+--   p_period TEXT - 'week', 'month', or 'year'
+--   p_limit INT - number of results to return
+--   p_category TEXT - optional category filter (null = all)
+-- Returns: Table of trending products with engagement data
+-- ============================================================
+create or replace function public.get_trending_products(
+  p_period text default 'month',
+  p_limit int default 10,
+  p_category text default null
+)
+returns table (
+  product_id uuid,
+  product_name text,
+  short_desc text,
+  logo text,
+  main_category text,
+  subscription text,
+  is_verified boolean,
+  vendor_name text,
+  engagement_score bigint,
+  previous_score bigint,
+  growth_percentage numeric
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_current_start timestamptz;
+  v_previous_start timestamptz;
+  v_previous_end timestamptz;
+begin
+  -- Calculate time periods
+  case p_period
+    when 'week' then
+      v_current_start := now() - interval '7 days';
+      v_previous_start := now() - interval '14 days';
+      v_previous_end := now() - interval '7 days';
+    when 'year' then
+      v_current_start := now() - interval '365 days';
+      v_previous_start := now() - interval '730 days';
+      v_previous_end := now() - interval '365 days';
+    else -- month (default)
+      v_current_start := now() - interval '30 days';
+      v_previous_start := now() - interval '60 days';
+      v_previous_end := now() - interval '30 days';
+  end case;
+
+  return query
+  with current_engagement as (
+    select
+      ae.product_id as pid,
+      count(*) as score
+    from public.analytics_events ae
+    where ae.product_id is not null
+      and ae.event_type in ('product_view', 'product_cta_click')
+      and ae.created_at >= v_current_start
+    group by ae.product_id
+  ),
+  previous_engagement as (
+    select
+      ae.product_id as pid,
+      count(*) as score
+    from public.analytics_events ae
+    where ae.product_id is not null
+      and ae.event_type in ('product_view', 'product_cta_click')
+      and ae.created_at >= v_previous_start
+      and ae.created_at < v_previous_end
+    group by ae.product_id
+  )
+  select
+    p.product_id,
+    p.product_name,
+    p.short_desc,
+    p.logo,
+    p.main_category::text,
+    v.subscription::text,
+    v.is_verified,
+    v.company_name as vendor_name,
+    coalesce(ce.score, 0)::bigint as engagement_score,
+    coalesce(pe.score, 0)::bigint as previous_score,
+    case
+      when coalesce(pe.score, 0) = 0 then 100.0
+      else round(((coalesce(ce.score, 0) - coalesce(pe.score, 0))::numeric / pe.score::numeric) * 100, 1)
+    end as growth_percentage
+  from public.products p
+  join public.vendors v on v.vendor_id = p.vendor_id
+  left join current_engagement ce on ce.pid = p.product_id
+  left join previous_engagement pe on pe.pid = p.product_id
+  where p.listing_status = 'approved'
+    and (p_category is null or p.main_category::text = p_category)
+  order by coalesce(ce.score, 0) desc, p.created_at desc
+  limit p_limit;
+end;
+$$;
+
+grant execute on function public.get_trending_products(text, int, text) to anon, authenticated, service_role;

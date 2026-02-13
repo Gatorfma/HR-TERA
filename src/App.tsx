@@ -34,6 +34,8 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Story from "./pages/Story";
 import Contact from "./pages/Contact";
+import Trending from "./pages/Trending";
+import Compare from "./pages/Compare";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +78,8 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/story" element={<Story />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/trending" element={<Trending />} />
+                <Route path="/compare" element={<Compare />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

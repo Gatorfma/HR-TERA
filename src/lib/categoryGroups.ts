@@ -97,11 +97,25 @@ const GROUP_RULES: CategoryGroupRule[] = [
     priority: 6,
   },
   {
+    name: "Yapay Zeka / AI",
+    nameEn: "AI / Artificial Intelligence",
+    keywords: [
+      "ai",
+      "artificial intelligence",
+      "yapay zeka",
+      "machine learning",
+      "nlp",
+      "chatbot",
+      "generative",
+      "copilot",
+    ],
+    priority: 11,
+  },
+  {
     name: "Teknoloji & Analitik",
     nameEn: "Technology & Analytics",
     keywords: [
       "analytics",
-      "ai",
       "rpa",
       "automation",
       "productivity",

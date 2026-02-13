@@ -211,12 +211,12 @@ const ProductCreatePage = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/admin/products">Ürünler</Link>
+                  <Link to="/admin/products">Çözümler</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Yeni Ürün</BreadcrumbPage>
+                <BreadcrumbPage>Yeni Çözüm</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -231,7 +231,7 @@ const ProductCreatePage = () => {
             Geri Dön
           </Button>
 
-          <h1 className="text-3xl font-bold text-foreground">Yeni Ürün Oluştur</h1>
+          <h1 className="text-3xl font-bold text-foreground">Yeni Çözüm Oluştur</h1>
           <p className="text-muted-foreground mt-2 mb-8">
             Ürün bilgilerini girin ve kaydedin.
           </p>

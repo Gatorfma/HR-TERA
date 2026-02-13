@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Crown, Award, Filter, Loader2 } from "lucide-react";
+import { Search, Filter, Loader2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tier, VendorCardData } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
 import { getVendors } from "@/api/supabaseApi";
@@ -10,13 +11,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const Vendors = () => {
   const { t } = useLanguage();
-  
-  const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
-    { value: "all", label: t("products.allTiers") },
-    { value: "premium", label: t("products.premium"), icon: <Crown className="w-3.5 h-3.5" /> },
-    { value: "plus", label: t("products.plus"), icon: <Award className="w-3.5 h-3.5" /> },
-    { value: "freemium", label: t("products.free") },
-  ];
   
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -121,26 +115,20 @@ const Vendors = () => {
                     <Filter className="w-4 h-4" />
                     {t("vendors.vendorTier")}
                   </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {tierOptions.map((tier) => (
-                      <button
-                        key={tier.value}
-                        onClick={() => handleTierSelect(tier.value)}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
-                          selectedTier === tier.value
-                            ? tier.value === "premium"
-                              ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "plus"
-                              ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
-                              : "bg-primary text-primary-foreground shadow-sm"
-                            : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                        }`}
-                      >
-                        {tier.icon}
-                        {tier.label}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={selectedTier}
+                    onValueChange={(value) => handleTierSelect(value as Tier | "all")}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("vendors.vendorTier")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("products.allTiers")}</SelectItem>
+                      <SelectItem value="premium">{t("products.premium")}</SelectItem>
+                      <SelectItem value="plus">{t("products.plus")}</SelectItem>
+                      <SelectItem value="freemium">{t("products.free")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Clear Filters */}

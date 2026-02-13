@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BadgeCheck, Search, Crown, Award, Filter, ChevronLeft, ChevronRight, Globe, Languages } from "lucide-react";
+import { BadgeCheck, Search, Filter, ChevronLeft, ChevronRight, Globe, Languages } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -27,13 +27,6 @@ interface Product {
 const Products = () => {
   const { t } = useLanguage();
 
-  const tierOptions: { value: Tier | "all"; label: string; icon?: React.ReactNode }[] = [
-    { value: "all", label: t("products.allTiers") },
-    { value: "premium", label: t("products.premium"), icon: <Crown className="w-3.5 h-3.5" /> },
-    { value: "plus", label: t("products.plus"), icon: <Award className="w-3.5 h-3.5" /> },
-    { value: "freemium", label: t("products.free") },
-  ];
-
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -52,6 +45,7 @@ const Products = () => {
   const countryFromUrl = searchParams.get("country");
   const languageFromUrl = searchParams.get("language");
   const pageFromUrl = searchParams.get("page");
+  const searchFromUrl = searchParams.get("search");
 
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
@@ -129,7 +123,11 @@ const Products = () => {
     } else {
       setCurrentPage(1);
     }
-  }, [categoryFromUrl, tierFromUrl, countryFromUrl, languageFromUrl, pageFromUrl, allCategories, allCountries, allLanguages]);
+
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+    }
+  }, [categoryFromUrl, tierFromUrl, countryFromUrl, languageFromUrl, pageFromUrl, searchFromUrl, allCategories, allCountries, allLanguages]);
 
   // Fetch products with pagination and filters
   useEffect(() => {
@@ -298,26 +296,20 @@ const Products = () => {
                     <Filter className="w-4 h-4" />
                     {t("products.vendorTier")}
                   </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {tierOptions.map((tier) => (
-                      <button
-                        key={tier.value}
-                        onClick={() => handleTierSelect(tier.value)}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center gap-1.5 ${
-                          selectedTier === tier.value
-                            ? tier.value === "premium"
-                              ? "bg-[#ADFF00] text-[#111827] shadow-sm"
-                              : tier.value === "plus"
-                              ? "bg-[#F3F4F6] text-[#111827] border border-[#D1D5DB] shadow-sm"
-                              : "bg-primary text-primary-foreground shadow-sm"
-                            : "bg-background text-foreground border border-border hover:border-primary/50 hover:bg-muted"
-                        }`}
-                      >
-                        {tier.icon}
-                        {tier.label}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={selectedTier}
+                    onValueChange={(value) => handleTierSelect(value as Tier | "all")}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("products.vendorTier")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("products.allTiers")}</SelectItem>
+                      <SelectItem value="premium">{t("products.premium")}</SelectItem>
+                      <SelectItem value="plus">{t("products.plus")}</SelectItem>
+                      <SelectItem value="freemium">{t("products.free")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Category Filter */}

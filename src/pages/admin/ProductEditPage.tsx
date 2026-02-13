@@ -407,7 +407,7 @@ const ProductEditPage = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/admin/products">Ürünler</Link>
+                  <Link to="/admin/products">Çözümler</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -438,7 +438,7 @@ const ProductEditPage = () => {
             {/* Left Side - Product List */}
             <Card className="lg:col-span-1 flex flex-col max-h-[80vh]">
               <CardHeader className="pb-3 flex-shrink-0">
-                <CardTitle className="text-lg">Ürünler</CardTitle>
+                <CardTitle className="text-lg">Çözümler</CardTitle>
                 <CardDescription>
                   Sistemdeki ürünleri yönetin ({totalCount} ürün)
                 </CardDescription>

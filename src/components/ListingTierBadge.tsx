@@ -12,7 +12,7 @@ const ListingTierBadge = ({ tier, className = "" }: ListingTierBadgeProps) => {
   if (tier === "premium") {
     return (
       <span 
-        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary text-[#111827] ${className}`}
+        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary text-white ${className}`}
       >
         <Crown className="w-3 h-3" />
         Premium
