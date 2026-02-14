@@ -39,7 +39,6 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
 
   // Determine which tabs should be visible
   const hasMedia = isPlusOrPremium && product.screenshots && product.screenshots.length > 0;
-  const hasReviews = isPlusOrPremium && product.reviews;
   const hasPricing = product.price && product.price !== "Contact";
   const hasVendor = !isUnclaimed && !!product.vendor;
 
@@ -180,16 +179,11 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
             </TabsContent>
 
             {/* Reviews Tab */}
-            <TabsContent value="reviews" className="mt-0 space-y-8">
-              {hasReviews && product.reviews && product.reviews.length > 0 ? (
-                <ReviewsSection reviews={product.reviews} />
-              ) : (
-                <div className="bg-card rounded-xl border border-border p-12 text-center">
-                  <MessageSquare className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">{t("productTabs.noReviews")}</h3>
-                  <p className="text-muted-foreground">{t("productTabs.beFirstReview")}</p>
-                </div>
-              )}
+            <TabsContent value="reviews" className="mt-0">
+              <ReviewsSection
+                productId={product.id}
+                productName={product.name}
+              />
             </TabsContent>
 
             {/* Pricing Tab */}

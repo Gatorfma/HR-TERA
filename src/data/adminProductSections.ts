@@ -3,7 +3,7 @@ export interface AdminProductSection {
   title: string;
   description: string;
   path: string;
-  icon: "cube" | "plus" | "tag" | "inbox" | "layers" | "chart" | "table";
+  icon: "cube" | "plus" | "tag" | "inbox" | "layers" | "chart" | "table" | "message";
 }
 
 export const adminProductSections: AdminProductSection[] = [
@@ -48,5 +48,12 @@ export const adminProductSections: AdminProductSection[] = [
     description: "Excel dosyasından birden fazla çözüm ekleyin.",
     path: "/admin/products/bulk-upload",
     icon: "table",
+  },
+  {
+    id: "reviews",
+    title: "Yorum Talepleri",
+    description: "Ürün yorumlarını ve yanıtlarını onaylayın veya reddedin.",
+    path: "/admin/products/reviews",
+    icon: "message",
   },
 ];

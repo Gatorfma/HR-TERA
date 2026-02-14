@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Box, Plus, Tag, Inbox, Layers, BarChart3, Table2 } from "lucide-react";
+import { Box, Plus, Tag, Inbox, Layers, BarChart3, Table2, MessageSquare } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTabs from "@/components/admin/AdminTabs";
 import { adminProductSections, AdminProductSection } from "@/data/adminProductSections";
@@ -14,6 +14,7 @@ const iconMap = {
   layers: Layers,
   chart: BarChart3,
   table: Table2,
+  message: MessageSquare,
 };
 
 const SectionTile = ({ section }: { section: AdminProductSection }) => {

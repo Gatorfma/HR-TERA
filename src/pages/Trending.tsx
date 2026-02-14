@@ -20,6 +20,7 @@ interface TrendingProduct {
   engagement_score: number;
   previous_score: number;
   growth_percentage: number;
+  rating?: number;
 }
 
 type Period = "week" | "month" | "year";
@@ -157,6 +158,7 @@ const Trending = () => {
                   growthPercentage={product.growth_percentage}
                   previousScore={product.previous_score}
                   isVerified={product.is_verified}
+                  rating={product.rating}
                 />
               ))
             )}

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { TrendingUp, TrendingDown, Minus, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Sparkles, Star } from "lucide-react";
 import ListingTierBadge from "@/components/ListingTierBadge";
 import { Tier } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +16,7 @@ interface TrendingCardProps {
   growthPercentage: number;
   previousScore: number;
   isVerified?: boolean;
+  rating?: number;
 }
 
 const TrendingCard = ({
@@ -30,6 +31,7 @@ const TrendingCard = ({
   growthPercentage,
   previousScore,
   isVerified,
+  rating,
 }: TrendingCardProps) => {
   const { t } = useLanguage();
 
@@ -98,6 +100,12 @@ const TrendingCard = ({
           <p className="text-xs text-muted-foreground mt-0.5">
             {engagementScore.toLocaleString()} {t("trending.views")}
           </p>
+          {rating != null && (
+            <div className="flex items-center justify-end gap-0.5 mt-0.5">
+              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+              <span className="text-xs text-muted-foreground">{rating.toFixed(1)}</span>
+            </div>
+          )}
         </div>
       </div>
     </Link>

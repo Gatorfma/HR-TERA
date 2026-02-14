@@ -96,6 +96,39 @@ export interface VendorDetailData {
   updated_at: string;
 }
 
+// Review reply returned by get_product_reviews (nested in ProductReviewDB.replies)
+export interface ReviewReplyDB {
+  review_id: string;
+  user_id: string;
+  body: string;
+  reviewer_name: string;
+  reviewer_role?: string;
+  reviewer_company?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+// Top-level review returned by get_product_reviews RPC
+export interface ProductReviewDB {
+  review_id: string;
+  user_id: string;
+  rating: number;
+  title?: string;
+  body?: string;
+  reviewer_name: string;
+  reviewer_role?: string;
+  reviewer_company?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  has_pending_edit: boolean;
+  created_at: string;
+  approved_at?: string;
+  helpful_count: number;
+  not_helpful_count: number;
+  my_vote: boolean | null;
+  reply_count: number;
+  replies: ReviewReplyDB[];
+}
+
 // Vendor product interface for vendor's products list
 export interface VendorProductData {
   product_id: string;

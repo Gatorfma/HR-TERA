@@ -116,3 +116,18 @@ using (public.is_admin());
 -- 6) tier_config: no policies (RPC-only)
 -- ------------------------------------------------------------
 -- Access must go through SECURITY DEFINER RPC with explicit checks.
+
+-- ------------------------------------------------------------
+-- 7) product_reviews / review_votes: RPC-only (RLS enabled, no client policies)
+-- ------------------------------------------------------------
+revoke all on table public.product_reviews from anon, authenticated;
+revoke all on table public.review_votes    from anon, authenticated;
+
+alter table public.product_reviews enable row level security;
+alter table public.product_reviews force  row level security;
+alter table public.review_votes    enable row level security;
+alter table public.review_votes    force  row level security;
+
+-- No client-accessible policies; all access via SECURITY DEFINER RPC functions
+grant select,insert,update,delete on public.product_reviews to service_role;
+grant select,insert,update,delete on public.review_votes    to service_role;

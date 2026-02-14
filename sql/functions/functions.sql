@@ -3726,7 +3726,9 @@ grant execute on function public.admin_update_product(uuid, uuid, text, text, te
 --   p_limit INT - number of results to return
 --   p_category TEXT - optional category filter (null = all)
 -- Returns: Table of trending products with engagement data
+-- NOTE: DROP required because we added 'rating' to the return type
 -- ============================================================
+drop function if exists public.get_trending_products(text, integer, text);
 create or replace function public.get_trending_products(
   p_period text default 'month',
   p_limit int default 10,
@@ -3743,7 +3745,8 @@ returns table (
   vendor_name text,
   engagement_score bigint,
   previous_score bigint,
-  growth_percentage numeric
+  growth_percentage numeric,
+  rating double precision
 )
 language plpgsql
 stable
@@ -3807,16 +3810,690 @@ begin
     case
       when coalesce(pe.score, 0) = 0 then 100.0
       else round(((coalesce(ce.score, 0) - coalesce(pe.score, 0))::numeric / pe.score::numeric) * 100, 1)
-    end as growth_percentage
+    end as growth_percentage,
+    p.rating
   from public.products p
   join public.vendors v on v.vendor_id = p.vendor_id
   left join current_engagement ce on ce.pid = p.product_id
   left join previous_engagement pe on pe.pid = p.product_id
   where p.listing_status = 'approved'
     and (p_category is null or p.main_category::text = p_category)
-  order by coalesce(ce.score, 0) desc, p.created_at desc
+  order by (coalesce(ce.score, 0) * (1.0 + coalesce((p.rating - 3.0) * 0.1, 0.0))) desc,
+           p.created_at desc
   limit p_limit;
 end;
 $$;
 
 grant execute on function public.get_trending_products(text, int, text) to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: get_product_reviews
+-- Purpose: Get paginated approved reviews for a product
+-- ============================================================
+create or replace function public.get_product_reviews(
+  p_product_id uuid,
+  p_sort       text default 'helpful',
+  p_offset     int  default 0,
+  p_limit      int  default 20
+)
+returns table (
+  review_id         uuid,
+  user_id           uuid,
+  rating            integer,
+  title             text,
+  body              text,
+  reviewer_name     text,
+  reviewer_role     text,
+  reviewer_company  text,
+  status            text,
+  has_pending_edit  boolean,
+  created_at        timestamptz,
+  approved_at       timestamptz,
+  helpful_count     bigint,
+  not_helpful_count bigint,
+  my_vote           boolean,
+  reply_count       bigint,
+  replies           jsonb
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+begin
+  return query
+  select
+    r.review_id,
+    r.user_id,
+    r.rating,
+    r.title,
+    r.body,
+    r.reviewer_name,
+    r.reviewer_role,
+    r.reviewer_company,
+    r.status::text,
+    r.has_pending_edit,
+    r.created_at,
+    r.approved_at,
+    coalesce(helpful.cnt, 0)::bigint as helpful_count,
+    coalesce(not_helpful.cnt, 0)::bigint as not_helpful_count,
+    (case when v_user_id is not null then mv.is_helpful else null end)::boolean as my_vote,
+    coalesce(rc.cnt, 0)::bigint as reply_count,
+    coalesce(replies_agg.replies_json, '[]'::jsonb) as replies
+  from public.product_reviews r
+  left join (
+    select v1.review_id, count(*) as cnt from public.review_votes v1 where v1.is_helpful = true group by v1.review_id
+  ) helpful on helpful.review_id = r.review_id
+  left join (
+    select v2.review_id, count(*) as cnt from public.review_votes v2 where v2.is_helpful = false group by v2.review_id
+  ) not_helpful on not_helpful.review_id = r.review_id
+  left join (
+    select v3.review_id, v3.is_helpful from public.review_votes v3 where v3.user_id = v_user_id
+  ) mv on mv.review_id = r.review_id
+  left join (
+    select rc_inner.parent_review_id, count(*) as cnt
+    from public.product_reviews rc_inner
+    where rc_inner.parent_review_id is not null and rc_inner.status = 'approved'
+    group by rc_inner.parent_review_id
+  ) rc on rc.parent_review_id = r.review_id
+  left join (
+    select
+      child.parent_review_id,
+      jsonb_agg(
+        jsonb_build_object(
+          'review_id',        child.review_id,
+          'user_id',          child.user_id,
+          'body',             child.body,
+          'reviewer_name',    child.reviewer_name,
+          'reviewer_role',    child.reviewer_role,
+          'reviewer_company', child.reviewer_company,
+          'status',           child.status,
+          'created_at',       child.created_at
+        ) order by child.created_at asc
+      ) as replies_json
+    from public.product_reviews child
+    where child.parent_review_id is not null and child.status = 'approved'
+    group by child.parent_review_id
+  ) replies_agg on replies_agg.parent_review_id = r.review_id
+  where r.product_id = p_product_id
+    and r.parent_review_id is null
+    and (
+      r.status = 'approved'
+      or (v_user_id is not null and r.user_id = v_user_id)
+    )
+  order by
+    case
+      when p_sort = 'newest'  then extract(epoch from r.created_at)::bigint
+      when p_sort = 'oldest'  then -extract(epoch from r.created_at)::bigint
+      when p_sort = 'highest' then (r.rating * 1000000)::bigint
+      when p_sort = 'lowest'  then ((6 - r.rating) * 1000000)::bigint
+      else coalesce(helpful.cnt, 0)::bigint
+    end desc,
+    r.created_at desc
+  offset p_offset
+  limit p_limit;
+end;
+$$;
+
+grant execute on function public.get_product_reviews(uuid, text, int, int) to anon, authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: submit_review
+-- ============================================================
+create or replace function public.submit_review(
+  p_product_id       uuid,
+  p_rating           integer,
+  p_title            text default null,
+  p_body             text default null,
+  p_reviewer_name    text default null,
+  p_reviewer_role    text default null,
+  p_reviewer_company text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+  insert into public.product_reviews (
+    product_id, user_id, rating, title, body,
+    reviewer_name, reviewer_role, reviewer_company, status
+  ) values (
+    p_product_id, auth.uid(), p_rating, p_title,
+    nullif(trim(coalesce(p_body, '')), ''),
+    p_reviewer_name, p_reviewer_role, p_reviewer_company, 'pending'
+  );
+end;
+$$;
+
+grant execute on function public.submit_review(uuid, integer, text, text, text, text, text) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: submit_reply
+-- ============================================================
+create or replace function public.submit_reply(
+  p_review_id   uuid,
+  p_body        text,
+  p_replier_name text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_parent public.product_reviews;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+  select * into v_parent from public.product_reviews where review_id = p_review_id;
+  if not found then
+    raise exception 'Review not found';
+  end if;
+  if v_parent.status != 'approved' then
+    raise exception 'Can only reply to approved reviews';
+  end if;
+  if v_parent.parent_review_id is not null then
+    raise exception 'Cannot reply to a reply';
+  end if;
+  insert into public.product_reviews (
+    product_id, parent_review_id, user_id, body,
+    reviewer_name, status
+  ) values (
+    v_parent.product_id, p_review_id, auth.uid(), p_body,
+    p_replier_name, 'pending'
+  );
+end;
+$$;
+
+grant execute on function public.submit_reply(uuid, text, text) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: edit_my_review
+-- ============================================================
+create or replace function public.edit_my_review(
+  p_review_id uuid,
+  p_rating    integer,
+  p_title     text default null,
+  p_body      text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_review public.product_reviews;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+  select * into v_review from public.product_reviews where review_id = p_review_id;
+  if not found then
+    raise exception 'Review not found';
+  end if;
+  if v_review.user_id != auth.uid() then
+    raise exception 'Not authorized to edit this review';
+  end if;
+  if v_review.status != 'approved' then
+    raise exception 'Can only edit approved reviews';
+  end if;
+  update public.product_reviews
+  set
+    has_pending_edit = true,
+    pending_rating   = p_rating,
+    pending_title    = p_title,
+    pending_body     = nullif(trim(coalesce(p_body, '')), ''),
+    updated_at       = now()
+  where review_id = p_review_id;
+end;
+$$;
+
+grant execute on function public.edit_my_review(uuid, integer, text, text) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: toggle_review_vote
+-- ============================================================
+create or replace function public.toggle_review_vote(
+  p_review_id  uuid,
+  p_is_helpful boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_review    public.product_reviews;
+  v_existing  public.review_votes;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+  select * into v_review from public.product_reviews where review_id = p_review_id;
+  if not found then
+    raise exception 'Review not found';
+  end if;
+  if v_review.status != 'approved' then
+    raise exception 'Can only vote on approved reviews';
+  end if;
+  if v_review.parent_review_id is not null then
+    raise exception 'Can only vote on top-level reviews';
+  end if;
+
+  select * into v_existing from public.review_votes
+  where review_id = p_review_id and user_id = auth.uid();
+
+  if not found then
+    -- No vote yet: insert
+    insert into public.review_votes (review_id, user_id, is_helpful)
+    values (p_review_id, auth.uid(), p_is_helpful);
+  elsif v_existing.is_helpful = p_is_helpful then
+    -- Same vote: toggle off (delete)
+    delete from public.review_votes where vote_id = v_existing.vote_id;
+  else
+    -- Different vote: update
+    update public.review_votes
+    set is_helpful = p_is_helpful
+    where vote_id = v_existing.vote_id;
+  end if;
+end;
+$$;
+
+grant execute on function public.toggle_review_vote(uuid, boolean) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_get_products_with_review_counts
+-- ============================================================
+create or replace function public.admin_get_products_with_review_counts(
+  p_page_num  int default 1,
+  p_page_size int default 20,
+  p_search    text default null
+)
+returns table (
+  product_id            uuid,
+  vendor_id             uuid,
+  product_name          text,
+  website_link          text,
+  main_category         text,
+  categories            text[],
+  features              text[],
+  short_desc            text,
+  long_desc             text,
+  logo                  text,
+  video_url             text,
+  gallery               text[],
+  pricing               text,
+  languages             text[],
+  demo_link             text,
+  release_date          date,
+  rating                double precision,
+  listing_status        text,
+  product_created_at    timestamptz,
+  product_updated_at    timestamptz,
+  company_name          text,
+  subscription          text,
+  is_verified           boolean,
+  pending_review_count  bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  return query
+  select
+    p.product_id,
+    p.vendor_id,
+    p.product_name::text,
+    p.website_link::text,
+    p.main_category::text,
+    p.categories::text[],
+    p.features::text[],
+    p.short_desc::text,
+    p.long_desc::text,
+    p.logo::text,
+    p.video_url::text,
+    p.gallery::text[],
+    p.pricing::text,
+    p.languages::text[],
+    p.demo_link::text,
+    p.release_date,
+    p.rating,
+    p.listing_status::text,
+    p.created_at as product_created_at,
+    p.updated_at as product_updated_at,
+    v.company_name::text,
+    v.subscription::text,
+    v.is_verified,
+    coalesce(prc.pending_count, 0)::bigint as pending_review_count
+  from public.products p
+  join public.vendors v on v.vendor_id = p.vendor_id
+  left join (
+    select
+      r.product_id,
+      count(*) as pending_count
+    from public.product_reviews r
+    where r.status = 'pending' or r.has_pending_edit = true
+    group by r.product_id
+  ) prc on prc.product_id = p.product_id
+  where (
+    p_search is null
+    or p.product_name ilike '%' || p_search || '%'
+    or v.company_name ilike '%' || p_search || '%'
+  )
+  order by coalesce(prc.pending_count, 0) desc, p.product_name asc
+  limit p_page_size offset (p_page_num - 1) * p_page_size;
+end;
+$$;
+
+grant execute on function public.admin_get_products_with_review_counts(int, int, text) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_get_reviews_for_product
+-- ============================================================
+create or replace function public.admin_get_reviews_for_product(
+  p_product_id uuid,
+  p_status     text    default 'pending',
+  p_page       int     default 1,
+  p_page_size  int     default 20
+)
+returns table (
+  review_id        uuid,
+  parent_review_id uuid,
+  product_id       uuid,
+  user_id          uuid,
+  rating           integer,
+  title            text,
+  body             text,
+  reviewer_name    text,
+  reviewer_role    text,
+  reviewer_company text,
+  status           text,
+  admin_note       text,
+  has_pending_edit boolean,
+  pending_rating   integer,
+  pending_title    text,
+  pending_body     text,
+  created_at       timestamptz,
+  approved_at      timestamptz,
+  replies          jsonb
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  return query
+  select
+    r.review_id,
+    r.parent_review_id,
+    r.product_id,
+    r.user_id,
+    r.rating,
+    r.title,
+    r.body,
+    r.reviewer_name,
+    r.reviewer_role,
+    r.reviewer_company,
+    r.status::text,
+    r.admin_note,
+    r.has_pending_edit,
+    r.pending_rating,
+    r.pending_title,
+    r.pending_body,
+    r.created_at,
+    r.approved_at,
+    coalesce(replies_agg.replies_json, '[]'::jsonb) as replies
+  from public.product_reviews r
+  left join (
+    select
+      child.parent_review_id,
+      jsonb_agg(
+        jsonb_build_object(
+          'review_id',        child.review_id,
+          'parent_review_id', child.parent_review_id,
+          'user_id',          child.user_id,
+          'body',             child.body,
+          'reviewer_name',    child.reviewer_name,
+          'status',           child.status,
+          'admin_note',       child.admin_note,
+          'has_pending_edit', child.has_pending_edit,
+          'pending_body',     child.pending_body,
+          'created_at',       child.created_at
+        ) order by child.created_at asc
+      ) as replies_json
+    from public.product_reviews child
+    where child.parent_review_id is not null
+    group by child.parent_review_id
+  ) replies_agg on replies_agg.parent_review_id = r.review_id
+  where r.product_id = p_product_id
+    and r.parent_review_id is null
+    and (
+      (p_status = 'pending' and (
+        r.status = 'pending'
+        or r.has_pending_edit = true
+        or exists (
+          select 1 from public.product_reviews rp
+          where rp.parent_review_id = r.review_id
+            and rp.status = 'pending'
+        )
+      ))
+      or (p_status != 'pending' and r.status = p_status and r.has_pending_edit = false)
+    )
+  order by r.created_at desc
+  limit p_page_size offset (p_page - 1) * p_page_size;
+end;
+$$;
+
+grant execute on function public.admin_get_reviews_for_product(uuid, text, int, int) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_approve_review
+-- ============================================================
+create or replace function public.admin_approve_review(
+  p_review_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_review public.product_reviews;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  select * into v_review from public.product_reviews where review_id = p_review_id;
+  if not found then
+    raise exception 'Review not found';
+  end if;
+
+  if v_review.has_pending_edit then
+    -- Approve the pending edit: copy pending fields to live fields
+    update public.product_reviews
+    set
+      rating           = coalesce(pending_rating, rating),
+      title            = coalesce(pending_title, title),
+      body             = coalesce(pending_body, body),
+      has_pending_edit = false,
+      pending_rating   = null,
+      pending_title    = null,
+      pending_body     = null,
+      updated_at       = now()
+    where review_id = p_review_id;
+  else
+    update public.product_reviews
+    set
+      status      = 'approved',
+      approved_at = now(),
+      updated_at  = now()
+    where review_id = p_review_id;
+  end if;
+end;
+$$;
+
+grant execute on function public.admin_approve_review(uuid) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_reject_review
+-- ============================================================
+create or replace function public.admin_reject_review(
+  p_review_id uuid,
+  p_note      text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_review public.product_reviews;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  select * into v_review from public.product_reviews where review_id = p_review_id;
+  if not found then
+    raise exception 'Review not found';
+  end if;
+
+  if v_review.has_pending_edit then
+    -- Reject pending edit: clear pending fields, keep status='approved'
+    update public.product_reviews
+    set
+      has_pending_edit = false,
+      pending_rating   = null,
+      pending_title    = null,
+      pending_body     = null,
+      updated_at       = now()
+    where review_id = p_review_id;
+  else
+    update public.product_reviews
+    set
+      status     = 'rejected',
+      admin_note = p_note,
+      updated_at = now()
+    where review_id = p_review_id;
+  end if;
+end;
+$$;
+
+grant execute on function public.admin_reject_review(uuid, text) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_delete_review
+-- ============================================================
+create or replace function public.admin_delete_review(
+  p_review_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  delete from public.product_reviews where review_id = p_review_id;
+end;
+$$;
+
+grant execute on function public.admin_delete_review(uuid) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_approve_reply
+-- ============================================================
+create or replace function public.admin_approve_reply(
+  p_reply_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  update public.product_reviews
+  set status = 'approved', approved_at = now(), updated_at = now()
+  where review_id = p_reply_id and parent_review_id is not null;
+end;
+$$;
+
+grant execute on function public.admin_approve_reply(uuid) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_reject_reply
+-- ============================================================
+create or replace function public.admin_reject_reply(
+  p_reply_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  update public.product_reviews
+  set status = 'rejected', updated_at = now()
+  where review_id = p_reply_id and parent_review_id is not null;
+end;
+$$;
+
+grant execute on function public.admin_reject_reply(uuid) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_delete_reply
+-- ============================================================
+create or replace function public.admin_delete_reply(
+  p_reply_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+  delete from public.product_reviews
+  where review_id = p_reply_id and parent_review_id is not null;
+end;
+$$;
+
+grant execute on function public.admin_delete_reply(uuid) to authenticated, service_role;
