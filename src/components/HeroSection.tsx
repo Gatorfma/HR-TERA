@@ -5,6 +5,7 @@ import { useState, useRef, useMemo, useEffect } from "react";
 import { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getProducts } from "@/api/supabaseApi";
+import LogoImage from "./ui/logo-image";
 
 interface HeroSectionProps {
   products?: DashboardProduct[];
@@ -599,9 +600,7 @@ const HeroSection = ({ products = [] }: HeroSectionProps) => {
                             onClick={() => setShowResults(false)}
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted transition-colors"
                           >
-                            <div className="w-9 h-9 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                              <img src={result.logo} alt={result.name} className="w-full h-full object-cover" />
-                            </div>
+                            <LogoImage variant="icon" src={result.logo} alt={result.name} sizeClassName="w-9 h-9" fallbackText={result.name} />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-foreground truncate">{result.name}</p>
                               <p className="text-xs text-muted-foreground truncate">{result.category}</p>
@@ -665,18 +664,14 @@ const HeroSection = ({ products = [] }: HeroSectionProps) => {
                   className="flex-shrink-0 group"
                 >
                   <div className="w-48 md:w-56 lg:w-64 bg-card rounded-xl overflow-hidden shadow-card border border-border/50 transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-                    <div className="aspect-[4/3] overflow-hidden bg-muted relative">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+                    <div className="relative">
+                      <LogoImage variant="card" src={product.image} alt={product.name} hoverZoom fallbackText={product.name} />
                       {/* Category Label */}
-                      <span className="absolute top-2 left-2 bg-card/90 backdrop-blur-sm text-xs font-medium text-foreground px-2 py-1 rounded-full">
+                      <span className="absolute top-2 left-2 z-10 bg-card/90 backdrop-blur-sm text-xs font-medium text-foreground px-2 py-1 rounded-full">
                         {product.category}
                       </span>
                       {product.isVerified && (
-                        <span className="absolute top-2 right-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md">
+                        <span className="absolute top-2 right-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white shadow-md">
                           <BadgeCheck className="h-4 w-4 text-white" />
                         </span>
                       )}

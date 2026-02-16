@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, Minus, Sparkles, Star } from "lucide-react";
 import ListingTierBadge from "@/components/ListingTierBadge";
 import { Tier } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LogoImage from "@/components/ui/logo-image";
 
 interface TrendingCardProps {
   rank: number;
@@ -60,13 +61,7 @@ const TrendingCard = ({
         </div>
 
         {/* Logo */}
-        <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-muted">
-          <img
-            src={logo}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <LogoImage variant="icon" src={logo} alt={name} sizeClassName="w-12 h-12" fallbackText={name} />
 
         {/* Info */}
         <div className="flex-1 min-w-0">

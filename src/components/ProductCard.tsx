@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BadgeCheck } from "lucide-react";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "./ListingTierBadge";
+import LogoImage from "./ui/logo-image";
 
 interface ProductCardProps {
   image: string;
@@ -40,14 +41,10 @@ const ProductCard = ({
         className="group cursor-pointer"
       >
         <div className="bg-card rounded-2xl overflow-hidden shadow-card card-hover border border-border">
-          <div className="aspect-[4/3] overflow-hidden bg-muted relative">
-            <img
-              src={image}
-              alt={name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+          <div className="relative">
+            <LogoImage variant="card" src={image} alt={name} hoverZoom fallbackText={name} />
             {tier !== "freemium" && (
-              <div className="absolute top-2.5 left-2.5">
+              <div className="absolute top-2.5 left-2.5 z-10">
                 <ListingTierBadge tier={tier} />
               </div>
             )}

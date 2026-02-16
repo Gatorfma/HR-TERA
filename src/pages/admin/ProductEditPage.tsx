@@ -472,7 +472,7 @@ const ProductEditPage = () => {
                             }`}
                         >
                           <Avatar className="h-10 w-10 rounded-lg">
-                            <AvatarImage src={product.logo} className="object-cover" />
+                            <AvatarImage src={product.logo} className="object-contain" />
                             <AvatarFallback className="bg-primary/20 text-primary text-sm rounded-lg">
                               {product.product_name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
