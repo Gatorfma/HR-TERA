@@ -596,6 +596,29 @@ export async function adminCreateVendor(
 
 
 // ============================================================
+// Admin: Check Existing Vendors
+// ============================================================
+
+/**
+ * Check which company names already exist in the database (admin only)
+ * Returns the subset of input names that are duplicates (case-insensitive)
+ */
+export async function adminCheckExistingVendors(
+  names: string[]
+): Promise<string[]> {
+  const { data, error } = await supabase.rpc('admin_check_existing_vendors', {
+    p_names: names,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as string[]) ?? [];
+}
+
+
+// ============================================================
 // Admin: Bulk Create Vendors
 // ============================================================
 
