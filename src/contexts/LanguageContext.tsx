@@ -55,6 +55,7 @@ const en: Record<string, string> = {
   "products.plus": "Plus",
   "products.free": "Free",
   "products.allProducts": "All Solutions",
+  "products.allCategories": "All Categories",
   "products.clearAllFilters": "Clear all filters",
   "products.fail": "Failed to load solutions",
   "products.filterCountry": "Country",
@@ -264,7 +265,7 @@ const en: Record<string, string> = {
   "productDetail.productNotFound": "Product not found",
   "productDetail.loadFailed": "Failed to load product",
   "productDetail.notAvailable": "N/A",
-  "productDetail.contact": "Contact",
+  "productDetail.contact": "Contact sales",
   "productDetail.viewScreenshot": "View screenshot",
   "productDetail.headquarters": "Headquarters",
   "productDetail.companySize": "Company size",
@@ -280,7 +281,6 @@ const en: Record<string, string> = {
   "productTabs.keyFeatures": "Key Features",
   "productTabs.noReviews": "No reviews yet",
   "productTabs.beFirstReview": "Be the first to review this product!",
-  "productTabs.perMonth": "/month",
   "productTabs.enterprisePricing": "Contact us for custom enterprise pricing and volume discounts.",
   "productTabs.flexiblePricing": "Get started with our flexible pricing plans.",
   "productTabs.getStarted": "Get Started",
@@ -300,7 +300,7 @@ const en: Record<string, string> = {
   "trending.engagementScore": "Engagement Score",
   "trending.views": "views",
   "trending.new": "New",
-  "trending.allCategories": "All",
+  "trending.allCategories": "All Categories",
 
   // Reviews
   "reviews.title": "Customer Reviews",
@@ -524,6 +524,7 @@ const tr: Record<string, string> = {
   "products.plus": "Plus",
   "products.free": "Ücretsiz",
   "products.allProducts": "Tüm Çözümler",
+  "products.allCategories": "Tüm Kategoriler",
   "products.clearAllFilters": "Tüm filtreleri temizle",
   "products.fail": "Çözümler yüklenemedi",
   "products.filterCountry": "Ülke",
@@ -734,7 +735,7 @@ const tr: Record<string, string> = {
   "productDetail.productNotFound": "Çözüm bulunamadı",
   "productDetail.loadFailed": "Çözüm yüklenemedi",
   "productDetail.notAvailable": "Mevcut Değil",
-  "productDetail.contact": "İletişim",
+  "productDetail.contact": "Bizimle iletişime geçin",
   "productDetail.viewScreenshot": "Ekran görüntüsünü görüntüle",
   "productDetail.headquarters": "Ülke",
   "productDetail.companySize": "Çalışan sayısı",
@@ -750,7 +751,6 @@ const tr: Record<string, string> = {
   "productTabs.keyFeatures": "Temel Özellikler",
   "productTabs.noReviews": "Henüz değerlendirme yok",
   "productTabs.beFirstReview": "Bu çözümü ilk değerlendiren siz olun!",
-  "productTabs.perMonth": "/ay",
   "productTabs.enterprisePricing":
     "Özel kurumsal fiyatlandırma ve toplu indirimler için bizimle iletişime geçin.",
   "productTabs.flexiblePricing": "Esnek fiyatlandırma planlarımızla başlayın.",
@@ -771,7 +771,7 @@ const tr: Record<string, string> = {
   "trending.engagementScore": "Etkileşim Puanı",
   "trending.views": "görüntülenme",
   "trending.new": "Yeni",
-  "trending.allCategories": "Tümü",
+  "trending.allCategories": "Tüm Kategoriler",
 
   // Reviews
   "reviews.title": "Müşteri Yorumları",

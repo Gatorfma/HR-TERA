@@ -199,7 +199,6 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
                   <div className="bg-card rounded-xl border border-border p-8">
                     <div className="flex items-baseline gap-2 mb-4">
                       <span className="text-4xl font-bold text-foreground">{product.price}</span>
-                      <span className="text-muted-foreground">{t("productTabs.perMonth")}</span>
                     </div>
                     <p className="text-muted-foreground mb-6">
                       {isPremium 

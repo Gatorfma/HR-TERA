@@ -128,7 +128,7 @@ const Compare = () => {
     <div className="min-h-screen bg-muted/30">
       <Navbar />
 
-      <main className="pt-24 pb-20">
+      <main className="pt-32 pb-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           {/* Header */}
           <div className="text-center mb-10">

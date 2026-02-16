@@ -48,7 +48,7 @@ const Products = () => {
   const pageFromUrl = searchParams.get("page");
   const searchFromUrl = searchParams.get("search");
 
-  const [selectedCategory, setSelectedCategory] = useState("All Products");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
@@ -62,12 +62,12 @@ const Products = () => {
           getAllCountries(),
           getAllLanguages(),
         ]);
-        setAllCategories(["All Products", ...categories]);
+        setAllCategories(categories);
         setAllCountries(countries || []);
         setAllLanguages(languages || []);
       } catch (err) {
         console.error("Error fetching filter options:", err);
-        setAllCategories(["All Products"]);
+        setAllCategories([]);
         setAllCountries([]);
         setAllLanguages([]);
       }
@@ -92,10 +92,10 @@ const Products = () => {
       if (matched) {
         setSelectedCategory(matched);
       } else {
-        setSelectedCategory("All Products");
+        setSelectedCategory("all");
       }
     } else {
-      setSelectedCategory("All Products");
+      setSelectedCategory("all");
     }
     
     if (tierFromUrl && ["premium", "plus", "freemium"].includes(tierFromUrl)) {
@@ -139,7 +139,7 @@ const Products = () => {
 
         // Prepare filters for database
         const productFilter = debouncedSearchQuery.trim() || null;
-        const categoryFilter = selectedCategory !== "All Products" ? selectedCategory : null;
+        const categoryFilter = selectedCategory !== "all" ? selectedCategory : null;
         const tierFilter = selectedTier !== "all" ? selectedTier : null;
         const countryFilter = selectedCountry !== "all" ? selectedCountry : null;
         const languageFilter = selectedLanguage !== "all" ? selectedLanguage : null;
@@ -215,7 +215,7 @@ const Products = () => {
     const search = overrides.search ?? searchQuery;
     const page = overrides.page ?? currentPage;
 
-    if (category !== "All Products") params.category = category.toLowerCase();
+    if (category !== "all") params.category = category.toLowerCase();
     if (tier !== "all") params.tier = tier;
     if (country !== "all") params.country = country;
     if (language !== "all") params.language = language;
@@ -269,7 +269,7 @@ const Products = () => {
   };
 
   const clearFilters = () => {
-    setSelectedCategory("All Products");
+    setSelectedCategory("all");
     setSelectedTier("all");
     setSelectedCountry("all");
     setSelectedLanguage("all");
@@ -278,7 +278,7 @@ const Products = () => {
     setSearchParams({});
   };
 
-  const hasActiveFilters = selectedCategory !== "All Products" || selectedTier !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || searchQuery !== "";
+  const hasActiveFilters = selectedCategory !== "all" || selectedTier !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || searchQuery !== "";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -324,6 +324,7 @@ const Products = () => {
                       <SelectValue placeholder={t("products.category")} />
                     </SelectTrigger>
                     <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                      <SelectItem value="all">{t("trending.allCategories")}</SelectItem>
                       {allCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
