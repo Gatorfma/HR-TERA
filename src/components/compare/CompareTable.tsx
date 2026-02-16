@@ -86,10 +86,12 @@ const CompareTable = ({ products, features }: CompareTableProps) => {
             {product.company_size || "—"}
           </span>
         );
-      case "categories":
-        return product.categories?.length > 0 ? (
+      case "categories": {
+        const allCategories = [product.main_category, ...(product.categories || [])]
+          .filter((c, i, arr) => Boolean(c) && arr.indexOf(c) === i);
+        return allCategories.length > 0 ? (
           <div className="flex flex-wrap gap-1">
-            {[product.main_category, ...(product.categories || [])].filter(Boolean).map((cat, i) => (
+            {allCategories.map((cat, i) => (
               <span
                 key={i}
                 className="px-2 py-0.5 bg-primary/10 rounded text-xs text-primary font-medium"
@@ -99,10 +101,9 @@ const CompareTable = ({ products, features }: CompareTableProps) => {
             ))}
           </div>
         ) : (
-          <span className="text-sm text-muted-foreground">
-            {product.main_category || "—"}
-          </span>
+          <span className="text-sm text-muted-foreground">—</span>
         );
+      }
       case "headquarters":
         return (
           <span className="text-sm text-foreground">
