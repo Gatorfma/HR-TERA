@@ -7,42 +7,32 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ProductCategory, AdminVendorLookup } from "@/lib/admin-types";
-import { adminLookupVendor, adminBulkCreateProducts } from "@/api/adminProductsApi";
+import { BulkProductInput, ProductCategory } from "@/lib/admin-types";
+import { adminBulkCreateProducts } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 
 interface ParsedProduct {
   id: string;
-  rawCategory: string;
   productName: string;
-  website: string;
-  status: "valid" | "invalid" | "approved";
+  companyName: string;
+  shortDesc: string;
+  longDesc: string;
+  mainCategory: string;
+  websiteLink: string;
+  features: string;
+  languages: string;
+  status: "valid" | "invalid";
   error?: string;
   resolvedCategory?: ProductCategory;
-}
-
-interface CategoryMapping {
-  from: string;
-  to: ProductCategory;
-  isNew: boolean;
 }
 
 const ProductBulkUploadPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Vendor state
-  const [vendorId, setVendorId] = useState("");
-  const [vendorStatus, setVendorStatus] = useState<"none" | "loading" | "valid" | "invalid">("none");
-  const [resolvedVendor, setResolvedVendor] = useState<AdminVendorLookup | null>(null);
-  
+
   const [isDragging, setIsDragging] = useState(false);
   const [parsedProducts, setParsedProducts] = useState<ParsedProduct[]>([]);
-  const [categoryMappings, setCategoryMappings] = useState<CategoryMapping[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [importResults, setImportResults] = useState<{
     success: number;
@@ -65,47 +55,16 @@ const ProductBulkUploadPage = () => {
     fetchCategories();
   }, []);
 
-  // Handle Vendor ID blur - lookup vendor
-  const handleVendorIdBlur = async () => {
-    if (!vendorId.trim()) {
-      setVendorStatus("none");
-      setResolvedVendor(null);
-      return;
-    }
-
-    // Validate UUID format
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(vendorId.trim())) {
-      setVendorStatus("invalid");
-      setResolvedVendor(null);
-      return;
-    }
-
-    setVendorStatus("loading");
-    try {
-      const vendor = await adminLookupVendor(vendorId.trim());
-      if (vendor) {
-        setVendorStatus("valid");
-        setResolvedVendor(vendor);
-      } else {
-        setVendorStatus("invalid");
-        setResolvedVendor(null);
-      }
-    } catch (err) {
-      setVendorStatus("invalid");
-      setResolvedVendor(null);
-    }
-  };
-
+  // Match category from Excel to DB category
   const matchCategory = useCallback((rawCategory: string): ProductCategory | null => {
     const normalized = rawCategory.toLowerCase().trim();
-    
+
     // Exact match (case-insensitive)
     const exactMatch = availableCategories.find(
       (cat) => cat.toLowerCase() === normalized
     );
     if (exactMatch) return exactMatch;
-    
+
     // Partial match
     const partialMatch = availableCategories.find(
       (cat) =>
@@ -113,18 +72,14 @@ const ProductBulkUploadPage = () => {
         normalized.includes(cat.toLowerCase())
     );
     if (partialMatch) return partialMatch;
-    
+
     return null;
   }, [availableCategories]);
 
+  // Validation helpers
   const validateWebsite = (url: string): boolean => {
     if (!url || url.trim() === "") return true; // Website is optional
-    try {
-      new URL(url.startsWith("http") ? url : `https://${url}`);
-      return true;
-    } catch {
-      return false;
-    }
+    return /^https?:\/\/.+/.test(url);
   };
 
   const parseExcelFile = useCallback(async (file: File) => {
@@ -145,7 +100,7 @@ const ProductBulkUploadPage = () => {
 
       // Check if first row is a header
       const firstRow = jsonData[0] as string[];
-      const headerKeywords = ["category", "kategori", "product", "çözüm", "website", "site"];
+      const headerKeywords = ["product", "çözüm", "company", "şirket", "category", "kategori", "website", "features", "languages"];
       const isHeader = firstRow.some((cell) =>
         headerKeywords.some((keyword) =>
           String(cell || "").toLowerCase().includes(keyword)
@@ -155,34 +110,58 @@ const ProductBulkUploadPage = () => {
       const dataRows = isHeader ? jsonData.slice(1) : jsonData;
       const products: ParsedProduct[] = [];
 
+      // Column order: product_name, company_name, short_desc, long_desc, main_category, website_link, features, languages
       dataRows.forEach((row, index) => {
         const cells = row as string[];
-        if (cells.length < 2) return;
+        if (cells.length < 1) return;
 
-        const rawCategory = String(cells[0] || "").trim();
-        const productName = String(cells[1] || "").trim();
-        const website = String(cells[2] || "").trim();
+        const productName = String(cells[0] || "").trim();
+        const companyName = String(cells[1] || "").trim();
+        const shortDesc = String(cells[2] || "").trim();
+        const longDesc = String(cells[3] || "").trim();
+        const mainCategory = String(cells[4] || "").trim();
+        const websiteLink = String(cells[5] || "").trim();
+        const features = String(cells[6] || "").trim();
+        const languages = String(cells[7] || "").trim();
 
-        if (!productName) return;
+        if (!productName) return; // Skip empty rows
 
         const errors: string[] = [];
-        const matchedCategory = matchCategory(rawCategory);
-        const websiteValid = validateWebsite(website);
 
-        if (!matchedCategory && rawCategory) {
+        // Validate required fields
+        if (!productName) {
+          errors.push("Çözüm adı zorunludur");
+        }
+        if (!companyName) {
+          errors.push("Şirket adı zorunludur");
+        }
+        if (!mainCategory) {
+          errors.push("Kategori zorunludur");
+        }
+
+        // Validate category
+        const matchedCategory = matchCategory(mainCategory);
+        if (mainCategory && !matchedCategory) {
           errors.push("Geçersiz kategori");
         }
-        if (!websiteValid) {
+
+        // Validate website format
+        if (websiteLink && !validateWebsite(websiteLink)) {
           errors.push("Geçersiz website formatı");
         }
 
-        const isValid = matchedCategory !== null && websiteValid;
+        const isValid = errors.length === 0 && matchedCategory !== null;
 
         products.push({
           id: `product-${index}-${Date.now()}`,
-          rawCategory,
           productName,
-          website: website.startsWith("http") ? website : (website ? `https://${website}` : ""),
+          companyName,
+          shortDesc: shortDesc || productName, // Default to product name
+          longDesc,
+          mainCategory,
+          websiteLink: websiteLink.startsWith("http") ? websiteLink : (websiteLink ? `https://${websiteLink}` : ""),
+          features,
+          languages,
           status: isValid ? "valid" : "invalid",
           error: errors.length > 0 ? errors.join(", ") : undefined,
           resolvedCategory: matchedCategory || undefined,
@@ -193,7 +172,6 @@ const ProductBulkUploadPage = () => {
       const invalidCount = products.filter((p) => p.status === "invalid").length;
 
       setParsedProducts(products);
-      setCategoryMappings([]);
       setImportResults(null);
 
       toast({
@@ -238,30 +216,6 @@ const ProductBulkUploadPage = () => {
     [parseExcelFile]
   );
 
-  const handleMapCategory = (rawCategory: string, targetCategory: ProductCategory) => {
-    setParsedProducts((prev) =>
-      prev.map((p) =>
-        p.rawCategory.toLowerCase() === rawCategory.toLowerCase() && p.status === "invalid"
-          ? { ...p, status: "approved" as const, resolvedCategory: targetCategory, error: undefined }
-          : p
-      )
-    );
-
-    setCategoryMappings((prev) => [
-      ...prev,
-      { from: rawCategory, to: targetCategory, isNew: false },
-    ]);
-
-    const affectedCount = parsedProducts.filter(
-      (p) => p.rawCategory.toLowerCase() === rawCategory.toLowerCase() && p.status === "invalid"
-    ).length;
-
-    toast({
-      title: "Kategori eşlendi",
-      description: `'${rawCategory}' → '${targetCategory}' olarak eşlendi (${affectedCount} çözüm).`,
-    });
-  };
-
   const handleRejectProduct = (productId: string) => {
     setParsedProducts((prev) => prev.filter((p) => p.id !== productId));
     toast({
@@ -279,19 +233,58 @@ const ProductBulkUploadPage = () => {
     });
   };
 
-  const handleImport = async () => {
-    if (vendorStatus !== "valid" || !resolvedVendor) {
-      toast({
-        title: "Hata",
-        description: "Lütfen geçerli bir Şirket ID girin.",
-        variant: "destructive",
-      });
-      return;
-    }
+  // Parse comma/semicolon separated string into array
+  const parseArrayField = (value: string): string[] => {
+    if (!value || value.trim() === "") return [];
+    return value.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 0);
+  };
 
-    const validProducts = parsedProducts.filter(
-      (p) => p.status === "valid" || p.status === "approved"
-    );
+  // Map language names to Turkish equivalents (system uses Turkish names)
+  const LANGUAGE_MAP: Record<string, string> = {
+    // English -> Turkish
+    "turkish": "Türkçe",
+    "english": "İngilizce",
+    "german": "Almanca",
+    "french": "Fransızca",
+    "spanish": "İspanyolca",
+    "italian": "İtalyanca",
+    "portuguese": "Portekizce",
+    "dutch": "Felemenkçe",
+    "polish": "Lehçe",
+    "russian": "Rusça",
+    "japanese": "Japonca",
+    "chinese": "Çince",
+    "korean": "Korece",
+    "arabic": "Arapça",
+    // Turkish names (pass through)
+    "türkçe": "Türkçe",
+    "ingilizce": "İngilizce",
+    "almanca": "Almanca",
+    "fransızca": "Fransızca",
+    "ispanyolca": "İspanyolca",
+    "italyanca": "İtalyanca",
+    "portekizce": "Portekizce",
+    "felemenkçe": "Felemenkçe",
+    "lehçe": "Lehçe",
+    "rusça": "Rusça",
+    "japonca": "Japonca",
+    "çince": "Çince",
+    "korece": "Korece",
+    "arapça": "Arapça",
+  };
+
+  const mapLanguage = (lang: string): string => {
+    const normalized = lang.toLowerCase().trim();
+    return LANGUAGE_MAP[normalized] || lang; // Return mapped or original
+  };
+
+  const parseLanguages = (value: string): string[] => {
+    const langs = parseArrayField(value);
+    return langs.map(mapLanguage);
+  };
+
+  const handleImport = async () => {
+    const validProducts = parsedProducts.filter((p) => p.status === "valid");
 
     if (validProducts.length === 0) return;
 
@@ -299,29 +292,33 @@ const ProductBulkUploadPage = () => {
     setImportResults(null);
 
     try {
-      const productsToImport = validProducts.map((p) => ({
+      const productsToImport: BulkProductInput[] = validProducts.map((p) => ({
         product_name: p.productName,
+        company_name: p.companyName,
+        short_desc: p.shortDesc || p.productName,
+        long_desc: p.longDesc || undefined,
         main_category: p.resolvedCategory!,
-        website_link: p.website || "",
-        short_desc: p.productName,
+        website_link: p.websiteLink || undefined,
+        features: parseArrayField(p.features),
+        languages: parseLanguages(p.languages),
       }));
 
-      const result = await adminBulkCreateProducts(vendorId.trim(), productsToImport);
+      const result = await adminBulkCreateProducts(productsToImport);
 
       setImportResults({
         success: result.success_count,
         failed: result.error_count,
-        errors: result.errors.map((e: any) => ({ name: e.product_name, message: e.error })),
+        errors: result.errors.map((e) => ({ name: e.product_name, message: e.error })),
       });
 
       toast({
         title: "İçe aktarma tamamlandı",
         description: `${result.success_count} başarılı, ${result.error_count} başarısız.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Hata",
-        description: error?.message || "İçe aktarma başarısız oldu.",
+        description: error instanceof Error ? error.message : "İçe aktarma başarısız oldu.",
         variant: "destructive",
       });
     } finally {
@@ -331,11 +328,10 @@ const ProductBulkUploadPage = () => {
 
   const handleReset = () => {
     setParsedProducts([]);
-    setCategoryMappings([]);
     setImportResults(null);
   };
 
-  const validCount = parsedProducts.filter((p) => p.status === "valid" || p.status === "approved").length;
+  const validCount = parsedProducts.filter((p) => p.status === "valid").length;
   const invalidCount = parsedProducts.filter((p) => p.status === "invalid").length;
   const showProductList = parsedProducts.length > 0;
 
@@ -372,58 +368,16 @@ const ProductBulkUploadPage = () => {
                       Excel ile Toplu Çözüm Ekle
                     </h1>
                     <p className="text-muted-foreground">
-                      Excel dosyanız aşağıdaki sırayla sütunlar içermelidir: Category, Product Name, Website.
+                      Excel dosyanız aşağıdaki sırayla sütunlar içermelidir.
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="grid lg:grid-cols-3 gap-6">
-                {/* Left Column */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Vendor Selection */}
+                {/* Left Column - Drop Zone */}
+                <div className="lg:col-span-2">
                   <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Şirket Seçimi</CardTitle>
-                      <CardDescription>Çözümlerin ekleneceği şirketi belirtin</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="vendorId">Şirket ID *</Label>
-                        <Input
-                          id="vendorId"
-                          value={vendorId}
-                          onChange={(e) => setVendorId(e.target.value)}
-                          onBlur={handleVendorIdBlur}
-                          placeholder="Şirket UUID"
-                        />
-                        {vendorStatus === "loading" && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Şirket aranıyor...</span>
-                          </div>
-                        )}
-                        {vendorStatus === "valid" && resolvedVendor && (
-                          <div className="flex items-center gap-2 text-sm text-green-600">
-                            <CheckCircle className="h-4 w-4" />
-                            <span>
-                              Şirket: {resolvedVendor.company_name || "İsimsiz"} 
-                              <Badge className="ml-2 capitalize">{resolvedVendor.subscription}</Badge>
-                            </span>
-                          </div>
-                        )}
-                        {vendorStatus === "invalid" && (
-                          <div className="flex items-center gap-2 text-sm text-red-600">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>Geçersiz Şirket ID</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Drop Zone */}
-                  <Card className={vendorStatus !== "valid" ? "opacity-50 pointer-events-none" : ""}>
                     <CardContent className="p-8">
                       <label
                         htmlFor="file-upload"
@@ -457,33 +411,67 @@ const ProductBulkUploadPage = () => {
                           accept=".xlsx,.xls"
                           onChange={handleFileSelect}
                           className="absolute inset-0 opacity-0 cursor-pointer"
-                          disabled={vendorStatus !== "valid"}
                         />
                       </label>
                       <p className="text-sm text-muted-foreground mt-4 text-center">
-                        İlk sayfa kullanılacaktır. Sütun sırası: Category, Product Name, Website (opsiyonel).
+                        İlk sayfa kullanılacaktır. Features ve Languages virgül veya noktalı virgül ile ayrılmalıdır.
                       </p>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Valid Categories Panel */}
+                {/* Right Column - Info Panel */}
                 <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
                   <CardHeader>
-                    <CardTitle className="text-lg">Geçerli Kategoriler</CardTitle>
-                    <CardDescription>Veritabanındaki mevcut kategoriler ({availableCategories.length})</CardDescription>
+                    <CardTitle className="text-lg">Sütun Bilgileri</CardTitle>
+                    <CardDescription>Excel dosyanız için gerekli sütunlar</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2 max-h-[400px] overflow-y-auto">
-                      {availableCategories.map((category) => (
-                        <Badge
-                          key={category}
-                          variant="secondary"
-                          className="bg-primary/10 text-primary border-primary/20 text-xs"
-                        >
-                          {category}
-                        </Badge>
-                      ))}
+                    <div className="space-y-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="text-xs">1</Badge>
+                        <span className="font-medium">Product Name</span>
+                        <span className="text-destructive">*</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="text-xs">2</Badge>
+                        <span className="font-medium">Company Name</span>
+                        <span className="text-destructive">*</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">3</Badge>
+                        <span>Short Description</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">4</Badge>
+                        <span>Long Description</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="text-xs">5</Badge>
+                        <span className="font-medium">Main Category</span>
+                        <span className="text-destructive">*</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">6</Badge>
+                        <span>Website Link</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">7</Badge>
+                        <span>Features</span>
+                        <span className="text-muted-foreground text-xs">(virgülle ayır)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">8</Badge>
+                        <span>Languages</span>
+                        <span className="text-muted-foreground text-xs">(virgülle ayır)</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Otomatik değerler:</strong><br />
+                        • listing_status: approved<br />
+                        • logo: placeholder image
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -504,41 +492,12 @@ const ProductBulkUploadPage = () => {
                   <p className="text-muted-foreground">
                     {parsedProducts.length} çözüm • {validCount} geçerli • {invalidCount} geçersiz
                   </p>
-                  {resolvedVendor && (
-                    <p className="text-sm text-primary mt-1">
-                      Şirket: {resolvedVendor.company_name || "İsimsiz"} ({resolvedVendor.subscription})
-                    </p>
-                  )}
                 </div>
                 <Button variant="outline" onClick={handleReset} className="gap-2">
                   <RefreshCw className="h-4 w-4" />
                   Baştan Başla
                 </Button>
               </div>
-
-              {/* Category Mappings Notice */}
-              {categoryMappings.length > 0 && (
-                <Card className="mb-6 border-amber-500/30 bg-amber-500/5">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base text-amber-600">
-                      Kategori eşleştirmeleri
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {categoryMappings.map((mapping, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="border-amber-500/50 text-amber-600"
-                        >
-                          {mapping.from} → {mapping.to}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Product List */}
               <Card className="mb-6">
@@ -549,8 +508,6 @@ const ProductBulkUploadPage = () => {
                         <ProductRow
                           key={product.id}
                           product={product}
-                          categories={availableCategories}
-                          onMap={handleMapCategory}
                           onReject={handleRejectProduct}
                         />
                       ))}
@@ -579,7 +536,7 @@ const ProductBulkUploadPage = () => {
               <Button
                 className="w-full"
                 size="lg"
-                disabled={validCount === 0 || isImporting || vendorStatus !== "valid"}
+                disabled={validCount === 0 || isImporting}
                 onClick={handleImport}
               >
                 {isImporting ? (
@@ -654,24 +611,14 @@ const ProductBulkUploadPage = () => {
 
 interface ProductRowProps {
   product: ParsedProduct;
-  categories: readonly ProductCategory[];
-  onMap: (rawCategory: string, targetCategory: ProductCategory) => void;
   onReject: (productId: string) => void;
 }
 
-const ProductRow = ({ product, categories, onMap, onReject }: ProductRowProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredCategories = categories.filter((cat) =>
-    cat.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+const ProductRow = ({ product, onReject }: ProductRowProps) => {
   const getBorderColor = () => {
     switch (product.status) {
       case "valid":
         return "border-green-500/30 bg-green-500/5";
-      case "approved":
-        return "border-amber-500/30 bg-amber-500/5 shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)]";
       case "invalid":
         return "border-destructive/30 bg-destructive/5 shadow-[0_0_15px_-3px_rgba(239,68,68,0.3)]";
       default:
@@ -683,38 +630,11 @@ const ProductRow = ({ product, categories, onMap, onReject }: ProductRowProps) =
     switch (product.status) {
       case "valid":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "approved":
-        return <CheckCircle className="h-5 w-5 text-amber-500" />;
       case "invalid":
         return <AlertCircle className="h-5 w-5 text-destructive" />;
       default:
         return null;
     }
-  };
-
-  const getCategoryBadge = () => {
-    if (product.resolvedCategory) {
-      return (
-        <Badge
-          variant="secondary"
-          className={
-            product.status === "approved"
-              ? "bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs"
-              : "bg-primary/10 text-primary border-primary/20 text-xs"
-          }
-        >
-          {product.resolvedCategory}
-        </Badge>
-      );
-    }
-    if (product.rawCategory) {
-      return (
-        <Badge variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20 text-xs">
-          {product.rawCategory}
-        </Badge>
-      );
-    }
-    return null;
   };
 
   return (
@@ -731,11 +651,21 @@ const ProductRow = ({ product, categories, onMap, onReject }: ProductRowProps) =
       {/* Content */}
       <div className="flex-1 min-w-0">
         <p className="font-medium text-foreground truncate">{product.productName}</p>
-        <div className="flex items-center gap-2 mt-1">
-          {getCategoryBadge()}
+        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+          <span className="truncate">{product.companyName}</span>
+          {product.resolvedCategory && (
+            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">
+              {product.resolvedCategory}
+            </Badge>
+          )}
+          {!product.resolvedCategory && product.mainCategory && (
+            <Badge variant="destructive" className="text-xs">
+              {product.mainCategory}
+            </Badge>
+          )}
         </div>
-        {product.website && (
-          <p className="text-sm text-muted-foreground truncate mt-1">{product.website}</p>
+        {product.websiteLink && (
+          <p className="text-sm text-muted-foreground truncate mt-1">{product.websiteLink}</p>
         )}
         {product.error && (
           <p className="text-sm text-destructive mt-1">{product.error}</p>
@@ -747,54 +677,18 @@ const ProductRow = ({ product, categories, onMap, onReject }: ProductRowProps) =
         {product.status === "valid" && (
           <span className="text-sm font-medium text-green-600">Geçerli</span>
         )}
-        {product.status === "approved" && (
-          <span className="text-sm font-medium text-amber-600">Eşlendi</span>
-        )}
       </div>
 
       {/* Actions for Invalid */}
       {product.status === "invalid" && (
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
-              >
-                Eşle...
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-72 p-2" align="end">
-              <Input
-                placeholder="Kategori ara..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="mb-2"
-              />
-              <div className="max-h-48 overflow-y-auto space-y-1">
-                {filteredCategories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => onMap(product.rawCategory, category)}
-                    className="w-full text-left px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-destructive/50 text-destructive hover:bg-destructive/10 px-2"
-            onClick={() => onReject(product.id)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-destructive/50 text-destructive hover:bg-destructive/10 px-2"
+          onClick={() => onReject(product.id)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       )}
     </motion.div>
   );

@@ -27,6 +27,7 @@ import ProductAnalyticsPage from "./pages/admin/ProductAnalyticsPage";
 import ProductBulkUploadPage from "./pages/admin/ProductBulkUploadPage";
 import CompanyEditPage from "./pages/admin/CompanyEditPage";
 import CompanyCreatePage from "./pages/admin/CompanyCreatePage";
+import CompanyBulkUploadPage from "./pages/admin/CompanyBulkUploadPage";
 import ReviewRequestsPage from "./pages/admin/ReviewRequestsPage";
 import Profile from "./pages/Profile";
 import AddProduct from "./pages/AddProduct";
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/admin/products/reviews" element={<ReviewRequestsPage />} />
                 <Route path="/admin/companies/edit" element={<CompanyEditPage />} />
                 <Route path="/admin/companies/new" element={<CompanyCreatePage />} />
+                <Route path="/admin/companies/bulk-upload" element={<CompanyBulkUploadPage />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/products/new" element={<AddProduct />} />
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />

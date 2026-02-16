@@ -341,14 +341,18 @@ export interface AdminProductWithReviewCounts extends AdminProductView {
 }
 
 /**
- * Product data for bulk import
+ * Product data for bulk import (v2)
+ * company_name is used to lookup vendor_id
  */
 export interface BulkProductInput {
   product_name: string;
-  main_category: ProductCategory;
-  website_link: string;
+  company_name: string;
   short_desc?: string;
-  logo?: string;
+  long_desc?: string;
+  main_category: ProductCategory;
+  website_link?: string;
+  features?: string[];
+  languages?: string[];
 }
 
 /**
@@ -360,3 +364,24 @@ export interface BulkImportResult {
   errors: { product_name: string; error: string }[];
 }
 
+/**
+ * Vendor data for bulk import
+ */
+export interface BulkVendorInput {
+  company_name: string;
+  website_link?: string;
+  headquarters?: string;
+  founded_at?: string;
+  company_size?: string;
+  company_motto?: string;
+  company_desc?: string;
+}
+
+/**
+ * Result from vendor bulk import
+ */
+export interface BulkVendorImportResult {
+  success_count: number;
+  error_count: number;
+  errors: { company_name: string; error: string }[];
+}
