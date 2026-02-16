@@ -308,7 +308,7 @@ const EditProduct = () => {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/profile?tab=products">Ürünlerim</Link>
+                    <Link to="/profile?tab=products">Çözümlerim</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />

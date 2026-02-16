@@ -303,6 +303,43 @@ export interface VendorSearchResult {
   headquarters: string | null;
 }
 
+// ============================================================
+// Admin Review Management Types
+// ============================================================
+
+/**
+ * Single review or reply item returned by admin_get_reviews_for_product
+ */
+export interface AdminReviewItem {
+  review_id: string;
+  parent_review_id: string | null;
+  product_id: string;
+  user_id: string;
+  rating?: number;
+  title?: string;
+  body: string;
+  reviewer_name: string;
+  reviewer_role?: string;
+  reviewer_company?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  admin_note?: string;
+  has_pending_edit: boolean;
+  pending_rating?: number;
+  pending_title?: string;
+  pending_body?: string;
+  created_at: string;
+  approved_at?: string;
+  replies?: AdminReviewItem[];
+}
+
+/**
+ * Admin product view extended with pending review counts
+ * Returned by admin_get_products_with_review_counts
+ */
+export interface AdminProductWithReviewCounts extends AdminProductView {
+  pending_review_count: number;
+}
+
 /**
  * Product data for bulk import
  */

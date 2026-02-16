@@ -11,6 +11,8 @@ import {
   BulkImportResult,
   ListingStatus,
   ProductCategory,
+  AdminReviewItem,
+  AdminProductWithReviewCounts,
 } from '@/lib/admin-types';
 import { Tier } from '@/lib/types';
 
@@ -286,5 +288,113 @@ export async function adminBulkCreateProducts(
   }
 
   return data as BulkImportResult;
+}
+
+/**
+ * Get paginated products with pending review counts
+ */
+export async function adminGetProductsWithReviewCounts(
+  page: number,
+  pageSize: number,
+  search?: string | null
+): Promise<AdminProductWithReviewCounts[]> {
+  const { data, error } = await supabase.rpc(
+    'admin_get_products_with_review_counts',
+    {
+      p_page_num:  page,
+      p_page_size: pageSize,
+      p_search:    search ?? null,
+    }
+  );
+
+  if (error) throw new Error(error.message);
+  return (data as AdminProductWithReviewCounts[]) ?? [];
+}
+
+/**
+ * Get reviews for a product (admin view)
+ */
+export async function adminGetReviewsForProduct(
+  productId: string,
+  status: string,
+  page = 1,
+  pageSize = 20
+): Promise<AdminReviewItem[]> {
+  const { data, error } = await supabase.rpc(
+    'admin_get_reviews_for_product',
+    {
+      p_product_id: productId,
+      p_status:     status,
+      p_page:       page,
+      p_page_size:  pageSize,
+    }
+  );
+
+  if (error) throw new Error(error.message);
+  return (data as AdminReviewItem[]) ?? [];
+}
+
+/**
+ * Approve a review or pending edit
+ */
+export async function adminApproveReview(reviewId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_approve_review', {
+    p_review_id: reviewId,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Reject a review or pending edit
+ */
+export async function adminRejectReview(
+  reviewId: string,
+  note?: string
+): Promise<void> {
+  const { error } = await supabase.rpc('admin_reject_review', {
+    p_review_id: reviewId,
+    p_note:      note ?? null,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Hard-delete a review (cascades to replies and votes)
+ */
+export async function adminDeleteReview(reviewId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_delete_review', {
+    p_review_id: reviewId,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Approve a reply
+ */
+export async function adminApproveReply(replyId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_approve_reply', {
+    p_reply_id: replyId,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Reject a reply
+ */
+export async function adminRejectReply(replyId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_reject_reply', {
+    p_reply_id: replyId,
+  });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Hard-delete a reply
+ */
+export async function adminDeleteReply(replyId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_delete_reply', {
+    p_reply_id: replyId,
+  });
+  if (error) throw new Error(error.message);
 }
 

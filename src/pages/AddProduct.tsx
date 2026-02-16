@@ -192,12 +192,12 @@ const AddProduct = () => {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/profile?tab=products">Ürünlerim</Link>
+                    <Link to="/profile?tab=products">Çözümlerim</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Yeni Ürün Ekle</BreadcrumbPage>
+                  <BreadcrumbPage>Yeni Çözüm Ekle</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -213,7 +213,7 @@ const AddProduct = () => {
               </Button>
               <div>
                 <h1 className="text-2xl font-heading font-bold text-foreground">
-                  Yeni Ürün Ekle
+                  Yeni Çözüm Ekle
                 </h1>
                 <p className="text-muted-foreground text-sm">
                   Ürün bilgilerinizi doldurun ve başvurunuzu gönderin
