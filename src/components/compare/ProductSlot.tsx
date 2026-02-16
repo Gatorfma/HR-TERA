@@ -3,6 +3,7 @@ import ListingTierBadge from "@/components/ListingTierBadge";
 import { Tier } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import LogoImage from "@/components/ui/logo-image";
 
 interface ProductData {
   product_id: string;
@@ -73,13 +74,7 @@ const ProductSlot = ({ product, onAdd, onRemove }: ProductSlotProps) => {
 
       <div className="flex flex-col items-center text-center gap-3 pt-2">
         {/* Logo */}
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-          <img
-            src={product.logo}
-            alt={product.product_name}
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <LogoImage variant="icon" src={product.logo} alt={product.product_name} sizeClassName="w-16 h-16" fallbackText={product.product_name} />
 
         {/* Name */}
         <h3 className="font-heading font-bold text-sm text-foreground leading-tight">

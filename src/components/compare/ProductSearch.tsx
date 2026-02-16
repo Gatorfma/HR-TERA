@@ -3,6 +3,7 @@ import { Search, X, Loader2, Bookmark, BookmarkCheck } from "lucide-react";
 import { getProducts, getAllCategories, getSimilarProducts } from "@/api/supabaseApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useBookmarks, BookmarkEntry } from "@/hooks/useBookmarks";
+import LogoImage from "@/components/ui/logo-image";
 
 interface SearchResult {
   product_id: string;
@@ -272,13 +273,7 @@ const ProductSearch = ({
         )}
       </button>
 
-      <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-        <img
-          src={product.logo}
-          alt={product.product_name}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <LogoImage variant="icon" src={product.logo} alt={product.product_name} sizeClassName="w-10 h-10" fallbackText={product.product_name} />
       <p className="text-xs font-medium text-foreground truncate w-full">
         {product.product_name}
       </p>
@@ -316,13 +311,7 @@ const ProductSearch = ({
         )}
       </button>
 
-      <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-        <img
-          src={product.logo}
-          alt={product.product_name}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <LogoImage variant="icon" src={product.logo} alt={product.product_name} sizeClassName="w-10 h-10" fallbackText={product.product_name} />
       <div className="flex-1 min-w-0 pr-6">
         <p className="text-sm font-medium text-foreground truncate">
           {product.product_name}

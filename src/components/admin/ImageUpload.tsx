@@ -310,7 +310,7 @@ const ImageUpload = (props: ImageUploadProps) => {
               <img
                 src={value as string}
                 alt="Preview"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => {
                   e.currentTarget.src = "";
                   e.currentTarget.alt = "Yüklenemedi";

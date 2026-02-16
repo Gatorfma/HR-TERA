@@ -10,6 +10,7 @@ import ListingTierBadge from "@/components/ListingTierBadge";
 import { getProducts, getProductCountFiltered, getAllCategories, getAllCountries, getAllLanguages } from "@/api/supabaseApi";
 import type { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import LogoImage from "@/components/ui/logo-image";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -460,14 +461,10 @@ const Products = () => {
                         <Link key={product.id} to={`/products/${product.id}`} className="group">
                           <article className="bg-card rounded-2xl overflow-hidden shadow-card border border-border transition-all duration-250 ease-in-out hover:-translate-y-1 hover:shadow-lg cursor-pointer">
                             {/* Image */}
-                            <div className="aspect-[16/10] overflow-hidden bg-muted relative">
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
+                            <div className="relative">
+                              <LogoImage variant="card" src={product.image} alt={product.name} hoverZoom fallbackText={product.name} />
                               {product.vendorTier !== "freemium" && (
-                                <div className="absolute top-2.5 left-2.5">
+                                <div className="absolute top-2.5 left-2.5 z-10">
                                   <ListingTierBadge tier={product.vendorTier} />
                                 </div>
                               )}

@@ -423,7 +423,7 @@ const ReviewRequestsPage = () => {
                           <img
                             src={product.logo}
                             alt={product.product_name}
-                            className="w-8 h-8 rounded object-cover flex-shrink-0"
+                            className="w-8 h-8 rounded object-contain border border-border bg-white dark:bg-card p-0.5 flex-shrink-0"
                           />
                         ) : (
                           <div className="w-8 h-8 rounded bg-muted flex items-center justify-center flex-shrink-0">

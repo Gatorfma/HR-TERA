@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "./ListingTierBadge";
+import LogoImage from "./ui/logo-image";
 
 interface VendorCardProps {
   vendorID: string;
@@ -23,14 +24,10 @@ const VendorCard = ({ vendorID, name, image, tier, isVerified, index = 0 }: Vend
         className="group cursor-pointer"
       >
         <div className="bg-secondary rounded-2xl overflow-hidden shadow-card card-hover">
-          <div className="aspect-[4/3] overflow-hidden relative">
-            <img
-              src={image}
-              alt={name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+          <div className="relative">
+            <LogoImage variant="card" src={image} alt={name} hoverZoom fallbackText={name} />
             {tier !== "freemium" && (
-              <div className="absolute top-2.5 left-2.5">
+              <div className="absolute top-2.5 left-2.5 z-10">
                 <ListingTierBadge tier={tier} />
               </div>
             )}
