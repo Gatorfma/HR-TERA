@@ -470,7 +470,7 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
                       <img
                         src={app.logo}
                         alt={app.name}
-                        className="w-10 h-10 rounded-lg object-cover"
+                        className="w-10 h-10 rounded-lg object-contain border border-border bg-white dark:bg-card p-0.5"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-foreground truncate">{app.name}</p>
@@ -669,7 +669,7 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
                   <img
                     src={selectedApplication.logo}
                     alt={selectedApplication.name}
-                    className="w-12 h-12 rounded-lg object-cover"
+                    className="w-12 h-12 rounded-lg object-contain border border-border bg-white dark:bg-card p-0.5"
                   />
                   <div>
                     <p className="font-semibold text-foreground">{selectedApplication.name}</p>

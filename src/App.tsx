@@ -28,6 +28,7 @@ import ProductBulkUploadPage from "./pages/admin/ProductBulkUploadPage";
 import CompanyEditPage from "./pages/admin/CompanyEditPage";
 import CompanyCreatePage from "./pages/admin/CompanyCreatePage";
 import CompanyBulkUploadPage from "./pages/admin/CompanyBulkUploadPage";
+import ReviewRequestsPage from "./pages/admin/ReviewRequestsPage";
 import Profile from "./pages/Profile";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
@@ -35,6 +36,8 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Story from "./pages/Story";
 import Contact from "./pages/Contact";
+import Trending from "./pages/Trending";
+import Compare from "./pages/Compare";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +71,7 @@ const App = () => (
                 <Route path="/admin/products/tiers" element={<ProductTiersPage />} />
                 <Route path="/admin/products/analytics" element={<ProductAnalyticsPage />} />
                 <Route path="/admin/products/bulk-upload" element={<ProductBulkUploadPage />} />
+                <Route path="/admin/products/reviews" element={<ReviewRequestsPage />} />
                 <Route path="/admin/companies/edit" element={<CompanyEditPage />} />
                 <Route path="/admin/companies/new" element={<CompanyCreatePage />} />
                 <Route path="/admin/companies/bulk-upload" element={<CompanyBulkUploadPage />} />
@@ -78,6 +82,8 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/story" element={<Story />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/trending" element={<Trending />} />
+                <Route path="/compare" element={<Compare />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

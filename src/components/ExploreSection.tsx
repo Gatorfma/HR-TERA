@@ -15,10 +15,10 @@ const ExploreSection = () => {
             className="bg-primary/10 rounded-2xl p-8"
           >
             <h3 className="text-2xl font-heading font-bold text-foreground mb-3">
-              Products
+              Solutions
             </h3>
             <p className="text-muted-foreground mb-6">
-              Our Premium products are designed to
+              Our Premium solutions are designed to
               accelerate your HR transformation process while
               offering complete flexibility.
             </p>

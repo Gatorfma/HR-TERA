@@ -272,3 +272,14 @@ export const getAllLanguages = async () => {
     if (error) throw error;
     return data ?? [];
 };
+
+export const getTrendingProducts = async (period = "month", limit = 10, category = null) => {
+    const { data, error } = await supabase.rpc("get_trending_products", {
+        p_period: period,
+        p_limit: limit,
+        p_category: category,
+    });
+
+    if (error) throw error;
+    return data ?? [];
+};

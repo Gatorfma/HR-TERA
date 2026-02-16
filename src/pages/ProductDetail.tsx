@@ -29,6 +29,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import TierBadge from "@/components/product-detail/TierBadge";
 import ProductTabs from "@/components/product-detail/ProductTabs";
 import UnclaimedVendorSection from "@/components/product-detail/UnclaimedVendorSection";
+import LogoImage from "@/components/ui/logo-image";
 
 // Helper to check if a string is a UUID
 const isUUID = (str: string) => {
@@ -412,17 +413,7 @@ const ProductDetail = () => {
                 {/* Logo & Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-4 mb-4 min-w-0">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-16 h-16 rounded-xl object-fill border border-border shrink-0"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center border border-border shrink-0">
-                        <span className="text-2xl font-bold text-muted-foreground">{product.name.charAt(0)}</span>
-                      </div>
-                    )}
+                    <LogoImage variant="icon" src={product.image} alt={product.name} sizeClassName="w-16 h-16" rounded="rounded-xl" fallbackText={product.name} />
 
                     <div className="flex-1 min-w-0">
                       {!isUnclaimed && <TierBadge tier={tier} showFeatured={isPremium} />}
@@ -583,11 +574,7 @@ const ProductDetail = () => {
                       <div
                         className="flex items-center gap-4 p-3 -mx-3 rounded-xl hover:bg-muted transition-colors min-w-0"
                       >
-                        <img
-                          src={vendorLogo || "/placeholder.svg"}
-                          alt={product.vendor.name}
-                          className="w-12 h-12 rounded-xl object-fill border border-border shrink-0"
-                        />
+                        <LogoImage variant="icon" src={vendorLogo || "/placeholder.svg"} alt={product.vendor.name} sizeClassName="w-12 h-12" rounded="rounded-xl" fallbackText={product.vendor.name} />
                         <div className="min-w-0">
                           <span className="font-semibold text-foreground block truncate">
                             {vendorDetails?.company_name || product.vendor.name}

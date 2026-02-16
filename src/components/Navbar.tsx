@@ -46,12 +46,18 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Nav - Centered */}
-            <div className="hidden desktop:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            <div className="hidden desktop:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
               <Link to="/products" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                {t("nav.products")}
+                {t("nav.categories")}
+              </Link>
+              <Link to="/compare" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                {t("nav.compare")}
+              </Link>
+              <Link to="/trending" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                {t("nav.trending")}
               </Link>
               <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                {t("nav.blog")}
+                {t("nav.hrtech_radar")}
               </Link>
               <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
                 {t("nav.pricing")}
@@ -119,13 +125,19 @@ const Navbar = () => {
               className="desktop:hidden mt-2 bg-card/95 backdrop-blur-md rounded-2xl p-4 shadow-card border border-border"
             >
               <div className="flex flex-col gap-4">
-                <Link to="/products" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
-                  {t("nav.products")}
+                <Link to="/products" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
+                  {t("nav.categories")}
                 </Link>
-                <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
-                  {t("nav.blog")}
+                <Link to="/compare" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
+                  {t("nav.compare")}
                 </Link>
-                <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2">
+                <Link to="/trending" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
+                  {t("nav.trending")}
+                </Link>
+                <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
+                  {t("nav.hrtech_radar")}
+                </Link>
+                <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
                   {t("nav.pricing")}
                 </a>
                 {isLoading ? (

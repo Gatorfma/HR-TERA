@@ -9,6 +9,7 @@ import { getVendorDetails, getVendorProducts } from "@/api/supabaseApi";
 import { VendorDetailData, VendorProductData, Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
 import { isValidUuid, logVendorEvent } from "@/lib/analytics";
+import LogoImage from "@/components/ui/logo-image";
 
 const VendorDetail = () => {
   const { slug } = useParams<{ slug: string }>(); // slug is actually vendor_id
@@ -240,15 +241,7 @@ const VendorDetail = () => {
                       >
                         <div className="border border-border rounded-xl p-4 hover:border-primary/50 hover:shadow-md transition-all">
                           <div className="flex items-start gap-3">
-                            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                              {product.logo ? (
-                                <img src={product.logo} alt={product.product_name} className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="text-lg font-bold text-muted-foreground">
-                                  {product.product_name.charAt(0)}
-                                </span>
-                              )}
-                            </div>
+                            <LogoImage variant="icon" src={product.logo} alt={product.product_name} sizeClassName="w-12 h-12" fallbackText={product.product_name} />
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                                 {product.product_name}

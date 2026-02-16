@@ -407,7 +407,7 @@ const ProductEditPage = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/admin/products">Ürünler</Link>
+                  <Link to="/admin/products">Çözümler</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -438,7 +438,7 @@ const ProductEditPage = () => {
             {/* Left Side - Product List */}
             <Card className="lg:col-span-1 flex flex-col max-h-[80vh]">
               <CardHeader className="pb-3 flex-shrink-0">
-                <CardTitle className="text-lg">Ürünler</CardTitle>
+                <CardTitle className="text-lg">Çözümler</CardTitle>
                 <CardDescription>
                   Sistemdeki ürünleri yönetin ({totalCount} ürün)
                 </CardDescription>
@@ -472,7 +472,7 @@ const ProductEditPage = () => {
                             }`}
                         >
                           <Avatar className="h-10 w-10 rounded-lg">
-                            <AvatarImage src={product.logo} className="object-cover" />
+                            <AvatarImage src={product.logo} className="object-contain" />
                             <AvatarFallback className="bg-primary/20 text-primary text-sm rounded-lg">
                               {product.product_name.slice(0, 2).toUpperCase()}
                             </AvatarFallback>
