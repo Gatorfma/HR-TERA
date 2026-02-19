@@ -29,6 +29,8 @@ import CompanyEditPage from "./pages/admin/CompanyEditPage";
 import CompanyCreatePage from "./pages/admin/CompanyCreatePage";
 import CompanyBulkUploadPage from "./pages/admin/CompanyBulkUploadPage";
 import ReviewRequestsPage from "./pages/admin/ReviewRequestsPage";
+import AdminNewsfeed from "./pages/admin/AdminNewsfeed";
+import NewsfeedEditPage from "./pages/admin/NewsfeedEditPage";
 import Profile from "./pages/Profile";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
@@ -75,6 +77,8 @@ const App = () => (
                 <Route path="/admin/companies/edit" element={<CompanyEditPage />} />
                 <Route path="/admin/companies/new" element={<CompanyCreatePage />} />
                 <Route path="/admin/companies/bulk-upload" element={<CompanyBulkUploadPage />} />
+                <Route path="/admin/newsfeed" element={<AdminNewsfeed />} />
+                <Route path="/admin/newsfeed/edit" element={<NewsfeedEditPage />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/products/new" element={<AddProduct />} />
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />

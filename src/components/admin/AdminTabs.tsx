@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-type AdminTabValue = "analytics" | "users" | "products";
+type AdminTabValue = "analytics" | "users" | "products" | "newsfeed";
 
 interface AdminTabsProps {
   activeTab: AdminTabValue;
@@ -13,6 +13,7 @@ const AdminTabs = ({ activeTab }: AdminTabsProps) => {
     { value: "analytics", label: "Analitik", path: "/admin" },
     { value: "users", label: "Şirket Ayarları", path: "/admin?tab=users" },
     { value: "products", label: "Çözüm Ayarları", path: "/admin/products" },
+    { value: "newsfeed", label: "HRTech Radar", path: "/admin/newsfeed" },
   ];
 
   const handleTabClick = (tab: typeof tabs[0]) => {

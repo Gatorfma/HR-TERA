@@ -283,3 +283,40 @@ export const getTrendingProducts = async (period = "month", limit = 10, category
     if (error) throw error;
     return data ?? [];
 };
+
+export const getNewsfeedPosts = async ({ n, page = 1, categoryFilter = null, searchQuery = null }) => {
+    const { data, error } = await supabase.rpc('get_newsfeed_posts', {
+        n,
+        page,
+        category_filter: categoryFilter,
+        search_query:    searchQuery,
+    });
+
+    if (error) throw error;
+    return data ?? [];
+};
+
+export const getNewsfeedPost = async ({ postId = null, postSlug = null }) => {
+    const { data, error } = await supabase.rpc('get_newsfeed_post', {
+        post_id:   postId,
+        post_slug: postSlug,
+    });
+
+    if (error) throw error;
+    return data?.[0] ?? null;
+};
+
+export const upsertNewsfeedPost = async ({ title, content, author, category, image = null, tags = [], postId = null }) => {
+    const { data, error } = await supabase.rpc('upsert_newsfeed_post', {
+        post_title:    title,
+        post_content:  content,
+        post_author:   author,
+        post_category: category,
+        post_image:    image,
+        post_tags:     tags,
+        post_id:       postId,
+    });
+
+    if (error) throw error;
+    return data?.[0] ?? null;
+};

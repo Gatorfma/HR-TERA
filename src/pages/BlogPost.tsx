@@ -169,10 +169,6 @@ const BlogPost = () => {
               <Calendar className="w-4 h-4" />
               <span>{post.publishDate}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{post.readTime}</span>
-            </div>
           </div>
         </motion.div>
 
