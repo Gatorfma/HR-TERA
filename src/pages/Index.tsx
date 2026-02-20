@@ -19,6 +19,18 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile/desktop (matches tailwind 'desktop' breakpoint at 1000px)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1000);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Fetch filter options (categories, countries, and languages)
   useEffect(() => {
@@ -61,9 +73,9 @@ const Index = () => {
       const categoryFilter = selectedCategory !== "all" ? selectedCategory : null;
       const countryFilter = selectedCountry !== "all" ? selectedCountry : null;
       const languageFilter = selectedLanguage !== "all" ? selectedLanguage : null;
-      
+
       const products = await getProducts({
-        n: 8,
+        n: isMobile ? 4 : 8,
         page: 1,
         categoryFilter,
         countryFilter,
@@ -73,7 +85,7 @@ const Index = () => {
     } catch (error) {
       console.error("Error fetching filtered products:", error);
     }
-  }, [selectedCategory, selectedCountry, selectedLanguage]);
+  }, [selectedCategory, selectedCountry, selectedLanguage, isMobile]);
 
   useEffect(() => {
     fetchFilteredProducts();
