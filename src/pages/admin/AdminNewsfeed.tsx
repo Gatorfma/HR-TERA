@@ -38,8 +38,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTabs from "@/components/admin/AdminTabs";
-import { getNewsfeedPosts } from "@/api/supabaseApi";
-import { supabase } from "@/api/supabaseClient";
+import { getNewsfeedPosts, deleteNewsfeedPost } from "@/api/supabaseApi";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 
@@ -97,7 +96,7 @@ const AdminNewsfeed = () => {
       setPosts(data);
       setHasMore(data.length === POSTS_PER_PAGE);
       setCurrentPage(page);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.message || "Yazılar yüklenirken hata oluştu");
     } finally {
       setIsLoading(false);
@@ -109,12 +108,7 @@ const AdminNewsfeed = () => {
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from("newsfeed_posts")
-        .delete()
-        .eq("id", deleteTarget.id);
-
-      if (error) throw error;
+      await deleteNewsfeedPost({ postId: deleteTarget.id });
 
       toast({
         title: "Yazı silindi",
@@ -123,7 +117,7 @@ const AdminNewsfeed = () => {
 
       // Refresh the list
       await fetchPosts(currentPage, searchQuery);
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Hata",
         description: err?.message || "Yazı silinemedi",

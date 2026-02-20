@@ -72,8 +72,18 @@ const Newsfeed = () => {
       month: "short",
     }).format(date);
     const year = date.getFullYear();
-    return { month, year };
+    return { month, year, key: `${year}-${date.getMonth()}` };
   };
+
+  // Group posts by month/year
+  const groupedPosts = posts.reduce((groups, post) => {
+    const { month, year, key } = formatDateParts(post.created_at);
+    if (!groups[key]) {
+      groups[key] = { month, year, posts: [] };
+    }
+    groups[key].posts.push(post);
+    return groups;
+  }, {} as Record<string, { month: string; year: number; posts: NewsfeedPost[] }>);
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,72 +154,85 @@ const Newsfeed = () => {
             </div>
           ) : (
             <>
-              <div className="max-w-6xl mx-auto space-y-6">
-                {posts.map((post, index) => {
-                  const { month, year } = formatDateParts(post.created_at);
-                  return (
-                    <motion.div
-                      key={post.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.05 }}
+              <div className="max-w-6xl mx-auto">
+                {Object.entries(groupedPosts).map(([key, group], groupIndex) => (
+                  <div key={key}>
+                    {/* Divider between months (not before first) */}
+                    {groupIndex > 0 && (
+                      <div className="border-t border-border my-10" />
+                    )}
+
+                    {/* Month/Year Header */}
+                    <motion.p
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: groupIndex * 0.1 }}
+                      className="text-sm text-muted-foreground mb-4"
                     >
-                      <Link to={`/newsfeed/${post.slug}`} className="group block mb-[-6px]">
-                        <div className="bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-200 hover:shadow-lg">
-                          <div className="flex flex-col md:flex-row">
-                            {/* Content - Left side */}
-                            <div className="flex-1 p-6 md:pr-4">
-                              {/* Date */}
-                              <p className="text-sm text-muted-foreground mb-6">
-                                {month} · {year}
-                              </p>
+                      <span className="font-extrabold">{group.month}</span>
+                      <span className="font-normal"> · {group.year}</span>
+                    </motion.p>
 
-                              {/* Author · Category */}
-                              <p className="text-sm text-muted-foreground mb-3 ml-2">
-                                {post.author}
-                                <span className="mx-2">·</span>
-                                <span className="text-primary font-medium">{post.category}</span>
-                              </p>
+                    {/* Posts in this month */}
+                    <div className="space-y-4">
+                      {group.posts.map((post, index) => (
+                        <motion.div
+                          key={post.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: groupIndex * 0.1 + index * 0.05 }}
+                        >
+                          <Link to={`/newsfeed/${post.slug}`} className="group block">
+                            <div className="bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-200 hover:shadow-lg">
+                              <div className="flex flex-col md:flex-row relative">
+                                {/* Content - Left side */}
+                                <div className="flex-1 p-6 md:pr-72 lg:pr-80">
+                                  {/* Author · Category */}
+                                  <p className="text-sm text-muted-foreground mb-3">
+                                    {post.author}
+                                    <span className="mx-2">·</span>
+                                    <span className="text-primary font-medium">{post.category}</span>
+                                  </p>
 
-                              {/* Title */}
-                              <h3 className="max-w-2xl font-heading font-bold text-xl text-foreground mb-4 group-hover:text-primary transition-colors ml-2">
-                                {post.title}
-                              </h3>
+                                  {/* Title */}
+                                  <h3 className="max-w-2xl font-heading font-bold text-xl text-foreground mb-4 group-hover:text-primary transition-colors">
+                                    {post.title}
+                                  </h3>
 
-                              {/* Tags */}
-                              {post.tags && post.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-2 ml-2">
-                                  {post.tags.map((tag) => (
-                                    <span
-                                      key={tag}
-                                      className="bg-muted text-muted-foreground text-sm px-3 py-1 rounded-full"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
+                                  {/* Tags */}
+                                  {post.tags && post.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                      {post.tags.map((tag) => (
+                                        <span
+                                          key={tag}
+                                          className="bg-muted text-muted-foreground text-sm px-3 py-1 rounded-full"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
 
-                            {/* Image - Right side */}
-                            <div className="md:w-64 lg:w-72 flex-shrink-0">
-                              <div className="h-full min-h-[160px] md:min-h-full">
-                                <LogoImage
-                                  variant="card"
-                                  src={post.image || ""}
-                                  alt={post.title}
-                                  hoverZoom
-                                  fallbackText={post.title}
-                                  className="h-full"
-                                />
+                                {/* Image - Right side (absolute positioned) */}
+                                <div className="relative h-48 md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72 flex items-center justify-center">
+                                  <LogoImage
+                                    variant="card"
+                                    src={post.image || ""}
+                                    alt={post.title}
+                                    hoverZoom
+                                    fallbackText={post.title}
+                                    className="!aspect-auto h-full w-full !border-b-0 rounded-b-2xl md:rounded-bl-none md:rounded-r-2xl [&_img]:rounded-b-2xl md:[&_img]:rounded-bl-none md:[&_img]:rounded-r-2xl"
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Pagination */}

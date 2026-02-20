@@ -199,3 +199,44 @@ end;
 $$;
 
 grant execute on function public.upsert_newsfeed_post(text, text, text, text, text, text[], uuid) to authenticated;
+
+
+-- ============================================================
+-- 4) Delete a post by id or slug (admin only)
+-- ============================================================
+create or replace function public.delete_newsfeed_post(
+  post_id   uuid default null,
+  post_slug text default null
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  if post_id is null and post_slug is null then
+    raise exception 'Either post_id or post_slug must be provided'
+      using errcode = 'P0400';
+  end if;
+
+  delete from newsfeed_posts p
+  where
+    (post_id   is not null and p.id   = post_id)
+    or
+    (post_slug is not null and p.slug = post_slug);
+
+  if not found then
+    raise exception 'Post not found'
+      using errcode = 'P0404';
+  end if;
+
+  return true;
+end;
+$$;
+
+grant execute on function public.delete_newsfeed_post(uuid, text) to authenticated;

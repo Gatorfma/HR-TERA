@@ -320,3 +320,13 @@ export const upsertNewsfeedPost = async ({ title, content, author, category, ima
     if (error) throw error;
     return data?.[0] ?? null;
 };
+
+export const deleteNewsfeedPost = async ({ postId = null, postSlug = null }) => {
+    const { data, error } = await supabase.rpc('delete_newsfeed_post', {
+        post_id:   postId,
+        post_slug: postSlug,
+    });
+
+    if (error) throw error;
+    return data ?? false;
+};

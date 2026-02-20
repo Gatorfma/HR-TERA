@@ -26,6 +26,7 @@ import {
   AlignRight,
   AlignJustify,
   Image as ImageIcon,
+  Minus,
 } from "lucide-react";
 import {
   Popover,
@@ -222,6 +223,15 @@ const TipTapEditor = ({ content, onChange, placeholder }: TipTapEditorProps) => 
         >
           <Code className="h-4 w-4" />
         </Toggle>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          title="Ayırıcı çizgi"
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
@@ -390,6 +400,13 @@ const TipTapEditor = ({ content, onChange, placeholder }: TipTapEditorProps) => 
         .ProseMirror pre code {
           background: none;
           padding: 0;
+        }
+
+        /* Horizontal Rule */
+        .ProseMirror hr {
+          border: none;
+          border-top: 2px solid hsl(var(--border));
+          margin: 1.5em 0;
         }
       `}</style>
     </div>

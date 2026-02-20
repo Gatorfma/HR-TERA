@@ -4,8 +4,8 @@ create table newsfeed_posts (
   content    text not null,
   author     text not null,
   slug       text not null unique,
-  image      text,  -- base64 string
-  tags       text[] not null default '{}',
+  image      text not null, -- base64 string
+  tags       text[] not null default '{}' check (array_length(tags, 1) >= 1),
   category   text not null check (category in (
     'Çözüm Güncellemeleri',
     'Haberler',
