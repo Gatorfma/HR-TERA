@@ -1,15 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileSpreadsheet, Upload, CheckCircle, AlertCircle, X, RefreshCw, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
+import { FileSpreadsheet, Upload, CheckCircle, AlertCircle, X, RefreshCw, ArrowRight, Loader2, ArrowLeft, Pencil, RotateCcw, Copy } from "lucide-react";
 import * as XLSX from "xlsx";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { BulkProductInput, ProductCategory } from "@/lib/admin-types";
-import { adminBulkCreateProducts } from "@/api/adminProductsApi";
+import { adminBulkCreateProducts, adminCheckExistingProducts } from "@/api/adminProductsApi";
 import { getAllCategories } from "@/api/supabaseApi";
 
 interface ParsedProduct {
@@ -22,7 +23,7 @@ interface ParsedProduct {
   websiteLink: string;
   features: string;
   languages: string;
-  status: "valid" | "invalid";
+  status: "valid" | "invalid" | "duplicate";
   error?: string;
   resolvedCategory?: ProductCategory;
 }
@@ -34,6 +35,7 @@ const ProductBulkUploadPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [parsedProducts, setParsedProducts] = useState<ParsedProduct[]>([]);
   const [isImporting, setIsImporting] = useState(false);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
   const [importResults, setImportResults] = useState<{
     success: number;
     failed: number;
@@ -43,7 +45,6 @@ const ProductBulkUploadPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Fetch categories from database
     const fetchCategories = async () => {
       try {
         const categories = await getAllCategories();
@@ -55,17 +56,14 @@ const ProductBulkUploadPage = () => {
     fetchCategories();
   }, []);
 
-  // Match category from Excel to DB category
   const matchCategory = useCallback((rawCategory: string): ProductCategory | null => {
     const normalized = rawCategory.toLowerCase().trim();
 
-    // Exact match (case-insensitive)
     const exactMatch = availableCategories.find(
       (cat) => cat.toLowerCase() === normalized
     );
     if (exactMatch) return exactMatch;
 
-    // Partial match
     const partialMatch = availableCategories.find(
       (cat) =>
         cat.toLowerCase().includes(normalized) ||
@@ -76,9 +74,8 @@ const ProductBulkUploadPage = () => {
     return null;
   }, [availableCategories]);
 
-  // Validation helpers
   const validateWebsite = (url: string): boolean => {
-    if (!url || url.trim() === "") return true; // Website is optional
+    if (!url || url.trim() === "") return true;
     return /^https?:\/\/.+/.test(url);
   };
 
@@ -98,7 +95,6 @@ const ProductBulkUploadPage = () => {
         return;
       }
 
-      // Check if first row is a header
       const firstRow = jsonData[0] as string[];
       const headerKeywords = ["product", "çözüm", "company", "şirket", "category", "kategori", "website", "features", "languages"];
       const isHeader = firstRow.some((cell) =>
@@ -110,7 +106,6 @@ const ProductBulkUploadPage = () => {
       const dataRows = isHeader ? jsonData.slice(1) : jsonData;
       const products: ParsedProduct[] = [];
 
-      // Column order: product_name, company_name, short_desc, long_desc, main_category, website_link, features, languages
       dataRows.forEach((row, index) => {
         const cells = row as string[];
         if (cells.length < 1) return;
@@ -124,14 +119,10 @@ const ProductBulkUploadPage = () => {
         const features = String(cells[6] || "").trim();
         const languages = String(cells[7] || "").trim();
 
-        if (!productName) return; // Skip empty rows
+        if (!productName) return;
 
         const errors: string[] = [];
 
-        // Validate required fields
-        if (!productName) {
-          errors.push("Çözüm adı zorunludur");
-        }
         if (!companyName) {
           errors.push("Şirket adı zorunludur");
         }
@@ -139,13 +130,11 @@ const ProductBulkUploadPage = () => {
           errors.push("Kategori zorunludur");
         }
 
-        // Validate category
         const matchedCategory = matchCategory(mainCategory);
         if (mainCategory && !matchedCategory) {
           errors.push("Geçersiz kategori");
         }
 
-        // Validate website format
         if (websiteLink && !validateWebsite(websiteLink)) {
           errors.push("Geçersiz website formatı");
         }
@@ -156,7 +145,7 @@ const ProductBulkUploadPage = () => {
           id: `product-${index}-${Date.now()}`,
           productName,
           companyName,
-          shortDesc: shortDesc || productName, // Default to product name
+          shortDesc: shortDesc || productName,
           longDesc,
           mainCategory,
           websiteLink: websiteLink.startsWith("http") ? websiteLink : (websiteLink ? `https://${websiteLink}` : ""),
@@ -168,15 +157,38 @@ const ProductBulkUploadPage = () => {
         });
       });
 
+      // Check for duplicates
+      const validProducts = products.filter((p) => p.status === "valid");
+      if (validProducts.length > 0) {
+        setIsCheckingDuplicates(true);
+        try {
+          const names = validProducts.map((p) => p.productName);
+          const existingNames = await adminCheckExistingProducts(names);
+          const existingSet = new Set(existingNames.map((n) => n.toLowerCase()));
+
+          for (const product of products) {
+            if (product.status === "valid" && existingSet.has(product.productName.toLowerCase())) {
+              product.status = "duplicate";
+              product.error = "Böyle bir ürün çoktan sistemde bulunmaktadır";
+            }
+          }
+        } catch (err) {
+          console.error("Error checking duplicates:", err);
+        } finally {
+          setIsCheckingDuplicates(false);
+        }
+      }
+
       const validCount = products.filter((p) => p.status === "valid").length;
       const invalidCount = products.filter((p) => p.status === "invalid").length;
+      const duplicateCount = products.filter((p) => p.status === "duplicate").length;
 
       setParsedProducts(products);
       setImportResults(null);
 
       toast({
         title: "Dosya işlendi",
-        description: `${products.length} çözüm bulundu: ${validCount} geçerli, ${invalidCount} geçersiz.`,
+        description: `${products.length} çözüm bulundu: ${validCount} geçerli, ${invalidCount} geçersiz${duplicateCount > 0 ? `, ${duplicateCount} mükerrer` : ""}.`,
       });
     } catch (error) {
       toast({
@@ -225,23 +237,91 @@ const ProductBulkUploadPage = () => {
   };
 
   const handleRejectAllInvalid = () => {
-    const invalidCount = parsedProducts.filter((p) => p.status === "invalid").length;
-    setParsedProducts((prev) => prev.filter((p) => p.status !== "invalid"));
+    const count = parsedProducts.filter((p) => p.status === "invalid" || p.status === "duplicate").length;
+    setParsedProducts((prev) => prev.filter((p) => p.status === "valid"));
     toast({
       title: "Geçersiz çözümler çıkarıldı",
-      description: `${invalidCount} geçersiz çözüm listeden çıkarıldı.`,
+      description: `${count} geçersiz/mükerrer çözüm listeden çıkarıldı.`,
     });
   };
 
-  // Parse comma/semicolon separated string into array
+  const handleUpdateProduct = (productId: string, updates: Partial<ParsedProduct>) => {
+    setParsedProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, ...updates } : p))
+    );
+  };
+
+  const handleRecheck = async (productId: string) => {
+    const product = parsedProducts.find((p) => p.id === productId);
+    if (!product) return;
+
+    const errors: string[] = [];
+
+    if (!product.productName) {
+      errors.push("Çözüm adı zorunludur");
+    }
+    if (!product.companyName) {
+      errors.push("Şirket adı zorunludur");
+    }
+    if (!product.mainCategory) {
+      errors.push("Kategori zorunludur");
+    }
+
+    const matchedCategory = matchCategory(product.mainCategory);
+    if (product.mainCategory && !matchedCategory) {
+      errors.push("Geçersiz kategori");
+    }
+
+    if (product.websiteLink && !validateWebsite(product.websiteLink)) {
+      errors.push("Geçersiz website formatı");
+    }
+
+    // Check for duplicate in DB
+    if (product.productName && errors.length === 0) {
+      try {
+        const existingNames = await adminCheckExistingProducts([product.productName]);
+        if (existingNames.some((n) => n.toLowerCase() === product.productName.toLowerCase())) {
+          setParsedProducts((prev) =>
+            prev.map((p) =>
+              p.id === productId
+                ? { ...p, status: "duplicate" as const, error: "Böyle bir ürün çoktan sistemde bulunmaktadır", resolvedCategory: matchedCategory || undefined }
+                : p
+            )
+          );
+          toast({ title: "Mükerrer", description: "Bu çözüm adı zaten sistemde mevcut.", variant: "destructive" });
+          return;
+        }
+      } catch (err) {
+        console.error("Error re-checking duplicate:", err);
+      }
+    }
+
+    const isValid = errors.length === 0 && matchedCategory !== null;
+
+    setParsedProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              status: isValid ? "valid" : "invalid",
+              error: errors.length > 0 ? errors.join(", ") : undefined,
+              resolvedCategory: matchedCategory || undefined,
+            }
+          : p
+      )
+    );
+
+    if (isValid) {
+      toast({ title: "Geçerli", description: "Çözüm artık geçerli durumda." });
+    }
+  };
+
   const parseArrayField = (value: string): string[] => {
     if (!value || value.trim() === "") return [];
     return value.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 0);
   };
 
-  // Map language names to Turkish equivalents (system uses Turkish names)
   const LANGUAGE_MAP: Record<string, string> = {
-    // English -> Turkish
     "turkish": "Türkçe",
     "english": "İngilizce",
     "german": "Almanca",
@@ -256,7 +336,6 @@ const ProductBulkUploadPage = () => {
     "chinese": "Çince",
     "korean": "Korece",
     "arabic": "Arapça",
-    // Turkish names (pass through)
     "türkçe": "Türkçe",
     "ingilizce": "İngilizce",
     "almanca": "Almanca",
@@ -275,7 +354,7 @@ const ProductBulkUploadPage = () => {
 
   const mapLanguage = (lang: string): string => {
     const normalized = lang.toLowerCase().trim();
-    return LANGUAGE_MAP[normalized] || lang; // Return mapped or original
+    return LANGUAGE_MAP[normalized] || lang;
   };
 
   const parseLanguages = (value: string): string[] => {
@@ -333,6 +412,8 @@ const ProductBulkUploadPage = () => {
 
   const validCount = parsedProducts.filter((p) => p.status === "valid").length;
   const invalidCount = parsedProducts.filter((p) => p.status === "invalid").length;
+  const duplicateCount = parsedProducts.filter((p) => p.status === "duplicate").length;
+  const rejectedCount = invalidCount + duplicateCount;
   const showProductList = parsedProducts.length > 0;
 
   return (
@@ -491,6 +572,7 @@ const ProductBulkUploadPage = () => {
                   <h1 className="text-2xl font-bold text-foreground">Çözüm Listesi</h1>
                   <p className="text-muted-foreground">
                     {parsedProducts.length} çözüm • {validCount} geçerli • {invalidCount} geçersiz
+                    {duplicateCount > 0 && ` • ${duplicateCount} mükerrer`}
                   </p>
                 </div>
                 <Button variant="outline" onClick={handleReset} className="gap-2">
@@ -498,6 +580,14 @@ const ProductBulkUploadPage = () => {
                   Baştan Başla
                 </Button>
               </div>
+
+              {/* Checking duplicates indicator */}
+              {isCheckingDuplicates && (
+                <div className="flex items-center gap-2 p-4 rounded-lg bg-primary/5 border border-primary/20 mb-6">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-primary font-medium">Mükerrer çözümler kontrol ediliyor...</span>
+                </div>
+              )}
 
               {/* Product List */}
               <Card className="mb-6">
@@ -508,7 +598,10 @@ const ProductBulkUploadPage = () => {
                         <ProductRow
                           key={product.id}
                           product={product}
+                          categories={availableCategories}
                           onReject={handleRejectProduct}
+                          onUpdate={handleUpdateProduct}
+                          onRecheck={handleRecheck}
                         />
                       ))}
                     </AnimatePresence>
@@ -516,18 +609,18 @@ const ProductBulkUploadPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Reject All Invalid */}
-              {invalidCount > 0 && (
+              {/* Reject All Invalid/Duplicate */}
+              {rejectedCount > 0 && (
                 <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/5 border border-destructive/20 mb-6">
                   <span className="text-destructive font-medium">
-                    {invalidCount} geçersiz çözüm beklemede.
+                    {rejectedCount} geçersiz/mükerrer çözüm beklemede.
                   </span>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={handleRejectAllInvalid}
                   >
-                    Tümünü Reddet ({invalidCount})
+                    Tümünü Reddet ({rejectedCount})
                   </Button>
                 </div>
               )}
@@ -611,14 +704,36 @@ const ProductBulkUploadPage = () => {
 
 interface ProductRowProps {
   product: ParsedProduct;
+  categories: readonly ProductCategory[];
   onReject: (productId: string) => void;
+  onUpdate: (productId: string, updates: Partial<ParsedProduct>) => void;
+  onRecheck: (productId: string) => void;
 }
 
-const ProductRow = ({ product, onReject }: ProductRowProps) => {
+const ProductRow = ({ product, categories, onReject, onUpdate, onRecheck }: ProductRowProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isRechecking, setIsRechecking] = useState(false);
+  const [editValues, setEditValues] = useState({
+    productName: product.productName,
+    companyName: product.companyName,
+    mainCategory: product.mainCategory,
+    websiteLink: product.websiteLink,
+  });
+  const [categorySearch, setCategorySearch] = useState("");
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
+  const isRejected = product.status === "invalid" || product.status === "duplicate";
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.toLowerCase().includes(categorySearch.toLowerCase())
+  );
+
   const getBorderColor = () => {
     switch (product.status) {
       case "valid":
         return "border-green-500/30 bg-green-500/5";
+      case "duplicate":
+        return "border-amber-500/30 bg-amber-500/5 shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)]";
       case "invalid":
         return "border-destructive/30 bg-destructive/5 shadow-[0_0_15px_-3px_rgba(239,68,68,0.3)]";
       default:
@@ -630,12 +745,112 @@ const ProductRow = ({ product, onReject }: ProductRowProps) => {
     switch (product.status) {
       case "valid":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case "duplicate":
+        return <Copy className="h-5 w-5 text-amber-500" />;
       case "invalid":
         return <AlertCircle className="h-5 w-5 text-destructive" />;
       default:
         return null;
     }
   };
+
+  const handleSaveAndRecheck = async () => {
+    onUpdate(product.id, {
+      productName: editValues.productName,
+      companyName: editValues.companyName,
+      mainCategory: editValues.mainCategory,
+      websiteLink: editValues.websiteLink,
+    });
+    setIsEditing(false);
+    setIsRechecking(true);
+    // Small delay to let state update propagate
+    await new Promise((r) => setTimeout(r, 50));
+    await onRecheck(product.id);
+    setIsRechecking(false);
+  };
+
+  if (isEditing) {
+    return (
+      <motion.div
+        layout
+        className={`p-4 rounded-lg border transition-all ${getBorderColor()}`}
+      >
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Çözüm Adı</label>
+              <Input
+                value={editValues.productName}
+                onChange={(e) => setEditValues((v) => ({ ...v, productName: e.target.value }))}
+                placeholder="Çözüm adı"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Şirket Adı</label>
+              <Input
+                value={editValues.companyName}
+                onChange={(e) => setEditValues((v) => ({ ...v, companyName: e.target.value }))}
+                placeholder="Şirket adı"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="relative">
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Kategori</label>
+              <Input
+                value={editValues.mainCategory}
+                onChange={(e) => {
+                  setEditValues((v) => ({ ...v, mainCategory: e.target.value }));
+                  setCategorySearch(e.target.value);
+                  setShowCategoryDropdown(true);
+                }}
+                onFocus={() => {
+                  setCategorySearch(editValues.mainCategory);
+                  setShowCategoryDropdown(true);
+                }}
+                onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                placeholder="Kategori"
+              />
+              {showCategoryDropdown && filteredCategories.length > 0 && (
+                <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-md max-h-40 overflow-y-auto">
+                  {filteredCategories.map((cat) => (
+                    <button
+                      key={cat}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        setEditValues((v) => ({ ...v, mainCategory: cat }));
+                        setShowCategoryDropdown(false);
+                      }}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Website</label>
+              <Input
+                value={editValues.websiteLink}
+                onChange={(e) => setEditValues((v) => ({ ...v, websiteLink: e.target.value }))}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
+              İptal
+            </Button>
+            <Button size="sm" onClick={handleSaveAndRecheck} className="gap-1">
+              <RotateCcw className="h-3.5 w-3.5" />
+              Kaydet & Kontrol Et
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -677,18 +892,39 @@ const ProductRow = ({ product, onReject }: ProductRowProps) => {
         {product.status === "valid" && (
           <span className="text-sm font-medium text-green-600">Geçerli</span>
         )}
+        {product.status === "duplicate" && (
+          <span className="text-sm font-medium text-amber-600">Mükerrer</span>
+        )}
       </div>
 
-      {/* Actions for Invalid */}
-      {product.status === "invalid" && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-destructive/50 text-destructive hover:bg-destructive/10 px-2"
-          onClick={() => onReject(product.id)}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+      {/* Actions for Invalid/Duplicate */}
+      {isRejected && (
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {isRechecking ? (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="px-2"
+                onClick={() => setIsEditing(true)}
+                title="Düzenle"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-destructive/50 text-destructive hover:bg-destructive/10 px-2"
+                onClick={() => onReject(product.id)}
+                title="Çıkar"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
       )}
     </motion.div>
   );

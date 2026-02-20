@@ -4497,3 +4497,165 @@ end;
 $$;
 
 grant execute on function public.admin_delete_reply(uuid) to authenticated, service_role;
+
+
+-- ============================================================
+-- RPC: admin_check_existing_products
+-- ============================================================
+-- Purpose: Check which product names already exist in the database
+-- Returns the subset of input names that match existing products (case-insensitive)
+-- ============================================================
+create or replace function public.admin_check_existing_products(p_names text[])
+returns text[]
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_existing text[];
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  select array_agg(unnested)
+  into v_existing
+  from unnest(p_names) as unnested
+  where lower(unnested) in (
+    select lower(product_name) from public.products
+  );
+
+  return coalesce(v_existing, '{}');
+end;
+$$;
+
+grant execute on function public.admin_check_existing_products(text[]) to authenticated;
+grant execute on function public.admin_check_existing_products(text[]) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_check_existing_vendors
+-- ============================================================
+-- Purpose: Check which company names already exist in the database
+-- Returns the subset of input names that match existing vendors (case-insensitive)
+-- ============================================================
+create or replace function public.admin_check_existing_vendors(p_names text[])
+returns text[]
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_existing text[];
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  select array_agg(unnested)
+  into v_existing
+  from unnest(p_names) as unnested
+  where lower(unnested) in (
+    select lower(company_name) from public.vendors where company_name is not null
+  );
+
+  return coalesce(v_existing, '{}');
+end;
+$$;
+
+grant execute on function public.admin_check_existing_vendors(text[]) to authenticated;
+grant execute on function public.admin_check_existing_vendors(text[]) to service_role;
+
+
+-- ============================================================
+-- RPC: admin_bulk_create_vendors
+-- ============================================================
+-- Purpose: Bulk create vendors (admin only)
+-- Creates multiple vendor records at once
+--
+-- Parameters:
+--   p_vendors : JSONB array of vendors to create
+--     Each vendor should have: company_name (required), company_size, headquarters, website_link
+--
+-- Returns: JSONB with success count and errors
+-- ============================================================
+create or replace function public.admin_bulk_create_vendors(p_vendors jsonb)
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path = public
+as $$
+declare
+  v_vendor jsonb;
+  v_success_count integer := 0;
+  v_error_count integer := 0;
+  v_errors jsonb := '[]'::jsonb;
+  v_new_vendor_id uuid;
+  v_company_name text;
+begin
+  -- Admin check
+  if not public.is_admin() then
+    raise exception 'Unauthorized: Admin access required'
+      using errcode = 'P0403';
+  end if;
+
+  -- Loop through vendors
+  for v_vendor in select * from jsonb_array_elements(p_vendors)
+  loop
+    begin
+      v_company_name := v_vendor->>'company_name';
+
+      -- Validate required fields
+      if v_company_name is null or v_company_name = '' then
+        v_error_count := v_error_count + 1;
+        v_errors := v_errors || jsonb_build_object(
+          'company_name', coalesce(v_company_name, 'unknown'),
+          'error', 'Company name is required'
+        );
+        continue;
+      end if;
+
+      -- Insert the vendor
+      insert into public.vendors (
+        company_name,
+        company_size,
+        headquarters,
+        website_link,
+        subscription
+      ) values (
+        v_company_name,
+        nullif(v_vendor->>'company_size', ''),
+        nullif(v_vendor->>'headquarters', ''),
+        nullif(v_vendor->>'website_link', ''),
+        coalesce(nullif(v_vendor->>'subscription', ''), 'freemium')::public.tier
+      )
+      returning vendor_id into v_new_vendor_id;
+
+      v_success_count := v_success_count + 1;
+
+    exception when others then
+      v_error_count := v_error_count + 1;
+      v_errors := v_errors || jsonb_build_object(
+        'company_name', coalesce(v_company_name, 'unknown'),
+        'error', SQLERRM
+      );
+    end;
+  end loop;
+
+  return jsonb_build_object(
+    'success_count', v_success_count,
+    'error_count', v_error_count,
+    'errors', v_errors
+  );
+end;
+$$;
+
+grant execute on function public.admin_bulk_create_vendors(jsonb) to authenticated;
+grant execute on function public.admin_bulk_create_vendors(jsonb) to service_role;
