@@ -510,13 +510,14 @@ const ProductDetail = () => {
                 {/* Hero Image (Plus/Premium only) */}
                 {isPlusOrPremium && product.screenshots?.length > 0 && (
                   <div className="lg:w-[45%] min-w-0">
-                    {/* Active screenshot: no crop, proportional, container = image size */}
+                    {/* Active screenshot with fixed container */}
                     <div className="w-full flex justify-center">
-                      <div className="w-fit rounded-xl overflow-hidden border border-border">
-                        <img
+                      <div className="w-[600px] [&>div]:bg-background">
+                        <LogoImage
+                          variant="card"
                           src={product.screenshots[activeScreenshot]}
                           alt={product.name}
-                          className="block max-w-full max-h-[46vh] w-auto h-auto"
+                          fallbackText={product.name}
                         />
                       </div>
                     </div>
@@ -585,7 +586,7 @@ const ProductDetail = () => {
                       {vendorMotto && (
                         <p className="text-sm text-muted-foreground mt-3 italic break-words">“{vendorMotto}”</p>
                       )}
-
+                      
                       {(vendorHQ || vendorSize) && (
                         <div className="mt-6 grid grid-cols-2 gap-2">
                           {vendorHQ && (

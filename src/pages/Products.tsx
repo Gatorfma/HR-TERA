@@ -397,7 +397,7 @@ const Products = () => {
             {/* Main Content Area */}
             <div className="flex-1 min-w-0">
               {/* Search Bar */}
-              <div className="mb-8">
+              <div className="mb-8 mt-4">
                 <div className="relative">
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
