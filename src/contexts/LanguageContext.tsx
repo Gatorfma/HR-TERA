@@ -213,10 +213,11 @@ const en: Record<string, string> = {
   "auth.orContinue": "Or continue with",
   "auth.continueWithGoogle": "Continue with Google",
   "auth.fullName": "Full Name",
-  "auth.workEmail": "Work Email",
+  "auth.workEmail": "Email",
   "auth.phone": "Phone Number",
-  "auth.company": "Company (optional)",
-  "auth.role": "Role (optional)",
+  "auth.company": "Company",
+  "auth.role": "Role",
+  "auth.optional": "optional",
   "auth.confirmPassword": "Confirm Password",
   "auth.invalidPhone": "Please enter a valid phone number",
   "auth.agreeTerms": "I agree to the",
@@ -225,12 +226,14 @@ const en: Record<string, string> = {
   "auth.privacyPolicy": "Privacy Policy",
   "auth.creatingAccount": "Creating account...",
   "auth.createAccount": "Create account",
+  "auth.missingFields": "Please fill in all required fields",
 
   // Search Bar
   "search.placeholder": "Search solutions & vendors...",
 
   // Profile Dropdown
   "profile.profile": "Profile",
+  "profile.adminPanel": "Admin Panel",
   "profile.logout": "Log out",
 
   // Common
@@ -679,7 +682,7 @@ const tr: Record<string, string> = {
   "footer.newsletter.storageNote": "E-postanız bu tarayıcıda yerel olarak saklanmaktadır.",
 
   // Auth Modal
-  "auth.welcome": "HRTera'a hoş geldiniz – İK pazaryeriniz",
+  "auth.welcome": "HRTera'ya Hoş Geldiniz – İK Teknolojilerinde Karar Merkezi",
   "auth.login": "Giriş Yap",
   "auth.signup": "Kayıt Ol",
   "auth.email": "E-posta",
@@ -692,10 +695,11 @@ const tr: Record<string, string> = {
   "auth.orContinue": "Veya şununla devam edin",
   "auth.continueWithGoogle": "Google ile devam et",
   "auth.fullName": "Ad Soyad",
-  "auth.workEmail": "İş E-postası",
+  "auth.workEmail": "E-posta",
   "auth.phone": "Telefon Numarası",
-  "auth.company": "Şirket (isteğe bağlı)",
-  "auth.role": "Pozisyon (isteğe bağlı)",
+  "auth.company": "Şirket",
+  "auth.role": "Pozisyon",
+  "auth.optional": "opsiyonel",
   "auth.confirmPassword": "Şifre Tekrar",
   "auth.invalidPhone": "Geçerli bir telefon numarası girin",
   "auth.agreeTerms": "Kabul ediyorum",
@@ -704,12 +708,14 @@ const tr: Record<string, string> = {
   "auth.privacyPolicy": "Gizlilik Politikası",
   "auth.creatingAccount": "Hesap oluşturuluyor...",
   "auth.createAccount": "Hesap Oluştur",
+  "auth.missingFields": "Lütfen bütün alanları doldurun.",
 
   // Search Bar
   "search.placeholder": "Çözüm ve şirket ara...",
 
   // Profile Dropdown
   "profile.profile": "Profil",
+  "profile.adminPanel": "Admin Paneli",
   "profile.logout": "Çıkış Yap",
 
   // Common

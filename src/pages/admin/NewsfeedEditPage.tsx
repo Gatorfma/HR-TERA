@@ -82,7 +82,7 @@ const NewsfeedEditPage = () => {
         });
         navigate("/admin/newsfeed");
       }
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Hata",
         description: err?.message || "Yazı yüklenemedi",
@@ -185,7 +185,7 @@ const NewsfeedEditPage = () => {
       });
 
       navigate("/admin/newsfeed");
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: "Hata",
         description: err?.message || "Yazı kaydedilemedi",
@@ -393,6 +393,7 @@ const NewsfeedEditPage = () => {
                         <button
                           onClick={() => handleRemoveTag(tag)}
                           className="ml-1 hover:text-destructive"
+                          title="X"
                         >
                           <X className="h-3 w-3" />
                         </button>

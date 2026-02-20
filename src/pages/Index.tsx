@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProductsSection from "@/components/ProductsSection";
@@ -9,7 +8,6 @@ import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
 import { getProducts, getAllCountries, getAllLanguages, getAllCategories } from "@/api/supabaseApi";
 import { DashboardProduct } from "@/lib/types";
-import { useAuth } from "@/contexts/AuthContext";
 
 
 const Index = () => {
@@ -21,16 +19,6 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
-  const { isAdmin, isAuthenticated, isLoading } = useAuth();
-  const navigate = useNavigate();
-
-  // Redirect admins to admin page on load
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && isAdmin) {
-      console.log('[Index] Admin detected, redirecting to /admin');
-      navigate('/admin', { replace: true });
-    }
-  }, [isLoading, isAuthenticated, isAdmin, navigate]);
 
   // Fetch filter options (categories, countries, and languages)
   useEffect(() => {

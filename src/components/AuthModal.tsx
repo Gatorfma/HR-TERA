@@ -86,14 +86,15 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!fullName || !email || !password || !phone) {
-      toast.error("Please fill in all required fields");
+
+    if (!fullName || !email || !password) {
+      toast.error(t("auth.missingFields"));
       return;
     }
 
+    // Only validate phone if provided
     const normalizedPhone = phone.trim();
-    if (!isValidPhone(normalizedPhone)) {
+    if (normalizedPhone && !isValidPhone(normalizedPhone)) {
       toast.error(t("auth.invalidPhone"));
       return;
     }
@@ -110,7 +111,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
     setIsLoading(true);
     try {
-      await signup(email, password, fullName, company, role, normalizedPhone);
+      await signup(email, password, fullName, company || undefined, role || undefined, normalizedPhone || undefined);
       toast.success("Account created successfully! Please check your email to verify.");
       onOpenChange(false);
       navigate("/profile");
@@ -126,7 +127,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
         <DialogOverlay className="bg-background/80 backdrop-blur-md" />
-        <DialogContent className="max-w-[540px] max-h-[90vh] overflow-y-auto p-0 border-none bg-transparent shadow-none">
+        <DialogContent className="max-w-[540px] max-h-[90vh] overflow-y-auto p-0 border-none bg-transparent shadow-none scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Visually hidden title for screen readers */}
           <VisuallyHidden>
             <DialogTitle>
@@ -144,10 +145,11 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
             {/* Logo */}
             <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="flex gap-0.5">
-                <div className="w-3 h-6 bg-primary rounded-full rotate-12" />
-                <div className="w-3 h-6 bg-primary rounded-full -rotate-12" />
-              </div>
+              <img
+                src={`${import.meta.env.BASE_URL}hrtera-nobg-icon.png`}
+                alt="HRTera logo"
+                className="w-6 h-6 object-contain"
+              />
               <span className="font-heading font-bold text-2xl text-foreground">HRTera</span>
             </div>
 
@@ -345,7 +347,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">{t("auth.phone")}</Label>
+                    <Label htmlFor="phone">{t("auth.phone")} <span className="text-muted-foreground font-normal">({t("auth.optional")})</span></Label>
                     <PhoneInput
                       id="phone"
                       value={phone}
@@ -356,7 +358,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="company">{t("auth.company")}</Label>
+                      <Label htmlFor="company">{t("auth.company")} <span className="text-muted-foreground font-normal">({t("auth.optional")})</span></Label>
                       <Input
                         id="company"
                         type="text"
@@ -367,7 +369,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="role">{t("auth.role")}</Label>
+                      <Label htmlFor="role">{t("auth.role")} <span className="text-muted-foreground font-normal">({t("auth.optional")})</span></Label>
                       <Input
                         id="role"
                         type="text"
@@ -456,16 +458,6 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                       {t("auth.login")}
                     </button>
                   </p>
-
-                  {/* Social Auth Divider */}
-                  <div className="relative my-6">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-border" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-3 text-muted-foreground">{t("auth.orContinue")}</span>
-                    </div>
-                  </div>
                 </motion.form>
               )}
             </AnimatePresence>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import VendorTierBadge from "@/components/vendor-detail/VendorTierBadge";
@@ -9,7 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -103,14 +103,25 @@ const ProfileDropdown = () => {
 
             {/* Menu items */}
             <div className="p-2">
-              <Link
-                to="/profile"
-                onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"
-              >
-                <User className="w-4 h-4 text-muted-foreground" />
-                {t("profile.profile")}
-              </Link>
+              {isAdmin ? (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"
+                >
+                  <Shield className="w-4 h-4 text-muted-foreground" />
+                  {t("profile.adminPanel")}
+                </Link>
+              ) : (
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"
+                >
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  {t("profile.profile")}
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"

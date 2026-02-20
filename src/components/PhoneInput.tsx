@@ -91,12 +91,11 @@ const PhoneInput = ({ value, onChange, defaultCountry = "TR", id, disabled }: Ph
   };
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row">
+    <div className="flex gap-2">
       <Select value={countryCode} onValueChange={handleCountryChange} disabled={disabled}>
-        <SelectTrigger className="w-full rounded-xl sm:w-[200px]">
-          <div className="flex items-center gap-2">
+        <SelectTrigger className="w-[90px] flex-shrink-0 rounded-xl">
+          <div className="flex items-center gap-1.5">
             <span className="text-base">{selectedCountry.flag}</span>
-            <span className="text-sm font-medium">{selectedCountry.name}</span>
             <span className="text-xs text-muted-foreground">{selectedCountry.dialCode}</span>
           </div>
         </SelectTrigger>

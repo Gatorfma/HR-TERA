@@ -1,9 +1,10 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import Navbar from "@/components/Navbar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -11,23 +12,14 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate();
-  const { logout, isAuthenticated, isAdmin, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
 
-  // Redirect non-admin users
+  // Redirect non-authenticated users
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       navigate("/");
     }
   }, [isLoading, isAuthenticated, navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
 
   // Show loading state
   if (isLoading) {
@@ -60,34 +52,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            {/* Left side - Admin title */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigate("/admin")}
-                className="text-xl font-bold text-foreground hover:text-primary transition-colors"
-              >
-                Admin Paneli
-              </button>
-            </div>
-
-            {/* Right side - Logout button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Çıkış Yap
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      {/* Wrapper to make Navbar static instead of fixed */}
+      <div className="flex justify-center py-4 px-4 [&_nav]:static [&_nav]:translate-x-0 [&_nav]:left-0 mb-4">
+        <Navbar />
+      </div>
       {/* Main content */}
       <main>{children}</main>
     </div>
