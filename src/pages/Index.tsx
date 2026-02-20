@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProductsSection from "@/components/ProductsSection";
-import BlogSection from "@/components/BlogSection";
+import NewsfeedSection from "@/components/NewsfeedSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
@@ -126,7 +126,7 @@ const Index = () => {
         onLanguageChange={handleLanguageChange}
         onClearFilters={handleClearFilters}
       />
-      <BlogSection />
+      <NewsfeedSection />
       <PricingSection />
       <FAQSection />
       <Footer />

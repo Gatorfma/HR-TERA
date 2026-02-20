@@ -99,10 +99,11 @@ begin
     select
       p.id,
       p.title,
-      case
-        when auth.role() = 'anon' then left(p.content, 1500)
-        else p.content
-      end as content,
+			case
+			when auth.role() = 'anon' then
+					left(p.content, greatest(1, (length(p.content) * 0.25)::int))
+			else p.content
+			end as content,
       p.author,
       p.slug,
       p.image,

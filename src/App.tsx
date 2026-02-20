@@ -15,8 +15,8 @@ import Vendors from "./pages/Vendors";
 import VendorDetail from "./pages/VendorDetail";
 import VendorApply from "./pages/VendorApply";
 import SearchResults from "./pages/SearchResults";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
+import Newsfeed from "./pages/Newsfeed";
+import NewsfeedPost from "./pages/NewsfeedPost";
 import Admin from "./pages/Admin";
 import AdminProducts from "./pages/AdminProducts";
 import ProductEditPage from "./pages/admin/ProductEditPage";
@@ -63,8 +63,8 @@ const App = () => (
                 <Route path="/vendors/:slug" element={<VendorDetail />} />
                 <Route path="/vendors/apply" element={<VendorApply />} />
                 <Route path="/search" element={<SearchResults />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/newsfeed" element={<Newsfeed />} />
+                <Route path="/newsfeed/:slug" element={<NewsfeedPost />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin/products" element={<AdminProducts />} />
                 <Route path="/admin/products/edit" element={<ProductEditPage />} />

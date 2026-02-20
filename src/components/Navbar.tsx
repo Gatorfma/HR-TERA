@@ -56,7 +56,7 @@ const Navbar = () => {
               <Link to="/trending" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
                 {t("nav.trending")}
               </Link>
-              <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <Link to="/newsfeed" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
                 {t("nav.hrtech_radar")}
               </Link>
               <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors">
@@ -134,7 +134,7 @@ const Navbar = () => {
                 <Link to="/trending" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
                   {t("nav.trending")}
                 </Link>
-                <Link to="/blog" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
+                <Link to="/newsfeed" className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
                   {t("nav.hrtech_radar")}
                 </Link>
                 <a href={`${import.meta.env.BASE_URL}#pricing`} className="text-sm font-medium text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>

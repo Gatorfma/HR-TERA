@@ -15,7 +15,7 @@ const en: Record<string, string> = {
   // Navbar
   "nav.products": "Solutions",
   "nav.vendors": "Vendors",
-  "nav.blog": "Blog",
+  "nav.newsfeed": "HRTech Radar",
   "nav.pricing": "Pricing",
   "nav.login": "Log in / Sign up",
   "nav.profile": "My Profile",
@@ -76,10 +76,19 @@ const en: Record<string, string> = {
   "vendors.allVendors": "All Vendors",
   "vendors.from": "From",
 
-  // Blog Section
-  "blog.title": "From the Blog",
-  "blog.subtitle": "Latest insights and trends in HR technology",
-  "blog.viewAll": "View all articles",
+  // Newsfeed Section (HRTech Radar)
+  "newsfeed.title": "HRTech Radar",
+  "newsfeed.subtitle": "Stay up to date with the latest trends, events, and developments in HR technology.",
+  "newsfeed.viewAll": "View all posts",
+  "newsfeed.allPosts": "All Posts",
+  "newsfeed.noPosts": "No posts found.",
+  "newsfeed.backToRadar": "Back to HRTech Radar",
+  "newsfeed.postNotFound": "Post Not Found",
+  "newsfeed.postNotFoundDesc": "The post you are looking for does not exist.",
+  "newsfeed.relatedPosts": "Related Posts",
+  "newsfeed.loginToReadFull": "Sign in to access the full article",
+  "newsfeed.loginToReadFullDesc": "Sign in with your account or create a new one for free to access the full article.",
+  "newsfeed.loginButton": "Sign In / Sign Up",
 
   // Testimonials Section
   "testimonials.title": "Pricing Plan",
@@ -173,7 +182,7 @@ const en: Record<string, string> = {
   "footer.newsletter.placeholder": "Enter your email",
   "footer.newsletter.button": "Subscribe",
   "footer.company": "Company",
-  "footer.blog": "Blog",
+  "footer.newsfeed": "HRTech Radar",
   "footer.products": "Solutions",
   "footer.vendors": "Vendors",
   "footer.pricing": "Pricing Plan",
@@ -484,7 +493,7 @@ const tr: Record<string, string> = {
   // Navbar
   "nav.products": "Çözümler",
   "nav.vendors": "Şirketler",
-  "nav.blog": "Blog",
+  "nav.newsfeed": "HRTech Radar",
   "nav.pricing": "Fiyatlandırma",
   "nav.login": "Giriş Yap / Kayıt Ol",
   "nav.profile": "Profilim",
@@ -545,10 +554,19 @@ const tr: Record<string, string> = {
   "vendors.allVendors": "Tüm Şirketler",
   "vendors.from": "Başlangıç",
 
-  // Blog Section
-  "blog.title": "Blogdan",
-  "blog.subtitle": "İK teknolojisindeki son gelişmeler ve trendler",
-  "blog.viewAll": "Tüm makaleleri gör",
+  // newsfeed Section (HRTech Radar)
+  "newsfeed.title": "HRTech Radar",
+  "newsfeed.subtitle": "İK teknolojilerindeki en güncel trendleri, etkinlikleri ve gelişmeleri takip edin.",
+  "newsfeed.viewAll": "Tüm gönderileri gör",
+  "newsfeed.allPosts": "Tüm Gönderiler",
+  "newsfeed.noPosts": "Gönderi bulunamadı.",
+  "newsfeed.backToRadar": "HRTech Radar'a Dön",
+  "newsfeed.postNotFound": "Gönderi Bulunamadı",
+  "newsfeed.postNotFoundDesc": "Aradığınız gönderi mevcut değil.",
+  "newsfeed.relatedPosts": "İlgili Gönderiler",
+  "newsfeed.loginToReadFull": "İçeriğin tamamına erişmek için giriş yapın",
+  "newsfeed.loginToReadFullDesc": "Bu makalenin devamına erişmek için giriş yapın veya ücretsiz yeni bir hesap oluşturun.",
+  "newsfeed.loginButton": "Giriş Yap / Kayıt Ol",
 
   // Testimonials Section
   "testimonials.title": "Fiyatlandırma Planı",
@@ -643,7 +661,7 @@ const tr: Record<string, string> = {
   "footer.newsletter.placeholder": "E-postanızı girin",
   "footer.newsletter.button": "Abone Ol",
   "footer.company": "Şirket",
-  "footer.blog": "Blog",
+  "footer.newsfeed": "HRTech Radar",
   "footer.products": "Çözümler",
   "footer.vendors": "Şirketler",
   "footer.pricing": "Fiyatlandırma",

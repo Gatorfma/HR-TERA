@@ -112,7 +112,7 @@ const ProductsSection = ({
                     <SelectValue placeholder={t("products.category")} />
                   </SelectTrigger>
                   <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
-                    <SelectItem value="all">{t("products.allProducts")}</SelectItem>
+                    <SelectItem value="all">{t("products.allCategories")}</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
