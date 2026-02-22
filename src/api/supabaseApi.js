@@ -1,6 +1,6 @@
 import { supabase } from "@/api/supabaseClient";
 
-export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, languageFilter = null, countryFilter = null, tierFilter = null }) => {
+export const getProducts = async ({ n, page, productFilter = null, vendorFilter = null, categoryFilter = null, languageFilter = null, countryFilter = null, tierFilter = null, aiOnly = false }) => {
     const { data, error } = await supabase.rpc('get_product_cards', {
         n,
         page,
@@ -10,6 +10,7 @@ export const getProducts = async ({ n, page, productFilter = null, vendorFilter 
         language_filter: languageFilter,
         country_filter: countryFilter,
         tier_filter: tierFilter,
+        ai_only: aiOnly,
     });
   
     if (error) throw error;

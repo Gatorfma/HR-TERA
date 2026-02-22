@@ -19,6 +19,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [aiOnly, setAiOnly] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile/desktop (matches tailwind 'desktop' breakpoint at 1000px)
@@ -80,12 +81,13 @@ const Index = () => {
         categoryFilter,
         countryFilter,
         languageFilter,
+        aiOnly,
       });
       setFilteredProducts(products);
     } catch (error) {
       console.error("Error fetching filtered products:", error);
     }
-  }, [selectedCategory, selectedCountry, selectedLanguage, isMobile]);
+  }, [selectedCategory, selectedCountry, selectedLanguage, aiOnly, isMobile]);
 
   useEffect(() => {
     fetchFilteredProducts();
@@ -103,17 +105,22 @@ const Index = () => {
     setSelectedLanguage(language);
   };
 
+  const handleAiOnlyChange = (value: boolean) => {
+    setAiOnly(value);
+  };
+
   const handleClearFilters = () => {
     setSelectedCategory("all");
     setSelectedCountry("all");
     setSelectedLanguage("all");
+    setAiOnly(false);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <HeroSection products={dashboardProducts} />
-      <ProductsSection 
+      <ProductsSection
         products={filteredProducts}
         categories={categories}
         countries={countries}
@@ -121,9 +128,11 @@ const Index = () => {
         selectedCategory={selectedCategory}
         selectedCountry={selectedCountry}
         selectedLanguage={selectedLanguage}
+        aiOnly={aiOnly}
         onCategoryChange={handleCategoryChange}
         onCountryChange={handleCountryChange}
         onLanguageChange={handleLanguageChange}
+        onAiOnlyChange={handleAiOnlyChange}
         onClearFilters={handleClearFilters}
       />
       <NewsfeedSection />
