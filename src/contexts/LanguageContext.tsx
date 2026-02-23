@@ -62,6 +62,10 @@ const en: Record<string, string> = {
   "products.filterLanguage": "Language",
   "products.allCountries": "All Countries",
   "products.allLanguages": "All Languages",
+  "products.aiFilter": "AI",
+  "products.aiPowered": "AI Powered",
+  "products.notAiPowered": "Not AI Powered",
+  "products.allAi": "All",
 
   // Vendors Section
   "vendors.title": "Vendors",
@@ -543,6 +547,10 @@ const tr: Record<string, string> = {
   "products.filterLanguage": "Dil",
   "products.allCountries": "Tüm Ülkeler",
   "products.allLanguages": "Tüm Diller",
+  "products.aiFilter": "AI",
+  "products.aiPowered": "AI Destekli",
+  "products.notAiPowered": "AI Destekli Değil",
+  "products.allAi": "Tümü",
 
   // Vendors Section
   "vendors.title": "Şirketler",

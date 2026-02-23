@@ -1,4 +1,4 @@
-import { ArrowUpRight, Globe, Languages, LayoutGrid, Filter } from "lucide-react";
+import { ArrowUpRight, Globe, Languages, LayoutGrid, Filter, BotMessageSquare, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "./ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ProductsSectionProps {
   products?: DashboardProduct[];
@@ -22,13 +28,15 @@ interface ProductsSectionProps {
   selectedCategory?: string;
   selectedCountry?: string;
   selectedLanguage?: string;
+  aiOnly?: boolean;
   onCategoryChange?: (category: string) => void;
   onCountryChange?: (country: string) => void;
   onLanguageChange?: (language: string) => void;
+  onAiOnlyChange?: (value: boolean) => void;
   onClearFilters?: () => void;
 }
 
-const ProductsSection = ({ 
+const ProductsSection = ({
   products = [],
   categories = [],
   countries = [],
@@ -36,15 +44,17 @@ const ProductsSection = ({
   selectedCategory = "all",
   selectedCountry = "all",
   selectedLanguage = "all",
+  aiOnly = false,
   onCategoryChange,
   onCountryChange,
   onLanguageChange,
+  onAiOnlyChange,
   onClearFilters,
 }: ProductsSectionProps) => {
   const { t } = useLanguage();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  
-  const hasActiveFilters = selectedCategory !== "all" || selectedCountry !== "all" || selectedLanguage !== "all";
+
+  const hasActiveFilters = selectedCategory !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || aiOnly;
   
   // Map API products to ProductCard format
   const mappedProducts = products
@@ -58,7 +68,7 @@ const ProductsSection = ({
       isVerified: product.is_verified,
     }));
 
-  if (mappedProducts.length === 0 && selectedCategory === "all" && selectedCountry === "all" && selectedLanguage === "all") return null;
+  if (mappedProducts.length === 0 && !hasActiveFilters) return null;
 
   return (
     <section id="products" className="py-20 bg-background">
@@ -163,6 +173,29 @@ const ProductsSection = ({
                   </SelectContent>
                 </Select>
               </div>
+              
+              {/* AI Filter */}
+              <div className="flex items-center gap-2">
+                <BotMessageSquare className="w-4 h-4 text-muted-foreground" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex h-9 w-[180px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    <span className={`flex items-center gap-2 ${aiOnly ? "text-foreground" : "text-muted-foreground"}`}>
+                      {t("products.aiFilter")}
+                      {aiOnly && <Check className="h-4 w-4 text-primary" />}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-[180px] p-2">
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={aiOnly}
+                        onCheckedChange={(checked) => onAiOnlyChange?.(checked === true)}
+                      />
+                      {t("products.aiPowered")}
+                    </label>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             {/* Clear Filters Button */}
@@ -246,6 +279,29 @@ const ProductsSection = ({
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* AI Filter */}
+                <div className="flex items-center gap-2">
+                  <BotMessageSquare className="w-4 h-4 text-muted-foreground" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <span className={`flex items-center gap-2 ${aiOnly ? "text-foreground" : "text-muted-foreground"}`}>
+                        {t("products.aiFilter")}
+                        {aiOnly && <Check className="h-4 w-4 text-primary" />}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[calc(100vw-4.5rem)] p-2">
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
+                        <Checkbox
+                          checked={aiOnly}
+                          onCheckedChange={(checked) => onAiOnlyChange?.(checked === true)}
+                        />
+                        {t("products.aiPowered")}
+                      </label>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
 
                 {/* Clear Filters Button - Mobile */}
