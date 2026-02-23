@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { BadgeCheck, Search, Filter, ChevronLeft, ChevronRight, Globe, Languages } from "lucide-react";
+import { BadgeCheck, Search, Filter, ChevronLeft, ChevronRight, Globe, Languages, BotMessageSquare, ChevronDown, Check } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
 import { getProducts, getProductCountFiltered, getAllCategories, getAllCountries, getAllLanguages } from "@/api/supabaseApi";
@@ -45,6 +48,7 @@ const Products = () => {
   const tierFromUrl = searchParams.get("tier");
   const countryFromUrl = searchParams.get("country");
   const languageFromUrl = searchParams.get("language");
+  const aiFromUrl = searchParams.get("ai");
   const pageFromUrl = searchParams.get("page");
   const searchFromUrl = searchParams.get("search");
 
@@ -52,6 +56,8 @@ const Products = () => {
   const [selectedTier, setSelectedTier] = useState<Tier | "all">("all");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [aiOnly, setAiOnly] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Fetch filter options from database
   useEffect(() => {
@@ -128,7 +134,13 @@ const Products = () => {
     if (searchFromUrl) {
       setSearchQuery(searchFromUrl);
     }
-  }, [categoryFromUrl, tierFromUrl, countryFromUrl, languageFromUrl, pageFromUrl, searchFromUrl, allCategories, allCountries, allLanguages]);
+
+    if (aiFromUrl === "true") {
+      setAiOnly(true);
+    } else {
+      setAiOnly(false);
+    }
+  }, [categoryFromUrl, tierFromUrl, countryFromUrl, languageFromUrl, aiFromUrl, pageFromUrl, searchFromUrl, allCategories, allCountries, allLanguages]);
 
   // Fetch products with pagination and filters
   useEffect(() => {
@@ -154,6 +166,7 @@ const Products = () => {
           languageFilter,
           countryFilter,
           tierFilter,
+          aiOnly,
         });
 
         // Fetch total count with same filters
@@ -164,6 +177,7 @@ const Products = () => {
           languageFilter,
           countryFilter,
           tierFilter,
+          aiOnly,
         });
 
         // Map API products to component structure
@@ -188,7 +202,7 @@ const Products = () => {
     };
 
     fetchProducts();
-  }, [currentPage, debouncedSearchQuery, selectedCategory, selectedTier, selectedCountry, selectedLanguage]);
+  }, [currentPage, debouncedSearchQuery, selectedCategory, selectedTier, selectedCountry, selectedLanguage, aiOnly]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -204,6 +218,7 @@ const Products = () => {
     tier: Tier | "all";
     country: string;
     language: string;
+    ai: boolean;
     search: string;
     page: number;
   }> = {}) => {
@@ -212,6 +227,7 @@ const Products = () => {
     const tier = overrides.tier ?? selectedTier;
     const country = overrides.country ?? selectedCountry;
     const language = overrides.language ?? selectedLanguage;
+    const ai = overrides.ai ?? aiOnly;
     const search = overrides.search ?? searchQuery;
     const page = overrides.page ?? currentPage;
 
@@ -219,6 +235,7 @@ const Products = () => {
     if (tier !== "all") params.tier = tier;
     if (country !== "all") params.country = country;
     if (language !== "all") params.language = language;
+    if (ai) params.ai = "true";
     if (search.trim()) params.search = search.trim();
     if (page > 1) params.page = page.toString();
 
@@ -253,6 +270,13 @@ const Products = () => {
     setSearchParams(buildUrlParams({ language, page: 1 }));
   };
 
+  // Handle AI filter selection - update URL and reset to page 1
+  const handleAiSelect = (value: boolean) => {
+    setAiOnly(value);
+    setCurrentPage(1);
+    setSearchParams(buildUrlParams({ ai: value, page: 1 }));
+  };
+
   // Handle search - debounced and reset to page 1
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -273,12 +297,13 @@ const Products = () => {
     setSelectedTier("all");
     setSelectedCountry("all");
     setSelectedLanguage("all");
+    setAiOnly(false);
     setSearchQuery("");
     setCurrentPage(1);
     setSearchParams({});
   };
 
-  const hasActiveFilters = selectedCategory !== "all" || selectedTier !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || searchQuery !== "";
+  const hasActiveFilters = selectedCategory !== "all" || selectedTier !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || aiOnly || searchQuery !== "";
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -288,8 +313,8 @@ const Products = () => {
       <main className="pt-24 pb-20">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar */}
-            <aside className="lg:w-[260px] flex-shrink-0">
+            {/* Desktop Sidebar */}
+            <aside className="hidden lg:block lg:w-[260px] flex-shrink-0">
               <div className="bg-card rounded-2xl p-5 shadow-card border border-border sticky top-28 space-y-6">
                 {/* Tier Filter */}
                 <div>
@@ -382,6 +407,32 @@ const Products = () => {
                   </Select>
                 </div>
 
+                {/* AI Filter */}
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <BotMessageSquare className="w-4 h-4" />
+                    {t("products.aiFilter")}
+                  </h3>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <span className={`flex items-center gap-2 ${aiOnly ? "text-foreground" : "text-muted-foreground"}`}>
+                        {t("products.aiFilter")}
+                        {aiOnly && <Check className="h-4 w-4 text-primary" />}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[220px] p-2">
+                      <label className="flex items-center gap-2 cursor-pointer text-sm">
+                        <Checkbox
+                          checked={aiOnly}
+                          onCheckedChange={(checked) => handleAiSelect(checked === true)}
+                        />
+                        {t("products.aiPowered")}
+                      </label>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
                 {/* Clear Filters */}
                 {hasActiveFilters && (
                   <button
@@ -396,19 +447,171 @@ const Products = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 min-w-0">
-              {/* Search Bar */}
-              <div className="mb-8 mt-4">
-                <div className="relative">
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder={t("products.searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    className="w-full pl-14 pr-6 py-4 bg-card border border-border rounded-full text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 shadow-sm"
-                  />
+              {/* Search Bar with Mobile Filter Toggle */}
+              <div className="mb-6 mt-4">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder={t("products.searchPlaceholder")}
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      className="w-full pl-14 pr-6 py-4 bg-card border border-border rounded-full text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 shadow-sm"
+                    />
+                  </div>
+                  {/* Mobile Filter Toggle Button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="lg:hidden h-14 w-14 rounded-full border-border text-foreground hover:bg-muted flex-shrink-0"
+                    onClick={() => setShowMobileFilters(!showMobileFilters)}
+                  >
+                    <Filter className="w-5 h-5" />
+                  </Button>
                 </div>
               </div>
+
+              {/* Mobile Filters */}
+              <AnimatePresence>
+                {showMobileFilters && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="lg:hidden mb-6 overflow-hidden"
+                  >
+                    <div className="bg-card rounded-2xl p-5 shadow-card border border-border space-y-4">
+                      {/* Tier Filter */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <Filter className="w-4 h-4" />
+                          {t("products.vendorTier")}
+                        </h3>
+                        <Select
+                          value={selectedTier}
+                          onValueChange={(value) => handleTierSelect(value as Tier | "all")}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t("products.vendorTier")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">{t("products.allTiers")}</SelectItem>
+                            <SelectItem value="premium">{t("products.premium")}</SelectItem>
+                            <SelectItem value="plus">{t("products.plus")}</SelectItem>
+                            <SelectItem value="freemium">{t("products.free")}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Category Filter */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground mb-2">{t("products.category")}</h3>
+                        <Select
+                          value={selectedCategory}
+                          onValueChange={(value) => handleCategorySelect(value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t("products.category")} />
+                          </SelectTrigger>
+                          <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                            <SelectItem value="all">{t("trending.allCategories")}</SelectItem>
+                            {allCategories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Country Filter */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <Globe className="w-4 h-4" />
+                          {t("products.filterCountry")}
+                        </h3>
+                        <Select
+                          value={selectedCountry}
+                          onValueChange={(value) => handleCountrySelect(value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t("products.filterCountry")} />
+                          </SelectTrigger>
+                          <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                            <SelectItem value="all">{t("products.allCountries")}</SelectItem>
+                            {allCountries.map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Language Filter */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <Languages className="w-4 h-4" />
+                          {t("products.filterLanguage")}
+                        </h3>
+                        <Select
+                          value={selectedLanguage}
+                          onValueChange={(value) => handleLanguageSelect(value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t("products.filterLanguage")} />
+                          </SelectTrigger>
+                          <SelectContent className="max-w-[calc(100vw-2rem)] max-h-[300px] overflow-auto">
+                            <SelectItem value="all">{t("products.allLanguages")}</SelectItem>
+                            {allLanguages.map((language) => (
+                              <SelectItem key={language} value={language}>
+                                {language}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* AI Filter */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                          <BotMessageSquare className="w-4 h-4" />
+                          {t("products.aiFilter")}
+                        </h3>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                            <span className={`flex items-center gap-2 ${aiOnly ? "text-foreground" : "text-muted-foreground"}`}>
+                              {t("products.aiFilter")}
+                              {aiOnly && <Check className="h-4 w-4 text-primary" />}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-[calc(100vw-4rem)] p-2">
+                            <label className="flex items-center gap-2 cursor-pointer text-sm">
+                              <Checkbox
+                                checked={aiOnly}
+                                onCheckedChange={(checked) => handleAiSelect(checked === true)}
+                              />
+                              {t("products.aiPowered")}
+                            </label>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {/* Clear Filters */}
+                      {hasActiveFilters && (
+                        <button
+                          onClick={clearFilters}
+                          className="w-full py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {t("products.clearAllFilters")}
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Results count */}
               <div className="mb-6 flex items-center justify-between">

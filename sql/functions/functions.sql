@@ -36,7 +36,8 @@ create or replace function public.get_product_cards(
   category_filter public.product_category default null,
   language_filter text default null,
   country_filter  text default null,
-  tier_filter     public.tier default null
+  tier_filter     public.tier default null,
+  ai_only         boolean default false
 )
 returns table (
   product_name     text,
@@ -104,6 +105,12 @@ as $$
       tier_filter is null
       or v.subscription = tier_filter
     )
+    and (
+      not coalesce(ai_only, false)
+      or exists (
+        select 1 from unnest(p.features) as f where f ilike '%ai%'
+      )
+    )
   order by
     case v.subscription
       when 'premium' then 1
@@ -124,7 +131,8 @@ grant execute on function public.get_product_cards(
   public.product_category,
   text,
   text,
-  public.tier
+  public.tier,
+  boolean
 ) to anon, authenticated, service_role;
 
 
@@ -265,6 +273,7 @@ create or replace function public.get_product_count_filtered(
   language_filter text default null,
   country_filter  text default null,
   tier_filter     public.tier default null
+  ai_only         boolean default false
 )
 returns integer
 language sql
@@ -297,17 +306,23 @@ as $$
     )
     and (
       country_filter is null
-      or v.headquarters ilike '%' || country_filter
+      or trim(substring(v.headquarters from '([^,]+)')) ilike country_filter
     )
     and (
       tier_filter is null
       or v.subscription = tier_filter
+    )
+    and (
+      not coalesce(ai_only, false)
+      or exists (
+        select 1 from unnest(p.features) as f where f ilike '%ai%'
+      )
     );
 $$;
 
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to anon;
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to authenticated;
-grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier) to service_role;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier, boolean) to anon;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier, boolean) to authenticated;
+grant execute on function public.get_product_count_filtered(text, text, public.product_category, text, text, public.tier, boolean) to service_role;
 
 
 -- ============================================================
