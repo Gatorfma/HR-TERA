@@ -238,6 +238,7 @@ const en: Record<string, string> = {
   // Profile Dropdown
   "profile.profile": "Profile",
   "profile.adminPanel": "Admin Panel",
+  "profile.favourites": "Favourites",
   "profile.logout": "Log out",
 
   // Common
@@ -724,6 +725,7 @@ const tr: Record<string, string> = {
   // Profile Dropdown
   "profile.profile": "Profil",
   "profile.adminPanel": "Admin Paneli",
+  "profile.favourites": "Favoriler",
   "profile.logout": "Çıkış Yap",
 
   // Common

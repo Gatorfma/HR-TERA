@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { BadgeCheck, Search, Filter, ChevronLeft, ChevronRight, Globe, Languages, BotMessageSquare, ChevronDown, Check } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Search, Filter, ChevronLeft, ChevronRight, Globe, Languages, BotMessageSquare, ChevronDown, Check } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,11 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tier } from "@/lib/types";
-import ListingTierBadge from "@/components/ListingTierBadge";
+import ProductCard from "@/components/ProductCard";
 import { getProducts, getProductCountFiltered, getAllCategories, getAllCountries, getAllLanguages } from "@/api/supabaseApi";
 import type { DashboardProduct } from "@/lib/types";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LogoImage from "@/components/ui/logo-image";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -661,44 +660,18 @@ const Products = () => {
                 ) : (
                   <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {products.map((product) => (
-                        <Link key={product.id} to={`/products/${product.id}`} className="group">
-                          <article className="bg-card rounded-2xl overflow-hidden shadow-card border border-border transition-all duration-250 ease-in-out hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-                            {/* Image */}
-                            <div className="relative">
-                              <LogoImage variant="card" src={product.image} alt={product.name} hoverZoom fallbackText={product.name} />
-                              {product.vendorTier !== "freemium" && (
-                                <div className="absolute top-2.5 left-2.5 z-10">
-                                  <ListingTierBadge tier={product.vendorTier} />
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Content */}
-                            <div className="p-5">
-                              {/* Category & Verified Row */}
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-muted-foreground">{product.category}</span>
-                                {product.isVerified && (
-                                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
-                                    <BadgeCheck className="h-3 w-3" />
-                                    Verified
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Title */}
-                              <h3 className="font-heading font-bold text-lg text-foreground mb-1 group-hover:text-primary transition-colors duration-200">
-                                {product.name}
-                              </h3>
-
-                              {/* Description */}
-                              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                                {product.description}
-                              </p>
-                            </div>
-                          </article>
-                        </Link>
+                      {products.map((product, i) => (
+                        <ProductCard
+                          key={product.id}
+                          product_id={product.id}
+                          image={product.image}
+                          category={product.category}
+                          name={product.name}
+                          description={product.description}
+                          tier={product.vendorTier}
+                          isVerified={product.isVerified}
+                          index={i}
+                        />
                       ))}
                     </div>
 
