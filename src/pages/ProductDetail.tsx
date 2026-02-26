@@ -114,7 +114,7 @@ interface VendorDetails {
 
 // Convert API product to the format expected by components
 const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Product => {
-  const isVendorClaimed = apiProduct.is_verified;
+  const isVendorClaimed = apiProduct.vendor_user_id !== null;
 
   const vendorTier = isVendorClaimed
     ? ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
