@@ -89,12 +89,14 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support Links */}
+          {/* Legal Links */}
           <div>
-            <h4 className="font-heading font-bold text-secondary-foreground mb-4">{t("footer.support")}</h4>
+            <h4 className="font-heading font-bold text-secondary-foreground mb-4">{t("footer.legal.heading")}</h4>
             <ul className="space-y-2">
-              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.terms")}</Link></li>
-              <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.privacy")}</Link></li>
+              <li><Link to="/kvkk" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.kvkk")}</Link></li>
+              <li><Link to="/privacy-security" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.privacySecurity")}</Link></li>
+              <li><Link to="/terms-of-use" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.termsOfUse")}</Link></li>
+              <li><Link to="/vendor-terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.vendorTerms")}</Link></li>
             </ul>
 
             <h4 className="font-heading font-bold text-secondary-foreground mt-8 mb-4">{t("footer.followUs")}</h4>
