@@ -36,6 +36,7 @@ import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import FAQ from "./pages/FAQ";
 import Story from "./pages/Story";
 import Contact from "./pages/Contact";
 import Trending from "./pages/Trending";
@@ -84,6 +85,7 @@ const App = () => (
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/faq" element={<FAQ />} />
                 <Route path="/story" element={<Story />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/trending" element={<Trending />} />
