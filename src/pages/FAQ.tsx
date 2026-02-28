@@ -218,7 +218,7 @@ const FAQ = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="pt-28 pb-16">
+      <main className="pt-32 pb-16">
         <div className="container max-w-4xl">
           <header className="mb-10">
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
@@ -248,7 +248,7 @@ const FAQ = () => {
                       <AccordionTrigger className="text-left text-foreground hover:no-underline hover:text-primary">
                         {item.question}
                       </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground leading-relaxed">
+                      <AccordionContent className="text-muted-foreground leading-relaxed text-justify">
                         {item.answer}
                       </AccordionContent>
                     </AccordionItem>

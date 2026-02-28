@@ -163,22 +163,22 @@ const en: Record<string, string> = {
   "faq.title1": "Frequently Asked",
   "faq.title2": "Questions",
   "faq.subtitle":
-    "Unlock the full potential of your HR with a membership that offers unlimited access to our entire library of premium products and vendors.",
-  "faq.q1": "What is included in the free plan?",
+    "Everything you want to know about HRTera",
+  "faq.q1": "What is HRTera?",
   "faq.a1":
-    "The free plan gives you access to a limited selection of products and vendors to help you get started. You'll also receive basic updates to the free library. Also our Team Plan allows up to 5 users to access the full library, collaborate on projects, and share resources. It's perfect for growing HR teams.",
-  "faq.q2": "What do I get with the Pro Plan?",
+    "HRTera is an independent HR Technologies marketplace that enables HR professionals to discover, compare, and make faster decisions on all domestic and international technology products/solutions and solution providers in the Human Resources field.",
+  "faq.q2": "Is using HRTera paid?",
   "faq.a2":
-    "The Pro Plan includes access to all premium HR products, priority vendor matching, advanced analytics, and dedicated support. You'll also get early access to new products and features.",
-  "faq.q3": "Can I upgrade or downgrade my plan at any time?",
+    "No. Platform usage is free for HR professionals. With free membership you can filter solutions, compare them, create favorite lists, send meeting/demo requests to solution providers, write reviews, like and share solutions, and access all HRTech Radar content. You can also receive personalized recommendations as a free member.",
+  "faq.q3": "How can I get listed on HRTera?",
   "faq.a3":
-    "Yes! You can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle. If you upgrade mid-cycle, you'll be charged a prorated amount.",
-  "faq.q4": "Do you offer a team plan for multiple users?",
+    "If your HRTech solution is not yet on HRTera, simply create a corporate membership to list your solution. After membership, you can access the solution provider panel to edit your company profile, add your product to relevant categories, and upload descriptions, images, videos, and feature information. All listings are reviewed by HRTera management before publishing.",
+  "faq.q4": "How can I edit a solution that belongs to me?",
   "faq.a4":
-    "Absolutely! Our Enterprise plan is designed for teams of all sizes. It includes multi-user access, team management features, shared resources, and volume discounts.",
-  "faq.q5": "How often are new products added?",
+    "First, we need to understand that you are the solution provider. You can apply from your solution page. Through your solution provider panel, you can update your solution information at any time: description and feature changes, new screenshots and videos, category updates, and meeting/demo form settings. Updates are published after a quick approval process. Active and up-to-date content means more visibility and leads.",
+  "faq.q5": "What is the difference between Pro and Premium membership?",
   "faq.a5":
-    "We add new products and vendors to our marketplace weekly. Premium members get early access to all new additions and can vote on upcoming features.",
+    "Pro Membership: listing in up to 3 categories, detailed product page, image and video uploads, priority support. Premium Membership: 3+ categories, featured placement, lead forwarding (meeting/demo requests), view and click reports, and sponsored visibility. Premium membership is designed for solution providers who want to generate active sales referrals.",
 
   // Footer
   "footer.newsletter.title": "Subscribe our Newsletter",
@@ -650,22 +650,22 @@ const tr: Record<string, string> = {
   "faq.title1": "Sıkça Sorulan",
   "faq.title2": "Sorular",
   "faq.subtitle":
-    "Premium çözümler ve şirketlerden oluşan tüm kütüphanemize sınırsız erişim sunan bir üyelikle İK'nızın tam potansiyelini açığa çıkarın.",
-  "faq.q1": "Ücretsiz plana neler dahil?",
+    "HRTera hakkında merak ettiğiniz her şey",
+  "faq.q1": "HRTera nedir?",
   "faq.a1":
-    "Ücretsiz plan, başlamanıza yardımcı olmak için sınırlı bir çözüm ve şirket seçimine erişim sağlar. Ayrıca ücretsiz kütüphaneye temel güncellemeler de alacaksınız. Takım Planımız 5 kullanıcıya kadar tam kütüphaneye erişim, projelerde işbirliği ve kaynak paylaşımı imkanı sunar. Büyüyen İK ekipleri için mükemmeldir.",
-  "faq.q2": "Pro Plan ile ne alırım?",
+    "HRTera, İnsan Kaynakları profesyonellerinin, İnsan Kaynakları alanındaki hem yerli hem de yabancı tüm teknolojik ürünleri/çözümleri ve çözüm sağlayıcıları keşfetmesini, karşılaştırmasını ve doğru teknolojiye daha hızlı karar vermesini sağlayan bağımsız bir İnsan Kaynakları Teknolojileri pazaryeridir.",
+  "faq.q2": "HRTera'yı kullanmak ücretli mi?",
   "faq.a2":
-    "Pro Plan, tüm premium İK çözümlerine erişim, öncelikli şirket eşleştirme, gelişmiş analitikler ve özel destek içerir. Ayrıca yeni çözüm ve özelliklere erken erişim elde edersiniz.",
-  "faq.q3": "Planımı istediğim zaman yükseltebilir veya düşürebilir miyim?",
+    "Hayır. İnsan Kaynakları profesyonelleri için platform kullanımı ücretsizdir. Ücretsiz üyelikle çözümleri filtreleyebilir, karşılaştırma yapabilir, favori liste oluşturabilir, çözüm sağlayıcılara toplantı/demo isteği gönderebilir, değerlendirme/yorum yazabilir, çözümleri beğenip paylaşabilir ve HRTech Radar'daki tüm içeriğe erişebilirsiniz. Ücretsiz üye olarak kişiselleştirilmiş öneriler de alabilirsiniz.",
+  "faq.q3": "HRTera'da nasıl yer alabilirim?",
   "faq.a3":
-    "Evet! Planınızı istediğiniz zaman yükseltebilir veya düşürebilirsiniz. Değişiklikler bir sonraki fatura döngünüze yansıtılacaktır. Döngü ortasında yükseltme yaparsanız, orantılı bir tutar tahsil edilecektir.",
-  "faq.q4": "Birden fazla kullanıcı için takım planı sunuyor musunuz?",
+    "Eğer HRTech çözümünüz henüz HRTera'da yoksa; çözümünüzü listelemek için kurumsal üyelik oluşturmanız yeterlidir. Üyelik sonrası, çözüm sağlayıcı paneline erişerek şirket profilinizi düzenleyebilir, ürününüzü ilgili kategorilere ekleyebilir, açıklama, görsel, video ve özellik bilgilerini yükleyebilirsiniz. Tüm listelemeler, HRTera yönetimi tarafından güncelleme öncesi kontrol edilir.",
+  "faq.q4": "Bana ait bir çözümü nasıl düzenleyebilirim?",
   "faq.a4":
-    "Kesinlikle! Kurumsal planımız her büyüklükteki ekip için tasarlanmıştır. Çoklu kullanıcı erişimi, takım yönetimi özellikleri, paylaşılan kaynaklar ve toplu indirimler içerir.",
-  "faq.q5": "Ne sıklıkla yeni çözümler ekleniyor?",
+    "Öncelikle, sizin çözüm sağlayıcı olduğunuzu anlamamız gerekiyor. Size ait çözüm sayfasından başvurabilirsiniz. Çözüm sağlayıcı paneliniz üzerinden çözüm bilgilerinizi dilediğiniz zaman güncelleyebilirsiniz: açıklama ve özellik değişiklikleri, yeni ekran görüntüleri ve videolar, kategori güncellemeleri, toplantı/demo formu ayarları. Yapılan güncellemeler hızlı onay sürecinin ardından yayına alınır. Aktif ve güncel içerik, daha fazla görünürlük ve lead demektir.",
+  "faq.q5": "Pro ve Premium üyelik arasındaki fark nedir?",
   "faq.a5":
-    "Pazaryerimize haftalık olarak yeni çözümle r ve şirketler ekliyoruz. Premium üyeler tüm yeni eklemelere erken erişim elde eder ve yaklaşan özellikler için oy kullanabilir.",
+    "Pro Üyelik: 3 kategoriye kadar listeleme, detaylı ürün sayfası, görsel ve video ekleme, öncelikli destek sunar. Premium Üyelik: 3+ kategori, öne çıkarılma (featured), lead yönlendirme (toplantı/demo isteği), görüntülenme ve tıklama raporları, sponsorlu görünürlük gibi avantajlar sunar. Premium üyelik, aktif satış yönlendirmesi üretmek isteyen çözüm sağlayıcılar için tasarlanmıştır.",
 
   // Footer
   "footer.newsletter.title": "Bültenimize Abone Olun",
