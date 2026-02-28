@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       screens: {
-        desktop: "1000px",
+        desktop: "1150px",
       },
       fontFamily: {
         heading: ["Space Grotesk", "sans-serif"],
