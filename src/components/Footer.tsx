@@ -3,7 +3,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Linkedin, Twitter, Instagram, Youtube } from "lucide-react";
+import { Linkedin, Instagram, Facebook } from "lucide-react";
+
+const XIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
 const NEWSLETTER_STORAGE_KEY = "hrtera_newsletter_subscribers";
 const isValidEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
@@ -89,21 +95,23 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support Links */}
+          {/* Legal Links */}
           <div>
-            <h4 className="font-heading font-bold text-secondary-foreground mb-4">{t("footer.support")}</h4>
+            <h4 className="font-heading font-bold text-secondary-foreground mb-4">{t("footer.legal.heading")}</h4>
             <ul className="space-y-2">
-              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.terms")}</Link></li>
-              <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.privacy")}</Link></li>
+              <li><Link to="/kvkk" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.kvkk")}</Link></li>
+              <li><Link to="/privacy-security" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.privacySecurity")}</Link></li>
+              <li><Link to="/terms-of-use" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.termsOfUse")}</Link></li>
+              <li><Link to="/vendor-terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer.vendorTerms")}</Link></li>
             </ul>
 
             <h4 className="font-heading font-bold text-secondary-foreground mt-8 mb-4">{t("footer.followUs")}</h4>
             <div className="flex gap-3">
               {[
-                { name: "linkedin", href: "https://www.linkedin.com", icon: Linkedin },
-                { name: "twitter", href: "https://twitter.com", icon: Twitter },
-                { name: "instagram", href: "https://www.instagram.com", icon: Instagram },
-                { name: "youtube", href: "https://www.youtube.com", icon: Youtube },
+                { name: "linkedin", href: "https://www.linkedin.com/company/hrtera/", icon: Linkedin },
+                { name: "x", href: "https://x.com/HRTeraTr", icon: XIcon },
+                { name: "instagram", href: "https://www.instagram.com/hrteratr/", icon: Instagram },
+                { name: "facebook", href: "https://www.facebook.com/people/HRTera/61585985142482/", icon: Facebook },
               ].map((social) => {
                 const Icon = social.icon;
                 return (
