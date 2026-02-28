@@ -34,6 +34,7 @@ import NewsfeedEditPage from "./pages/admin/NewsfeedEditPage";
 import Profile from "./pages/Profile";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
+import FAQ from "./pages/FAQ";
 import KVKK from "./pages/KVKK";
 import PrivacySecurity from "./pages/PrivacySecurity";
 import TermsOfUse from "./pages/TermsOfUse";
@@ -84,6 +85,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/products/new" element={<AddProduct />} />
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />
+                <Route path="/faq" element={<FAQ />} />
                 <Route path="/kvkk" element={<KVKK />} />
                 <Route path="/privacy-security" element={<PrivacySecurity />} />
                 <Route path="/terms-of-use" element={<TermsOfUse />} />

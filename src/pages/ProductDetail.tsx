@@ -117,9 +117,7 @@ interface VendorDetails {
 const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Product => {
   const isVendorClaimed = apiProduct.vendor_user_id !== null;
 
-  const vendorTier = isVendorClaimed
-    ? ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
-    : ("freemium" as Tier);
+  const vendorTier = ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
 
   return {
     id: apiProduct.product_id,
@@ -374,7 +372,7 @@ const ProductDetail = () => {
   const isUnclaimed = !product.isVendorClaimed;
 
   // For unclaimed products, force freemium tier behavior
-  const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
+  const effectiveTier = product.vendorTier;
   const tier = effectiveTier;
   const isPlusOrPremium = tier === "plus" || tier === "premium";
   const isPremium = tier === "premium";
@@ -448,7 +446,7 @@ const ProductDetail = () => {
                     <LogoImage variant="icon" src={product.image} alt={product.name} sizeClassName="w-16 h-16" rounded="rounded-xl" fallbackText={product.name} />
 
                     <div className="flex-1 min-w-0">
-                      {!isUnclaimed && <TierBadge tier={tier} showFeatured={isPremium} />}
+                      {<TierBadge tier={tier} showFeatured={isPremium} />}
 
                       <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2 break-words">
                         {product.name}
@@ -473,7 +471,7 @@ const ProductDetail = () => {
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
-                    {isUnclaimed ? null : isPremium ? (
+                    {isPremium ? (
                       <>
                         <Button
                           className="bg-primary text-primary-foreground hover:bg-primary/90"
