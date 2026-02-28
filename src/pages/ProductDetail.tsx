@@ -1,9 +1,10 @@
 import { useParams, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe } from "lucide-react";
+import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getProductBySlug, getSimilarProducts as getStaticSimilarProducts, Product } from "@/data/products";
@@ -114,7 +115,7 @@ interface VendorDetails {
 
 // Convert API product to the format expected by components
 const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Product => {
-  const isVendorClaimed = apiProduct.is_verified;
+  const isVendorClaimed = apiProduct.vendor_user_id !== null;
 
   const vendorTier = isVendorClaimed
     ? ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
@@ -160,6 +161,7 @@ const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
@@ -338,6 +340,36 @@ const ProductDetail = () => {
     });
   };
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: product.name,
+      text: product.description,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User cancelled or share failed — ignore AbortError
+        if (err instanceof Error && err.name !== "AbortError") {
+          console.error("Share failed:", err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: t("productDetail.shareCopied"),
+          description: t("productDetail.shareCopiedDesc"),
+        });
+      } catch {
+        console.error("Clipboard write failed");
+      }
+    }
+  };
+
   // Determine if product is unclaimed (vendor has no user_id)
   const isUnclaimed = !product.isVendorClaimed;
 
@@ -504,6 +536,16 @@ const ProductDetail = () => {
                         </a>
                       </Button>
                     )}
+
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="hover:bg-transparent hover:text-foreground"
+                      onClick={handleShare}
+                    >
+                      <Share2 className="w-4 h-4 mr-2" />
+                      {t("productDetail.share")}
+                    </Button>
                   </div>
                 </div>
 

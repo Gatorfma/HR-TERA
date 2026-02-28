@@ -34,9 +34,11 @@ import NewsfeedEditPage from "./pages/admin/NewsfeedEditPage";
 import Profile from "./pages/Profile";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
 import FAQ from "./pages/FAQ";
+import KVKK from "./pages/KVKK";
+import PrivacySecurity from "./pages/PrivacySecurity";
+import TermsOfUse from "./pages/TermsOfUse";
+import VendorTerms from "./pages/VendorTerms";
 import Story from "./pages/Story";
 import Contact from "./pages/Contact";
 import Trending from "./pages/Trending";
@@ -83,9 +85,11 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/products/new" element={<AddProduct />} />
                 <Route path="/profile/products/:productId/edit" element={<EditProduct />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy" element={<Privacy />} />
                 <Route path="/faq" element={<FAQ />} />
+                <Route path="/kvkk" element={<KVKK />} />
+                <Route path="/privacy-security" element={<PrivacySecurity />} />
+                <Route path="/terms-of-use" element={<TermsOfUse />} />
+                <Route path="/vendor-terms" element={<VendorTerms />} />
                 <Route path="/story" element={<Story />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/trending" element={<Trending />} />
