@@ -1,6 +1,6 @@
 import { useParams, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe, Share2 } from "lucide-react";
+import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe, Share2, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -25,6 +25,8 @@ import {
 import { Tier } from "@/lib/types";
 import { logProductEvent } from "@/lib/analytics";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFavouritesContext } from "@/contexts/FavouritesContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Tier-specific components
 import TierBadge from "@/components/product-detail/TierBadge";
@@ -160,6 +162,8 @@ const ProductDetail = () => {
   const location = useLocation();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { isFavourited, toggleFavourite } = useFavouritesContext();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
@@ -368,6 +372,26 @@ const ProductDetail = () => {
     }
   };
 
+  const handleHeartClick = async () => {
+    if (!user) {
+      toast({
+        title: "Giriş yapın",
+        description: "Favorilere eklemek için giriş yapmanız gerekiyor.",
+      });
+      return;
+    }
+    if (!productId) return;
+    try {
+      await toggleFavourite(productId);
+    } catch {
+      toast({
+        title: "Hata",
+        description: "Favori işlemi başarısız oldu.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Determine if product is unclaimed (vendor has no user_id)
   const isUnclaimed = !product.isVendorClaimed;
 
@@ -538,11 +562,29 @@ const ProductDetail = () => {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="hover:bg-transparent hover:text-foreground"
+                      className="hover:bg-transparent hover:text-foreground px-4"
                       onClick={handleShare}
+                      title={t("productDetail.share")}
                     >
-                      <Share2 className="w-4 h-4 mr-2" />
-                      {t("productDetail.share")}
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className={`hover:bg-transparent px-4 ${
+                        productId && isFavourited(productId)
+                          ? "bg-red-50 border-red-200 hover:bg-red-100 text-red-600"
+                          : "hover:text-foreground"
+                      }`}
+                      onClick={handleHeartClick}
+                      title={productId && isFavourited(productId) ? t("compare.removeBookmark") : t("compare.bookmark")}
+                    >
+                      <Heart
+                        className={`w-4 h-4 ${
+                          productId && isFavourited(productId) ? "fill-red-500" : ""
+                        }`}
+                      />
                     </Button>
                   </div>
                 </div>

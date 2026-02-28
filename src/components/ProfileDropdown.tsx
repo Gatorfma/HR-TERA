@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, LogOut, ChevronDown, Shield } from "lucide-react";
+import { User, LogOut, ChevronDown, Shield, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFavouritesContext } from "@/contexts/FavouritesContext";
 import VendorTierBadge from "@/components/vendor-detail/VendorTierBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -10,6 +11,7 @@ const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAdmin } = useAuth();
+  const { count: favouriteCount } = useFavouritesContext();
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -122,6 +124,19 @@ const ProfileDropdown = () => {
                   {t("profile.profile")}
                 </Link>
               )}
+              <Link
+                to="/favourites"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"
+              >
+                <Heart className="w-4 h-4 text-muted-foreground" />
+                {t("profile.favourites")}
+                {favouriteCount > 0 && (
+                  <span className="ml-auto text-xs font-medium bg-red-100 text-red-600 rounded-full px-1.5 py-0.5 leading-none">
+                    {favouriteCount}
+                  </span>
+                )}
+              </Link>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground hover:bg-muted transition-colors"

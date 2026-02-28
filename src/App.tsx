@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { FavouritesProvider } from "@/contexts/FavouritesContext";
 import { ProductApplicationsProvider } from "@/contexts/ProductApplicationsContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
@@ -43,6 +44,7 @@ import Story from "./pages/Story";
 import Contact from "./pages/Contact";
 import Trending from "./pages/Trending";
 import Compare from "./pages/Compare";
+import Favourites from "./pages/Favourites";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,55 +53,58 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <ProductApplicationsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter basename={import.meta.env.BASE_URL}>
-              <ScrollToTop />
-              <AnalyticsTracker />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:slug" element={<ProductDetail />} />
-                <Route path="/vendors" element={<Vendors />} />
-                <Route path="/vendors/:slug" element={<VendorDetail />} />
-                <Route path="/vendors/apply" element={<VendorApply />} />
-                <Route path="/search" element={<SearchResults />} />
-                <Route path="/newsfeed" element={<Newsfeed />} />
-                <Route path="/newsfeed/:slug" element={<NewsfeedPost />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/products/edit" element={<ProductEditPage />} />
-                <Route path="/admin/products/new" element={<ProductCreatePage />} />
-                <Route path="/admin/products/requests" element={<ProductRequestsPage />} />
-                <Route path="/admin/products/tiers" element={<ProductTiersPage />} />
-                <Route path="/admin/products/analytics" element={<ProductAnalyticsPage />} />
-                <Route path="/admin/products/bulk-upload" element={<ProductBulkUploadPage />} />
-                <Route path="/admin/products/reviews" element={<ReviewRequestsPage />} />
-                <Route path="/admin/companies/edit" element={<CompanyEditPage />} />
-                <Route path="/admin/companies/new" element={<CompanyCreatePage />} />
-                <Route path="/admin/companies/bulk-upload" element={<CompanyBulkUploadPage />} />
-                <Route path="/admin/newsfeed" element={<AdminNewsfeed />} />
-                <Route path="/admin/newsfeed/edit" element={<NewsfeedEditPage />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/profile/products/new" element={<AddProduct />} />
-                <Route path="/profile/products/:productId/edit" element={<EditProduct />} />
-                <Route path="/faq" element={<FAQ />} />
-                <Route path="/kvkk" element={<KVKK />} />
-                <Route path="/privacy-security" element={<PrivacySecurity />} />
-                <Route path="/terms-of-use" element={<TermsOfUse />} />
-                <Route path="/vendor-terms" element={<VendorTerms />} />
-                <Route path="/story" element={<Story />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/trending" element={<Trending />} />
-                <Route path="/compare" element={<Compare />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </ProductApplicationsProvider>
+        <FavouritesProvider>
+          <ProductApplicationsProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter basename={import.meta.env.BASE_URL}>
+                <ScrollToTop />
+                <AnalyticsTracker />
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:slug" element={<ProductDetail />} />
+                  <Route path="/vendors" element={<Vendors />} />
+                  <Route path="/vendors/:slug" element={<VendorDetail />} />
+                  <Route path="/vendors/apply" element={<VendorApply />} />
+                  <Route path="/search" element={<SearchResults />} />
+                  <Route path="/newsfeed" element={<Newsfeed />} />
+                  <Route path="/newsfeed/:slug" element={<NewsfeedPost />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin/products" element={<AdminProducts />} />
+                  <Route path="/admin/products/edit" element={<ProductEditPage />} />
+                  <Route path="/admin/products/new" element={<ProductCreatePage />} />
+                  <Route path="/admin/products/requests" element={<ProductRequestsPage />} />
+                  <Route path="/admin/products/tiers" element={<ProductTiersPage />} />
+                  <Route path="/admin/products/analytics" element={<ProductAnalyticsPage />} />
+                  <Route path="/admin/products/bulk-upload" element={<ProductBulkUploadPage />} />
+                  <Route path="/admin/products/reviews" element={<ReviewRequestsPage />} />
+                  <Route path="/admin/companies/edit" element={<CompanyEditPage />} />
+                  <Route path="/admin/companies/new" element={<CompanyCreatePage />} />
+                  <Route path="/admin/companies/bulk-upload" element={<CompanyBulkUploadPage />} />
+                  <Route path="/admin/newsfeed" element={<AdminNewsfeed />} />
+                  <Route path="/admin/newsfeed/edit" element={<NewsfeedEditPage />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/products/new" element={<AddProduct />} />
+                  <Route path="/profile/products/:productId/edit" element={<EditProduct />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/kvkk" element={<KVKK />} />
+                  <Route path="/privacy-security" element={<PrivacySecurity />} />
+                  <Route path="/terms-of-use" element={<TermsOfUse />} />
+                  <Route path="/vendor-terms" element={<VendorTerms />} />
+                  <Route path="/story" element={<Story />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/trending" element={<Trending />} />
+                  <Route path="/compare" element={<Compare />} />
+                  <Route path="/favourites" element={<Favourites />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ProductApplicationsProvider>
+        </FavouritesProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
