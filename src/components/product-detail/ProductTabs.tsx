@@ -32,7 +32,7 @@ const ProductTabs = ({ product, isUnclaimed = false }: ProductTabsProps) => {
   const { t } = useLanguage();
 
   // Force freemium tier for unclaimed products
-  const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
+  const effectiveTier = product.vendorTier;
   const tier = effectiveTier;
   const isPlusOrPremium = tier === "plus" || tier === "premium";
   const isPremium = tier === "premium";

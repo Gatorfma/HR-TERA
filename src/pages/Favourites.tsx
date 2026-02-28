@@ -54,7 +54,7 @@ const Favourites = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-28 pb-16">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex items-center gap-3 mb-8">
             <Heart className="w-6 h-6 text-red-500 fill-red-500" />

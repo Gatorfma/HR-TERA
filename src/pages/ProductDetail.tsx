@@ -1,9 +1,10 @@
 import { useParams, Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe } from "lucide-react";
+import { ChevronRight, ExternalLink, Mail, Play, Linkedin, Instagram, Globe, Share2, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getProductBySlug, getSimilarProducts as getStaticSimilarProducts, Product } from "@/data/products";
@@ -24,6 +25,8 @@ import {
 import { Tier } from "@/lib/types";
 import { logProductEvent } from "@/lib/analytics";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFavouritesContext } from "@/contexts/FavouritesContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Tier-specific components
 import TierBadge from "@/components/product-detail/TierBadge";
@@ -114,11 +117,9 @@ interface VendorDetails {
 
 // Convert API product to the format expected by components
 const mapApiToProduct = (apiProduct: ApiProduct, t: (key: string) => string): Product => {
-  const isVendorClaimed = apiProduct.is_verified;
+  const isVendorClaimed = apiProduct.vendor_user_id !== null;
 
-  const vendorTier = isVendorClaimed
-    ? ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
-    : ("freemium" as Tier);
+  const vendorTier = ((apiProduct.subscription?.toLowerCase() || "freemium") as Tier)
 
   return {
     id: apiProduct.product_id,
@@ -160,6 +161,9 @@ const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const { t } = useLanguage();
+  const { toast } = useToast();
+  const { isFavourited, toggleFavourite } = useFavouritesContext();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
@@ -338,11 +342,61 @@ const ProductDetail = () => {
     });
   };
 
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: product.name,
+      text: product.description,
+      url: shareUrl,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User cancelled or share failed — ignore AbortError
+        if (err instanceof Error && err.name !== "AbortError") {
+          console.error("Share failed:", err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: t("productDetail.shareCopied"),
+          description: t("productDetail.shareCopiedDesc"),
+        });
+      } catch {
+        console.error("Clipboard write failed");
+      }
+    }
+  };
+
+  const handleHeartClick = async () => {
+    if (!user) {
+      toast({
+        title: "Giriş yapın",
+        description: "Favorilere eklemek için giriş yapmanız gerekiyor.",
+      });
+      return;
+    }
+    if (!productId) return;
+    try {
+      await toggleFavourite(productId);
+    } catch {
+      toast({
+        title: "Hata",
+        description: "Favori işlemi başarısız oldu.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Determine if product is unclaimed (vendor has no user_id)
   const isUnclaimed = !product.isVendorClaimed;
 
   // For unclaimed products, force freemium tier behavior
-  const effectiveTier = isUnclaimed ? "freemium" : product.vendorTier;
+  const effectiveTier = product.vendorTier;
   const tier = effectiveTier;
   const isPlusOrPremium = tier === "plus" || tier === "premium";
   const isPremium = tier === "premium";
@@ -416,7 +470,7 @@ const ProductDetail = () => {
                     <LogoImage variant="icon" src={product.image} alt={product.name} sizeClassName="w-16 h-16" rounded="rounded-xl" fallbackText={product.name} />
 
                     <div className="flex-1 min-w-0">
-                      {!isUnclaimed && <TierBadge tier={tier} showFeatured={isPremium} />}
+                      {<TierBadge tier={tier} showFeatured={isPremium} />}
 
                       <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground mt-2 break-words">
                         {product.name}
@@ -441,7 +495,7 @@ const ProductDetail = () => {
 
                   {/* CTAs */}
                   <div className="flex flex-wrap gap-3">
-                    {isUnclaimed ? null : isPremium ? (
+                    {isPremium ? (
                       <>
                         <Button
                           className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -504,6 +558,34 @@ const ProductDetail = () => {
                         </a>
                       </Button>
                     )}
+
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="hover:bg-transparent hover:text-foreground px-4"
+                      onClick={handleShare}
+                      title={t("productDetail.share")}
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className={`hover:bg-transparent px-4 ${
+                        productId && isFavourited(productId)
+                          ? "bg-red-50 border-red-200 hover:bg-red-100 text-red-600"
+                          : "hover:text-foreground"
+                      }`}
+                      onClick={handleHeartClick}
+                      title={productId && isFavourited(productId) ? t("compare.removeBookmark") : t("compare.bookmark")}
+                    >
+                      <Heart
+                        className={`w-4 h-4 ${
+                          productId && isFavourited(productId) ? "fill-red-500" : ""
+                        }`}
+                      />
+                    </Button>
                   </div>
                 </div>
 
