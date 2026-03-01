@@ -23,7 +23,7 @@ create table if not exists public.vendors (
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now(),
 
-  -- company_size regex: "number-number" (e.g. 1-10)
+  -- company_size regex: "number-number" or "number+" (e.g. 1-10, 10001+)
   constraint vendors_company_size_range_chk
-    check (company_size is null or company_size ~ '^[0-9]+-[0-9]+$')
+    check (company_size is null or company_size ~ '^[0-9]+(-[0-9]+|\+)$')
 );

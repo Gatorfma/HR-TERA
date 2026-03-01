@@ -41,7 +41,7 @@ function isValidUrl(url: string): boolean {
 }
 
 function isValidCompanySize(size: string): boolean {
-  return /^[0-9]+-[0-9]+$/.test(size);
+  return /^[0-9]+(-[0-9]+|\+)$/.test(size);
 }
 
 // ============================================================

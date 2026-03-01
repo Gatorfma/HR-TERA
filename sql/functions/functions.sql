@@ -1227,10 +1227,10 @@ begin
     end if;
   end if;
 
-  -- Validate company_size format if provided (must be "number-number")
+  -- Validate company_size format if provided (must be "number-number" or "number+")
   if p_company_size is not null and p_company_size != '' then
-    if not (p_company_size ~ '^[0-9]+-[0-9]+$') then
-      raise exception 'Invalid company size format. Must be like "1-10" or "50-100"'
+    if not (p_company_size ~ '^[0-9]+(-[0-9]+|\+)$') then
+      raise exception 'Invalid company size format. Must be like "1-10", "50-100", or "10001+"'
         using errcode = 'P0400';
     end if;
   end if;
@@ -1340,8 +1340,8 @@ begin
 
   -- Validate company_size format if provided
   if p_company_size is not null and p_company_size != '' then
-    if not (p_company_size ~ '^[0-9]+-[0-9]+$') then
-      raise exception 'Invalid company size format. Must be like "1-10" or "50-100"'
+    if not (p_company_size ~ '^[0-9]+(-[0-9]+|\+)$') then
+      raise exception 'Invalid company size format. Must be like "1-10", "50-100", or "10001+"'
         using errcode = 'P0400';
     end if;
   end if;

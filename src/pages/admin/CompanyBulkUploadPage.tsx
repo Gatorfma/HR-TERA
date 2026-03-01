@@ -46,7 +46,7 @@ const CompanyBulkUploadPage = () => {
 
   const validateCompanySize = (size: string): boolean => {
     if (!size || size.trim() === "") return true;
-    return /^[0-9]+-[0-9]+$/.test(size.trim());
+    return /^[0-9]+(-[0-9]+|\+)$/.test(size.trim());
   };
 
   const parseExcelFile = useCallback(async (file: File) => {
@@ -97,7 +97,7 @@ const CompanyBulkUploadPage = () => {
         }
 
         if (companySize && !validateCompanySize(companySize)) {
-          errors.push("Geçersiz şirket büyüklüğü formatı (örn: 1-10, 50-100)");
+          errors.push("Geçersiz şirket büyüklüğü formatı (örn: 1-10, 50-100, 10001+)");
         }
 
         const isValid = errors.length === 0;
@@ -225,7 +225,7 @@ const CompanyBulkUploadPage = () => {
     }
 
     if (vendor.companySize && !validateCompanySize(vendor.companySize)) {
-      errors.push("Geçersiz şirket büyüklüğü formatı (örn: 1-10, 50-100)");
+      errors.push("Geçersiz şirket büyüklüğü formatı (örn: 1-10, 50-100, 10001+)");
     }
 
     // Check for duplicate in DB
@@ -616,8 +616,6 @@ const VendorRow = ({ vendor, onReject, onUpdate, onRecheck }: VendorRowProps) =>
     companySize: vendor.companySize,
   });
 
-  const isRejected = vendor.status === "invalid" || vendor.status === "duplicate";
-
   const getBorderColor = () => {
     switch (vendor.status) {
       case "valid":
@@ -758,35 +756,33 @@ const VendorRow = ({ vendor, onReject, onUpdate, onRecheck }: VendorRowProps) =>
         )}
       </div>
 
-      {/* Actions for Invalid/Duplicate */}
-      {isRejected && (
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {isRechecking ? (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          ) : (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="px-2"
-                onClick={() => setIsEditing(true)}
-                title="Düzenle"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-destructive/50 text-destructive hover:bg-destructive/10 px-2"
-                onClick={() => onReject(vendor.id)}
-                title="Çıkar"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      )}
+      {/* Actions */}
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {isRechecking ? (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        ) : (
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              className="px-2"
+              onClick={() => setIsEditing(true)}
+              title="Düzenle"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10 px-2"
+              onClick={() => onReject(vendor.id)}
+              title="Çıkar"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </>
+        )}
+      </div>
     </motion.div>
   );
 };
