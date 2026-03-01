@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, Plus, Pencil, Table2 } from "lucide-react";
+import { Building2, Plus, Pencil, Table2, ImageIcon } from "lucide-react";
 import { adminCompanySections, AdminCompanySection } from "@/data/adminCompanySections";
 
 const iconMap = {
@@ -8,6 +8,7 @@ const iconMap = {
   plus: Plus,
   edit: Pencil,
   table: Table2,
+  image: ImageIcon,
 };
 
 const SectionTile = ({ section }: { section: AdminCompanySection }) => {

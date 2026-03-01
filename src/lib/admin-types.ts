@@ -385,3 +385,33 @@ export interface BulkVendorImportResult {
   error_count: number;
   errors: { company_name: string; error: string }[];
 }
+
+/**
+ * Input for bulk logo update (vendor + products)
+ */
+export interface BulkLogoInput {
+  company_name: string;
+  website_link?: string;
+  vendor_logo?: string;
+  product_logo?: string;
+}
+
+/**
+ * Per-entry result from admin_check_logo_status RPC
+ */
+export interface LogoStatusCheckResult {
+  company_name: string | null;
+  website_link: string | null;
+  vendor_found: boolean;
+  vendor_has_logo: boolean;
+  products_with_logo: number;
+}
+
+/**
+ * Result from admin_bulk_update_logos RPC
+ */
+export interface BulkLogoUpdateResult {
+  success_count: number;
+  error_count: number;
+  errors: { company_name: string; error: string }[];
+}

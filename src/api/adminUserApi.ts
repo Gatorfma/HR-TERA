@@ -16,6 +16,9 @@ import {
   CreateVendorInput,
   BulkVendorInput,
   BulkVendorImportResult,
+  BulkLogoInput,
+  BulkLogoUpdateResult,
+  LogoStatusCheckResult,
   ApiResponse,
   AdminErrorCodes,
 } from '@/lib/admin-types';
@@ -642,5 +645,56 @@ export async function adminBulkCreateVendors(
 
   console.log('[adminBulkCreateVendors] Result:', data);
   return data as BulkVendorImportResult;
+}
+
+
+// ============================================================
+// Admin: Check Logo Status
+// ============================================================
+
+/**
+ * Check whether vendors / products already have logos set.
+ * Returns one result per entry in the same order as the input.
+ * @requires Admin role
+ */
+export async function adminCheckLogoStatus(
+  entries: { company_name: string; website_link?: string }[]
+): Promise<LogoStatusCheckResult[]> {
+  const { data, error } = await supabase.rpc('admin_check_logo_status', {
+    p_entries: entries,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data as LogoStatusCheckResult[]) ?? [];
+}
+
+
+// ============================================================
+// Admin: Bulk Update Logos
+// ============================================================
+
+/**
+ * Bulk update vendor and product logos from Excel import.
+ * @requires Admin role
+ */
+export async function adminBulkUpdateLogos(
+  logos: BulkLogoInput[]
+): Promise<BulkLogoUpdateResult> {
+  console.log('[adminBulkUpdateLogos] Updating logos for', logos.length, 'entries');
+
+  const { data, error } = await supabase.rpc('admin_bulk_update_logos', {
+    p_logos: logos,
+  });
+
+  if (error) {
+    console.error('[adminBulkUpdateLogos] RPC error:', error);
+    throw new Error(error.message);
+  }
+
+  console.log('[adminBulkUpdateLogos] Result:', data);
+  return data as BulkLogoUpdateResult;
 }
 

@@ -3,7 +3,7 @@ export interface AdminCompanySection {
   title: string;
   description: string;
   path: string;
-  icon: "building" | "plus" | "edit" | "table";
+  icon: "building" | "plus" | "edit" | "table" | "image";
 }
 
 export const adminCompanySections: AdminCompanySection[] = [
@@ -27,5 +27,12 @@ export const adminCompanySections: AdminCompanySection[] = [
     description: "Excel dosyasından birden fazla şirket ekleyin.",
     path: "/admin/companies/bulk-upload",
     icon: "table",
+  },
+  {
+    id: "logo-bulk-upload",
+    title: "Excel ile Toplu Logo Güncelle",
+    description: "Excel dosyasından şirket ve ürün logolarını toplu güncelleyin.",
+    path: "/admin/companies/logo-upload",
+    icon: "image",
   },
 ];
