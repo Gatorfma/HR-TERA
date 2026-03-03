@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cd /c/dev/HR-TERA && npx tsc --noEmit 2>&1)"
+      "Bash(cd /c/dev/HR-TERA && npx tsc --noEmit 2>&1)",
+      "Bash(grep -n \"get_my_products\\\\|get_product_analytics\" /c/dev/HR-TERA/src/api/*.ts /c/dev/HR-TERA/src/api/*.js)"
     ]
   }
 }

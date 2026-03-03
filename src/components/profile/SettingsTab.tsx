@@ -458,13 +458,17 @@ const SettingsTab = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="foundedAt">{t("settings.vendor.foundedAt")}</Label>
-              <Input
+              <select
                 id="foundedAt"
-                type="date"
-                value={formData.foundedAt}
-                onChange={(e) => setFormData({ ...formData, foundedAt: e.target.value })}
-                className="rounded-xl"
-              />
+                value={formData.foundedAt ? new Date(formData.foundedAt).getFullYear().toString() : ""}
+                onChange={(e) => setFormData({ ...formData, foundedAt: e.target.value ? `${e.target.value}-01-01` : "" })}
+                className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">{t("settings.vendor.foundedAtPlaceholder")}</option>
+                {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="companySize">{t("settings.vendor.companySize")}</Label>

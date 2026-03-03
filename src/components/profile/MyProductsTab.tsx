@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Eye, Edit, FileCheck, Lock, Image, MessageSquare, BarChart3, Star, FileText, Link as LinkIcon, Package } from "lucide-react";
+import { Plus, Eye, Edit, FileCheck, Lock, Image, MessageSquare, BarChart3, Star, FileText, Link as LinkIcon, Package, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { getMyProducts } from "@/api/supabaseApi";
+import { getMyProducts, getMyOwnershipRequests, getMyProductAnalytics } from "@/api/supabaseApi";
 import { Tier } from "@/lib/types";
 import ListingTierBadge from "@/components/ListingTierBadge";
 import {
@@ -101,6 +101,15 @@ const mapListingStatus = (status: string): "published" | "draft" | "pending" | "
   }
 };
 
+interface OwnershipRequest {
+  id: string;
+  claimed_vendor_id: string;
+  claimed_vendor_name: string | null;
+  status: "pending" | "approved" | "rejected";
+  message: string | null;
+  created_at: string;
+}
+
 const MyProductsTab = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -108,31 +117,43 @@ const MyProductsTab = () => {
   const [products, setProducts] = useState<MyProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ownershipRequests, setOwnershipRequests] = useState<OwnershipRequest[]>([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        const apiProducts: ApiProduct[] = await getMyProducts();
-        
+
+        const [apiProducts, analyticsData] = await Promise.all([
+          getMyProducts() as Promise<ApiProduct[]>,
+          getMyProductAnalytics().catch(() => []) as Promise<{ product_id: string; views: number; clicks: number }[]>,
+        ]);
+
+        const analyticsMap = new Map(
+          analyticsData.map((a) => [a.product_id, { views: a.views, clicks: a.clicks }])
+        );
+
         // Map API products to display format
-        const mappedProducts: MyProduct[] = apiProducts.map((p) => ({
-          id: p.product_id,
-          slug: p.product_id,
-          name: p.product_name,
-          image: p.logo || "/placeholder.svg",
-          category: p.main_category,
-          description: p.short_desc,
-          vendorTier: (p.subscription?.toLowerCase() || "freemium") as Tier,
-          status: mapListingStatus(p.listing_status),
-          screenshotCount: p.gallery?.length || 0,
-          reviewCount: 0, // TODO: Add reviews count when implemented
-          views: 0, // TODO: Add analytics when implemented
-          clicks: 0,
-          demoRequests: 0,
-        }));
-        
+        const mappedProducts: MyProduct[] = apiProducts.map((p) => {
+          const stats = analyticsMap.get(p.product_id);
+          return {
+            id: p.product_id,
+            slug: p.product_id,
+            name: p.product_name,
+            image: p.logo || "/placeholder.svg",
+            category: p.main_category,
+            description: p.short_desc,
+            vendorTier: (p.subscription?.toLowerCase() || "freemium") as Tier,
+            status: mapListingStatus(p.listing_status),
+            screenshotCount: p.gallery?.length || 0,
+            reviewCount: 0,
+            views: stats?.views || 0,
+            clicks: stats?.clicks || 0,
+            demoRequests: 0,
+          };
+        });
+
         setProducts(mappedProducts);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -144,6 +165,9 @@ const MyProductsTab = () => {
 
     if (user) {
       fetchProducts();
+      getMyOwnershipRequests()
+        .then((data) => setOwnershipRequests(data))
+        .catch((err) => console.error("Error fetching ownership requests:", err));
     }
   }, [user]);
 
@@ -352,16 +376,6 @@ const MyProductsTab = () => {
                     <Edit className="w-4 h-4" />
                     Düzenle
                   </Button>
-                  <LockedFeature
-                    currentTier={user.vendorTier}
-                    requiredTier="plus"
-                    featureName="gallery management"
-                  >
-                    <Button variant="outline" size="sm" className="gap-1.5 rounded-lg w-full">
-                      <Image className="w-4 h-4" />
-                      Galeri
-                    </Button>
-                  </LockedFeature>
                 </div>
               </div>
 
@@ -404,15 +418,58 @@ const MyProductsTab = () => {
         </div>
       )}
 
-      {/* Pending claims section */}
+      {/* Ownership requests section */}
       <div className="bg-muted/30 rounded-xl border border-border p-4">
         <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
           <FileCheck className="w-5 h-5 text-muted-foreground" />
-          Bekleyen Talep Başvuruları
+          Talep Başvuruları
         </h3>
-        <p className="text-sm text-muted-foreground">
-          Bekleyen başvuru yok. Çözümler sayfasından sahipsiz çözümleri talep edebilirsiniz.
-        </p>
+        {ownershipRequests.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Bekleyen başvuru yok. Çözümler sayfasından sahipsiz çözümleri talep edebilirsiniz.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {ownershipRequests.map((req) => (
+              <div
+                key={req.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {req.claimed_vendor_name || req.claimed_vendor_id}
+                  </p>
+                  {req.message && (
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{req.message}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {new Date(req.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  {req.status === "pending" && (
+                    <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 gap-1">
+                      <Clock className="w-3 h-3" />
+                      Beklemede
+                    </Badge>
+                  )}
+                  {req.status === "approved" && (
+                    <Badge variant="secondary" className="bg-green-500/10 text-green-600 gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Onaylandı
+                    </Badge>
+                  )}
+                  {req.status === "rejected" && (
+                    <Badge variant="secondary" className="bg-red-500/10 text-red-600 gap-1">
+                      <XCircle className="w-3 h-3" />
+                      Reddedildi
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
