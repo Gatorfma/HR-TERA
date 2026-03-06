@@ -2022,6 +2022,63 @@ grant execute on function public.admin_get_ownership_requests() to service_role;
 
 
 -- ============================================================
+-- RPC: get_my_ownership_requests
+-- Purpose: List ownership requests submitted by the current user
+-- Returns: Request info with claimed vendor name and status
+-- Errors: P0401 if not authenticated
+-- ============================================================
+create or replace function public.get_my_ownership_requests()
+returns table (
+  id uuid,
+  claimed_vendor_id uuid,
+  claimed_vendor_name text,
+  status public.listing_status,
+  message text,
+  created_at timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_vendor_id uuid;
+begin
+  if v_user_id is null then
+    raise exception 'Authentication required'
+      using errcode = 'P0401';
+  end if;
+
+  select vendor_id into v_vendor_id
+  from public.vendors
+  where user_id = v_user_id;
+
+  if v_vendor_id is null then
+    return;
+  end if;
+
+  return query
+  select
+    o.id,
+    o.claimed_vendor_id,
+    v_claimed.company_name,
+    o.status,
+    o.message,
+    o.created_at
+  from public.ownership_requests o
+  join public.vendors v_claimed
+    on v_claimed.vendor_id = o.claimed_vendor_id
+  where o.claimer_vendor_id = v_vendor_id
+  order by o.created_at desc;
+end;
+$$;
+
+grant execute on function public.get_my_ownership_requests() to authenticated;
+grant execute on function public.get_my_ownership_requests() to service_role;
+
+
+-- ============================================================
 -- RPC: submit_ownership_request
 -- Purpose: Submit ownership claim for a vendor (current user only)
 -- Returns: UUID of the created request
@@ -2402,6 +2459,52 @@ $$;
 
 grant execute on function public.get_my_products() to authenticated;
 grant execute on function public.get_my_products() to service_role;
+
+
+-- ============================================================
+-- RPC: get_my_product_analytics
+-- Purpose: Get view and click counts for the current user's products
+-- Returns: product_id with views, clicks counts
+-- Security: Only returns data for the calling user's own vendor
+-- ============================================================
+create or replace function public.get_my_product_analytics()
+returns table (
+  product_id uuid,
+  views      bigint,
+  clicks     bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_vendor_id uuid;
+begin
+  select vendor_id into v_vendor_id
+  from public.vendors
+  where user_id = auth.uid();
+
+  if v_vendor_id is null then
+    return;
+  end if;
+
+  return query
+  select
+    p.product_id,
+    coalesce(sum(case when e.event_type = 'product_view' then 1 else 0 end), 0)::bigint as views,
+    coalesce(sum(case when e.event_type = 'product_cta_click' then 1 else 0 end), 0)::bigint as clicks
+  from public.products p
+  left join public.analytics_events e
+    on e.product_id = p.product_id
+    and e.event_type in ('product_view', 'product_cta_click')
+  where p.vendor_id = v_vendor_id
+  group by p.product_id;
+end;
+$$;
+
+grant execute on function public.get_my_product_analytics() to authenticated;
+grant execute on function public.get_my_product_analytics() to service_role;
 
 
 -- ============================================================

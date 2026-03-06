@@ -768,8 +768,8 @@ const ProductDetail = () => {
 
         {isUnclaimed && (
           <Dialog open={ownershipDialogOpen} onOpenChange={setOwnershipDialogOpen}>
-            <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-              <UnclaimedVendorSection claimedVendorId={product.vendor?.slug ?? null} />
+            <DialogContent className="max-w-lg">
+              <UnclaimedVendorSection claimedVendorId={product.vendor?.slug ?? null} onSuccess={() => setOwnershipDialogOpen(false)} />
             </DialogContent>
           </Dialog>
         )}
