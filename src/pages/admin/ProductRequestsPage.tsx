@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Check, X, MoreHorizontal, FileText, UserCheck, Clock, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Check, X, MoreHorizontal, FileText, UserCheck, Clock, CheckCircle, XCircle, Building2, Globe, Linkedin, Instagram, Calendar, Users, Crown, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/api/supabaseClient";
+import { getVendorDetails } from "@/api/supabaseApi";
 import { ListingStatus } from "@/lib/admin-types";
 
 interface ListingRequest {
@@ -54,6 +55,21 @@ interface OwnershipRequest {
   status: ListingStatus;
   submittedAt: Date;
   message?: string;
+}
+
+interface ClaimerVendorDetails {
+  vendor_id: string;
+  company_name: string | null;
+  company_size: string | null;
+  company_motto: string | null;
+  company_desc: string | null;
+  headquarters: string | null;
+  website_link: string | null;
+  linkedin_link: string | null;
+  instagram_link: string | null;
+  logo: string | null;
+  founded_at: string | null;
+  subscription: string | null;
 }
 
 type FilterStatus = "all" | "pending" | "approved" | "rejected";
@@ -110,6 +126,8 @@ const ProductRequestsPage = () => {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<ListingRequest | null>(null);
   const [selectedOwnership, setSelectedOwnership] = useState<OwnershipRequest | null>(null);
+  const [claimerVendor, setClaimerVendor] = useState<ClaimerVendorDetails | null>(null);
+  const [claimerVendorLoading, setClaimerVendorLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -382,10 +400,24 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
   };
 
   // Open ownership details
-  const openOwnershipDetails = (req: OwnershipRequest) => {
+  const openOwnershipDetails = async (req: OwnershipRequest) => {
     setSelectedOwnership(req);
     setSelectedApplication(null);
+    setClaimerVendor(null);
+    setClaimerVendorLoading(true);
     setDetailsDialogOpen(true);
+
+    try {
+      const vendor = await getVendorDetails(req.claimerVendorId);
+      setClaimerVendor(vendor);
+    } catch {
+      toast({
+        title: "Vendor bilgileri yüklenemedi",
+        variant: "destructive",
+      });
+    } finally {
+      setClaimerVendorLoading(false);
+    }
   };
 
   const filterButtons = (filter: FilterStatus, setFilter: (f: FilterStatus) => void) => (
@@ -656,7 +688,7 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
 
         {/* Details Dialog */}
         <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedApplication ? "Başvuru Detayları" : "Talep Detayları"}
@@ -728,44 +760,158 @@ claimedVendorName: row.claimed_vendor_name ?? "Bilinmeyen Şirket",
             )}
             
             {selectedOwnership && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                    <UserCheck className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{selectedOwnership.claimerVendorName}</p>
+              <div className="space-y-5">
+                {/* Header: status + claim direction */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">
-                      {selectedOwnership.claimerUserFullName ?? "Kullanıcı"}
-                      {selectedOwnership.claimerUserEmail ? ` • ${selectedOwnership.claimerUserEmail}` : ""}
+                      <span className="font-medium text-foreground">{selectedOwnership.claimerVendorName}</span>
+                      {" "}&rarr;{" "}
+                      <span className="font-medium text-foreground">{selectedOwnership.claimedVendorName}</span>
                     </p>
-                    {selectedOwnership.claimerUserId && (
-                      <p className="text-xs text-muted-foreground">Kullanıcı ID: {selectedOwnership.claimerUserId}</p>
-                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {selectedOwnership.submittedAt.toLocaleDateString("tr-TR")}
+                    </p>
                   </div>
                   {getStatusBadge(selectedOwnership.status)}
                 </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium text-muted-foreground">Talep Eden Şirket:</span>
-                    <p className="text-foreground">{selectedOwnership.claimerVendorName}</p>
+
+                {/* Claimer Vendor Details */}
+                {claimerVendorLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
-                  <div>
-                    <span className="font-medium text-muted-foreground">Talep Edilen Şirket:</span>
-                    <p className="text-foreground">{selectedOwnership.claimedVendorName}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-muted-foreground">Talep Tarihi:</span>
-                    <span className="ml-2">{selectedOwnership.submittedAt.toLocaleDateString("tr-TR")}</span>
-                  </div>
-                  {selectedOwnership.message && (
-                    <div>
-                      <span className="font-medium text-muted-foreground">Mesaj:</span>
-                      <p className="text-foreground bg-muted p-2 rounded mt-1">{selectedOwnership.message}</p>
+                ) : claimerVendor ? (
+                  <div className="space-y-4">
+                    {/* Company header with logo */}
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+                      {claimerVendor.logo ? (
+                        <img
+                          src={claimerVendor.logo}
+                          alt={claimerVendor.company_name ?? ""}
+                          className="w-12 h-12 rounded-lg object-contain border border-border bg-white dark:bg-card p-0.5"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center border border-border">
+                          <Building2 className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground truncate">
+                          {claimerVendor.company_name ?? "Bilinmeyen"}
+                        </p>
+                        {claimerVendor.company_motto && (
+                          <p className="text-sm text-muted-foreground italic truncate">
+                            {claimerVendor.company_motto}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
+
+                    {/* Info grid */}
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      {claimerVendor.headquarters && (
+                        <div className="flex items-start gap-2">
+                          <Building2 className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Merkez</p>
+                            <p className="text-foreground">{claimerVendor.headquarters}</p>
+                          </div>
+                        </div>
+                      )}
+                      {claimerVendor.company_size && (
+                        <div className="flex items-start gap-2">
+                          <Users className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Boyut</p>
+                            <p className="text-foreground">{claimerVendor.company_size}</p>
+                          </div>
+                        </div>
+                      )}
+                      {claimerVendor.founded_at && (
+                        <div className="flex items-start gap-2">
+                          <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Kuruluş</p>
+                            <p className="text-foreground">{new Date(claimerVendor.founded_at).getFullYear()}</p>
+                          </div>
+                        </div>
+                      )}
+                      {claimerVendor.subscription && (
+                        <div className="flex items-start gap-2">
+                          <Crown className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Abonelik</p>
+                            <Badge variant="outline" className="capitalize mt-0.5">{claimerVendor.subscription}</Badge>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    {claimerVendor.company_desc && (
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Hakkında</p>
+                        <p className="text-sm text-foreground bg-muted/50 p-3 rounded-lg border border-border leading-relaxed">
+                          {claimerVendor.company_desc}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Social links */}
+                    {(claimerVendor.website_link || claimerVendor.linkedin_link || claimerVendor.instagram_link) && (
+                      <div className="flex items-center gap-2">
+                        {claimerVendor.website_link && (
+                          <a
+                            href={claimerVendor.website_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md border border-border hover:bg-muted"
+                          >
+                            <Globe className="h-3.5 w-3.5" />
+                            Website
+                          </a>
+                        )}
+                        {claimerVendor.linkedin_link && (
+                          <a
+                            href={claimerVendor.linkedin_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md border border-border hover:bg-muted"
+                          >
+                            <Linkedin className="h-3.5 w-3.5" />
+                            LinkedIn
+                          </a>
+                        )}
+                        {claimerVendor.instagram_link && (
+                          <a
+                            href={claimerVendor.instagram_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md border border-border hover:bg-muted"
+                          >
+                            <Instagram className="h-3.5 w-3.5" />
+                            Instagram
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Vendor bilgileri bulunamadı.
+                  </p>
+                )}
+
+                {/* Message */}
+                {selectedOwnership.message && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Mesaj</p>
+                    <p className="text-sm text-foreground bg-muted p-3 rounded-lg border border-border">
+                      {selectedOwnership.message}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
             
