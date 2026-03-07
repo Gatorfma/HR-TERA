@@ -36,10 +36,12 @@ interface AuthContextType {
   signup: (
     email: string,
     password: string,
-    fullName: string,
+    fullName?: string,
     company?: string,
     role?: string,
-    phone?: string
+    phone?: string,
+    hrTechInvestmentPlanned?: boolean,
+    hrTechInvestmentArea?: string
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
@@ -302,30 +304,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Sign up with email/password
   const signup = useCallback(async (
-    email: string, 
-    password: string, 
-    fullName: string, 
-    company?: string, 
+    email: string,
+    password: string,
+    fullName?: string,
+    company?: string,
     role?: string,
-    phone?: string
+    phone?: string,
+    hrTechInvestmentPlanned?: boolean,
+    hrTechInvestmentArea?: string
   ) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          full_name: fullName,
-          company,
-          role,
+          full_name: fullName || undefined,
+          company: company || undefined,
+          role: role || undefined,
           phone: phone || undefined,
+          hr_tech_investment_planned: hrTechInvestmentPlanned,
+          hr_tech_investment_area: hrTechInvestmentArea || undefined,
         },
       },
     });
-    
+
     if (error) {
       throw new Error(error.message);
     }
-    
+
     if (data.user) {
       const appUser = await fetchUserDataFromRPC(data.user);
       setUser(appUser);

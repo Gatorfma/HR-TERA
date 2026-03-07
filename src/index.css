@@ -99,11 +99,11 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80;
   }
-  
+
   .card-hover {
     @apply transition-all duration-300 hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-1;
   }
-  
+
   /* Hide scrollbar for horizontal tab scrolling */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -112,6 +112,18 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Hide browser's native password reveal button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
 }
 
 /* Infinite Carousel Animations - Seamless marquee */

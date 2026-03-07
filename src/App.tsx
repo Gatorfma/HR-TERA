@@ -45,6 +45,7 @@ import Contact from "./pages/Contact";
 import Trending from "./pages/Trending";
 import Compare from "./pages/Compare";
 import Favourites from "./pages/Favourites";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,7 @@ const App = () => (
                   <Route path="/trending" element={<Trending />} />
                   <Route path="/compare" element={<Compare />} />
                   <Route path="/favourites" element={<Favourites />} />
+                  <Route path="/auth" element={<Auth />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
