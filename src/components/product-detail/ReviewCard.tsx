@@ -44,8 +44,8 @@ const ReviewCard = ({ review, productId, productName, onRefresh }: ReviewCardPro
       onRefresh();
     } catch (err) {
       toast({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Vote failed",
+        title: t("reviews.error"),
+        description: err instanceof Error ? err.message : t("reviews.voteFailed"),
         variant: "destructive",
       });
     } finally {

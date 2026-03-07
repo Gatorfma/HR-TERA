@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { tr } from "date-fns/locale";
+import { tr, enUS } from "date-fns/locale";
 import { Eye, Edit, Clock, CheckCircle, XCircle, AlertTriangle, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,38 +16,40 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProductApplications, ProductStatus } from "@/contexts/ProductApplicationsContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import ListingTierBadge from "@/components/ListingTierBadge";
-
-const STATUS_CONFIG: Record<
-  ProductStatus,
-  { label: string; icon: React.ReactNode; className: string }
-> = {
-  pending: {
-    label: "Beklemede",
-    icon: <Clock className="w-3.5 h-3.5" />,
-    className: "bg-muted text-muted-foreground border-muted-foreground/20",
-  },
-  approved: {
-    label: "Onaylandı",
-    icon: <CheckCircle className="w-3.5 h-3.5" />,
-    className: "bg-green-500/10 text-green-600 border-green-500/20",
-  },
-  rejected: {
-    label: "Reddedildi",
-    icon: <XCircle className="w-3.5 h-3.5" />,
-    className: "bg-destructive/10 text-destructive border-destructive/20",
-  },
-  changes_requested: {
-    label: "Revizyon Gerekli",
-    icon: <AlertTriangle className="w-3.5 h-3.5" />,
-    className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  },
-};
 
 const ProductApplicationsTab = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { getApplicationsByVendor, isLoading, error } = useProductApplications();
+  const { t, language } = useLanguage();
+
+  const STATUS_CONFIG: Record<
+    ProductStatus,
+    { label: string; icon: React.ReactNode; className: string }
+  > = {
+    pending: {
+      label: t("applications.pending"),
+      icon: <Clock className="w-3.5 h-3.5" />,
+      className: "bg-muted text-muted-foreground border-muted-foreground/20",
+    },
+    approved: {
+      label: t("applications.approved"),
+      icon: <CheckCircle className="w-3.5 h-3.5" />,
+      className: "bg-green-500/10 text-green-600 border-green-500/20",
+    },
+    rejected: {
+      label: t("applications.rejected"),
+      icon: <XCircle className="w-3.5 h-3.5" />,
+      className: "bg-destructive/10 text-destructive border-destructive/20",
+    },
+    changes_requested: {
+      label: t("applications.changesRequested"),
+      icon: <AlertTriangle className="w-3.5 h-3.5" />,
+      className: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    },
+  };
 
   const applications = getApplicationsByVendor(user?.vendorId || "");
 
@@ -58,8 +60,8 @@ const ProductApplicationsTab = () => {
           <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="font-heading font-semibold text-foreground mb-2">Başvurular yükleniyor</h3>
-          <p className="text-muted-foreground text-sm">Lütfen bekleyin...</p>
+          <h3 className="font-heading font-semibold text-foreground mb-2">{t("applications.loading")}</h3>
+          <p className="text-muted-foreground text-sm">{t("applications.pleaseWait")}</p>
         </CardContent>
       </Card>
     );
@@ -72,7 +74,7 @@ const ProductApplicationsTab = () => {
           <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <XCircle className="w-8 h-8 text-destructive" />
           </div>
-          <h3 className="font-heading font-semibold text-foreground mb-2">Başvurular yüklenemedi</h3>
+          <h3 className="font-heading font-semibold text-foreground mb-2">{t("applications.loadFailed")}</h3>
           <p className="text-muted-foreground text-sm">{error}</p>
         </CardContent>
       </Card>
@@ -86,11 +88,11 @@ const ProductApplicationsTab = () => {
           <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="font-heading font-semibold text-foreground mb-2">Henüz başvuru yok</h3>
+          <h3 className="font-heading font-semibold text-foreground mb-2">{t("applications.noApplications")}</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            İlk çözüm başvurunuzu oluşturarak başlayın.
+            {t("applications.startFirst")}
           </p>
-          <Button onClick={() => navigate("/profile/products/new")}>Yeni Çözüm Ekle</Button>
+          <Button onClick={() => navigate("/profile/products/new")}>{t("applications.addNewSolution")}</Button>
         </CardContent>
       </Card>
     );
@@ -102,9 +104,9 @@ const ProductApplicationsTab = () => {
       <Card className="bg-muted/30 border-border">
         <CardContent className="py-4">
           <p className="text-sm text-muted-foreground">
-            Çözüm başvurularınız burada listelenir. Onaylanan çözümler otomatik olarak{" "}
-            <span className="font-medium text-foreground">Çözümlerim</span> sekmesine taşınır ve
-            kamuya açık hale gelir.
+            {t("applications.infoBanner").split("**").map((part, i) =>
+              i % 2 === 1 ? <span key={i} className="font-medium text-foreground">{part}</span> : part
+            )}
           </p>
         </CardContent>
       </Card>
@@ -115,12 +117,12 @@ const ProductApplicationsTab = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[300px]">Çözüm</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Paket</TableHead>
-                <TableHead>Başvuru Tarihi</TableHead>
-                <TableHead>Durum</TableHead>
-                <TableHead className="text-right">İşlemler</TableHead>
+                <TableHead className="w-[300px]">{t("applications.solution")}</TableHead>
+                <TableHead>{t("applications.category")}</TableHead>
+                <TableHead>{t("applications.package")}</TableHead>
+                <TableHead>{t("applications.submissionDate")}</TableHead>
+                <TableHead>{t("applications.status")}</TableHead>
+                <TableHead className="text-right">{t("applications.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -160,7 +162,7 @@ const ProductApplicationsTab = () => {
                     {/* Submission Date */}
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
-                        {format(app.submittedAt, "dd MMM yyyy", { locale: tr })}
+                        {format(app.submittedAt, "dd MMM yyyy", { locale: language === "tr" ? tr : enUS })}
                       </span>
                     </TableCell>
 
@@ -177,7 +179,7 @@ const ProductApplicationsTab = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="text-xs text-amber-600 mt-1 cursor-help underline decoration-dotted">
-                              Detay için tıklayın
+                              {t("applications.clickForDetails")}
                             </p>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="max-w-[300px]">
@@ -189,7 +191,7 @@ const ProductApplicationsTab = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="text-xs text-destructive mt-1 cursor-help underline decoration-dotted">
-                              Red gerekçesi
+                              {t("applications.rejectionReason")}
                             </p>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="max-w-[300px]">
@@ -209,7 +211,7 @@ const ProductApplicationsTab = () => {
                                 <ExternalLink className="w-4 h-4" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Çözümü görüntüle</TooltipContent>
+                            <TooltipContent>{t("applications.viewSolution")}</TooltipContent>
                           </Tooltip>
                         )}
                         {app.status === "changes_requested" && (
@@ -219,7 +221,7 @@ const ProductApplicationsTab = () => {
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Düzenle ve tekrar gönder</TooltipContent>
+                            <TooltipContent>{t("applications.editAndResubmit")}</TooltipContent>
                           </Tooltip>
                         )}
                         {app.status === "pending" && (
@@ -229,7 +231,7 @@ const ProductApplicationsTab = () => {
                                 <Eye className="w-4 h-4" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>Başvuruyu görüntüle</TooltipContent>
+                            <TooltipContent>{t("applications.viewApplication")}</TooltipContent>
                           </Tooltip>
                         )}
                       </div>

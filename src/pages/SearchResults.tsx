@@ -109,7 +109,7 @@ const SearchResults = () => {
                       category={vendor.category}
                       name={vendor.name}
                       addedDate={vendor.addedDate}
-                      isPro={vendor.isPro}
+                      isPlus={vendor.isPlus}
                     />
                   ))}
                 </div>

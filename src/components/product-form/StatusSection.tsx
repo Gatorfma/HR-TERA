@@ -1,6 +1,7 @@
 import { UseFormReturn } from "react-hook-form";
-import { Settings, Calendar, Clock, Star } from "lucide-react";
+import { Settings, Calendar, Clock, Star, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,8 @@ interface StatusSectionProps {
   createdAt?: string | null;
   updatedAt?: string | null;
   rating?: number | null;
+  isVerified?: boolean;
+  onVerifiedChange?: (value: boolean) => void;
 }
 
 const formatDate = (dateStr: string | null | undefined) => {
@@ -49,6 +52,8 @@ export function StatusSection({
   createdAt,
   updatedAt,
   rating,
+  isVerified,
+  onVerifiedChange,
 }: StatusSectionProps) {
   return (
     <ProductFormSection id="status">
@@ -108,6 +113,38 @@ export function StatusSection({
               </FormItem>
             )}
           />
+
+          {/* Verification Status */}
+          {onVerifiedChange && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                Onaylanma Durumu
+              </Label>
+              <Select
+                value={isVerified ? "verified" : "unverified"}
+                onValueChange={(value) => onVerifiedChange(value === "verified")}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="verified">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                      Onaylı
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="unverified">
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                      Onaylı Değil
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Created At (read-only) */}
           {createdAt !== undefined && (
