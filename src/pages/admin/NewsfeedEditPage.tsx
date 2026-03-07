@@ -166,14 +166,6 @@ const NewsfeedEditPage = () => {
       });
       return;
     }
-    if (!image) {
-      toast({
-        title: "Hata",
-        description: "Kapak görseli zorunludur",
-        variant: "destructive",
-      });
-      return;
-    }
     if (tags.length === 0) {
       toast({
         title: "Hata",
@@ -323,7 +315,7 @@ const NewsfeedEditPage = () => {
             {/* Cover Image */}
             <Card>
               <CardHeader>
-                <CardTitle>Kapak Görseli *</CardTitle>
+                <CardTitle>Kapak Görseli</CardTitle>
                 <CardDescription>
                   Yazı için bir kapak görseli ekleyin (max 2MB)
                 </CardDescription>
