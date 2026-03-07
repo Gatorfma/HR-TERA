@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "@/components/SearchBar";
-import AuthModal from "@/components/AuthModal";
 import ProfileDropdown from "@/components/ProfileDropdown";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,16 +12,20 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const { isAuthenticated, isLoading, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // Navigate to /auth with redirect param when other components dispatch this event
   useEffect(() => {
-    const handler = () => setShowAuthModal(true);
+    const handler = () => {
+      const currentPath = location.pathname + location.search;
+      navigate(`/auth?redirect=${encodeURIComponent(currentPath)}`);
+    };
     window.addEventListener("open-auth-modal", handler);
     return () => window.removeEventListener("open-auth-modal", handler);
-  }, []);
+  }, [navigate, location]);
 
   const handleLogout = () => {
     logout();
@@ -72,8 +75,8 @@ const Navbar = () => {
               ) : isAuthenticated ? (
                 <ProfileDropdown />
               ) : (
-                <Button 
-                  onClick={() => setShowAuthModal(true)}
+                <Button
+                  onClick={() => navigate("/auth")}
                   className="rounded-full bg-secondary text-secondary-foreground px-6 border-2 border-transparent hover:border-primary hover:shadow-[0_0_20px_hsl(var(--primary)/0.4)] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
                 >
                   {t("nav.login")}
@@ -157,10 +160,10 @@ const Navbar = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
+                  <Button
                     onClick={() => {
                       setIsOpen(false);
-                      setShowAuthModal(true);
+                      navigate("/auth");
                     }}
                     className="rounded-full bg-secondary text-secondary-foreground w-full border-2 border-transparent hover:border-primary transition-all duration-200"
                   >
@@ -172,9 +175,6 @@ const Navbar = () => {
           )}
         </AnimatePresence>
       </nav>
-
-      {/* Auth Modal */}
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
     </>
   );
 };

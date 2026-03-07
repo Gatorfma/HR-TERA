@@ -32,9 +32,9 @@ const TierBadge = ({ tier, showFeatured = false }: TierBadgeProps) => {
   return (
     <div className="flex items-center gap-2">
       <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${tierConfig.className}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border text-orange-700 ${tierConfig.className}`}
       >
-        <Icon className="w-3.5 h-3.5" />
+        <Icon className="w-3.5 h-3.5 text-orange-700 font-bold" />
         {tierConfig.label}
       </span>
     </div>

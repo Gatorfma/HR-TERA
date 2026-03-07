@@ -398,6 +398,7 @@ interface SearchResult {
 const HeroSection = ({ products = [] }: HeroSectionProps) => {
   const [topRowPaused, setTopRowPaused] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -427,7 +428,51 @@ const HeroSection = ({ products = [] }: HeroSectionProps) => {
     }));
   }, [products]);
 
-  const topRowProducts = useMemo(() => [...mappedProducts, ...mappedProducts], [mappedProducts]);
+  // Carousel animation using requestAnimationFrame
+  const positionRef = useRef(0);
+  const pausedRef = useRef(false);
+
+  // Keep pausedRef in sync with state
+  useEffect(() => {
+    pausedRef.current = topRowPaused;
+  }, [topRowPaused]);
+
+  useEffect(() => {
+    const track = carouselRef.current;
+    if (!track || mappedProducts.length === 0) return;
+
+    let lastTime = performance.now();
+    let animationId: number;
+
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+
+      if (!pausedRef.current) {
+        const trackWidth = track.scrollWidth / 2;
+
+        // Speed: pixels per ms (faster on mobile, slower on desktop)
+        const isMobile = window.innerWidth < 1150;
+        const duration = isMobile ? 40000 : 50000;
+        const speed = trackWidth / duration;
+
+        positionRef.current += speed * deltaTime;
+
+        // Reset when scrolled past the end
+        if (positionRef.current >= trackWidth) {
+          positionRef.current = 0;
+        }
+
+        track.style.transform = `translateX(-${positionRef.current}px)`;
+      }
+
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationId);
+  }, [mappedProducts.length]);
 
   // Debounced search — only fetches when user has typed 2+ chars
   useEffect(() => {
@@ -490,7 +535,7 @@ const HeroSection = ({ products = [] }: HeroSectionProps) => {
   return (
     <section className="relative">
       {/* Hero Band */}
-      <div ref={heroRef} className="relative h-[65vh] min-h-[550px] max-h-[750px] pt-24">
+      <div ref={heroRef} className="relative h-[65vh] min-h-[550px] max-h-[750px] pt-28">
         {/* Background layers — clipped so gradient/pattern don't overflow */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Gradient Background — bright center radial matching logo */}
@@ -651,15 +696,12 @@ const HeroSection = ({ products = [] }: HeroSectionProps) => {
             onMouseLeave={() => setTopRowPaused(false)}
           >
             <div
+              ref={carouselRef}
               className="flex gap-4 will-change-transform"
-              style={{
-                animation: 'scroll-left 30s linear infinite',
-                animationPlayState: topRowPaused ? 'paused' : 'running',
-              }}
             >
-              {topRowProducts.map((product, index) => (
+              {[...mappedProducts, ...mappedProducts].map((product) => (
                 <Link
-                  key={`top-${product.product_id}-${index}`}
+                  key={product.product_id}
                   to={`/products/${product.product_id}`}
                   className="flex-shrink-0 group"
                 >

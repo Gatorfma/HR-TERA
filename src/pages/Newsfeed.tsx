@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, User, Calendar } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,15 @@ const Newsfeed = () => {
     }).format(date);
     const year = date.getFullYear();
     return { month, year, key: `${year}-${date.getMonth()}` };
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat(language === "tr" ? "tr-TR" : "en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(date);
   };
 
   // Group posts by month/year
@@ -184,46 +193,69 @@ const Newsfeed = () => {
                         >
                           <Link to={`/newsfeed/${post.slug}`} className="group block">
                             <div className="bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-200 hover:shadow-lg">
-                              <div className="flex flex-col md:flex-row relative">
-                                {/* Content - Left side */}
+                              <div className={`flex relative ${post.image ? "flex-col-reverse md:flex-row" : "flex-row"}`}>
+                                {/* Content */}
                                 <div className={`flex-1 p-6 ${post.image ? "md:pr-72 lg:pr-80" : ""}`}>
-                                  {/* Author · Category */}
-                                  <p className="text-sm text-muted-foreground mb-3">
+                                  {/* Mobile: Category badge (only if has image, otherwise use desktop style) */}
+                                  {post.image && (
+                                    <span className="inline-block md:hidden bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                                      {post.category}
+                                    </span>
+                                  )}
+
+                                  {/* Desktop: Author · Category inline (always show if no image) */}
+                                  <p className={`text-sm text-muted-foreground mb-3 ${post.image ? "hidden md:block" : "block"}`}>
                                     {post.author}
                                     <span className="mx-2">·</span>
                                     <span className="text-primary font-medium">{post.category}</span>
                                   </p>
 
                                   {/* Title */}
-                                  <h3 className="max-w-2xl font-heading font-bold text-xl text-foreground mb-4 group-hover:text-primary transition-colors">
+                                  <h3 className="max-w-2xl font-heading font-bold text-xl text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
                                     {post.title}
                                   </h3>
 
                                   {/* Tags */}
                                   {post.tags && post.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className={`flex flex-wrap gap-2 ${post.image ? "mb-3 md:mb-0" : "mb-0"}`}>
                                       {post.tags.map((tag) => (
                                         <span
                                           key={tag}
-                                          className="bg-muted text-muted-foreground text-sm px-3 py-1 rounded-full"
+                                          className="bg-muted text-muted-foreground text-xs md:text-sm px-2 md:px-3 py-0.5 md:py-1 rounded-full"
                                         >
                                           {tag}
                                         </span>
                                       ))}
                                     </div>
                                   )}
+
+                                  {/* Mobile: Author & Date row (only if has image) */}
+                                  {post.image && (
+                                    <div className="flex md:hidden items-center justify-between mt-4">
+                                      <div className="flex items-center gap-2">
+                                        <User className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-sm text-foreground font-medium">
+                                          {post.author}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                                        <Calendar className="w-4 h-4" />
+                                        {formatDate(post.created_at)}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
 
-                                {/* Image - Right side (absolute positioned) */}
+                                {/* Image - only render if post has an image */}
                                 {post.image && (
-                                  <div className="relative h-48 md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72 flex items-center justify-center">
+                                  <div className="relative md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72">
                                     <LogoImage
                                       variant="card"
                                       src={post.image}
                                       alt={post.title}
                                       hoverZoom
                                       fallbackText={post.title}
-                                      className="!aspect-auto h-full w-full !border-b-0 rounded-b-2xl md:rounded-bl-none md:rounded-r-2xl [&_img]:rounded-b-2xl md:[&_img]:rounded-bl-none md:[&_img]:rounded-r-2xl"
+                                      className="aspect-[16/9] md:!aspect-auto h-full w-full rounded-t-2xl md:rounded-tl-none md:rounded-r-2xl [&_img]:rounded-t-2xl md:[&_img]:rounded-tl-none md:[&_img]:rounded-r-2xl"
                                     />
                                   </div>
                                 )}
