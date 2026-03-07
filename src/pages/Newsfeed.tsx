@@ -186,7 +186,7 @@ const Newsfeed = () => {
                             <div className="bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-200 hover:shadow-lg">
                               <div className="flex flex-col md:flex-row relative">
                                 {/* Content - Left side */}
-                                <div className="flex-1 p-6 md:pr-72 lg:pr-80">
+                                <div className={`flex-1 p-6 ${post.image ? "md:pr-72 lg:pr-80" : ""}`}>
                                   {/* Author · Category */}
                                   <p className="text-sm text-muted-foreground mb-3">
                                     {post.author}
@@ -215,16 +215,18 @@ const Newsfeed = () => {
                                 </div>
 
                                 {/* Image - Right side (absolute positioned) */}
-                                <div className="relative h-48 md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72 flex items-center justify-center">
-                                  <LogoImage
-                                    variant="card"
-                                    src={post.image || ""}
-                                    alt={post.title}
-                                    hoverZoom
-                                    fallbackText={post.title}
-                                    className="!aspect-auto h-full w-full !border-b-0 rounded-b-2xl md:rounded-bl-none md:rounded-r-2xl [&_img]:rounded-b-2xl md:[&_img]:rounded-bl-none md:[&_img]:rounded-r-2xl"
-                                  />
-                                </div>
+                                {post.image && (
+                                  <div className="relative h-48 md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72 flex items-center justify-center">
+                                    <LogoImage
+                                      variant="card"
+                                      src={post.image}
+                                      alt={post.title}
+                                      hoverZoom
+                                      fallbackText={post.title}
+                                      className="!aspect-auto h-full w-full !border-b-0 rounded-b-2xl md:rounded-bl-none md:rounded-r-2xl [&_img]:rounded-b-2xl md:[&_img]:rounded-bl-none md:[&_img]:rounded-r-2xl"
+                                    />
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </Link>

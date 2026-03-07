@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { ProductFormSection, SectionHeader, SectionContent } from "./ProductFormLayout";
 import { ProductFormValues, AVAILABLE_FEATURES, TIER_CONSTRAINTS } from "@/lib/schemas/product.schema";
@@ -24,6 +27,7 @@ export function FeaturesSection({
 }: FeaturesSectionProps) {
   const selectedFeatures = form.watch("features");
   const constraints = TIER_CONSTRAINTS[tier];
+  const [customFeature, setCustomFeature] = useState("");
 
   const handleToggleFeature = (feature: string) => {
     if (selectedFeatures.includes(feature)) {
@@ -32,6 +36,30 @@ export function FeaturesSection({
       addFeature(feature);
     }
   };
+
+  const handleAddCustomFeature = () => {
+    const trimmed = customFeature.trim();
+    if (!trimmed) return;
+    if (selectedFeatures.includes(trimmed)) {
+      setCustomFeature("");
+      return;
+    }
+    if (!canAddFeature) return;
+    addFeature(trimmed);
+    setCustomFeature("");
+  };
+
+  const handleCustomKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddCustomFeature();
+    }
+  };
+
+  // Separate selected features into predefined and custom
+  const customSelected = selectedFeatures.filter(
+    (f) => !(AVAILABLE_FEATURES as readonly string[]).includes(f)
+  );
 
   return (
     <ProductFormSection id="features">
@@ -76,12 +104,47 @@ export function FeaturesSection({
                       </Badge>
                     );
                   })}
+                  {/* Show custom features as removable badges */}
+                  {customSelected.map((feature) => (
+                    <Badge
+                      key={feature}
+                      variant="default"
+                      className="cursor-pointer transition-all bg-violet-600 text-white hover:bg-violet-700"
+                      onClick={() => removeFeature(feature)}
+                    >
+                      {feature}
+                      <X className="h-3 w-3 ml-1" />
+                    </Badge>
+                  ))}
                 </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Custom feature input */}
+        <div className="flex gap-2">
+          <Input
+            placeholder="Yeni özellik ekle..."
+            value={customFeature}
+            onChange={(e) => setCustomFeature(e.target.value)}
+            onKeyDown={handleCustomKeyDown}
+            disabled={!canAddFeature}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddCustomFeature}
+            disabled={!canAddFeature || !customFeature.trim()}
+            className="shrink-0"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Ekle
+          </Button>
+        </div>
 
         {/* Selected features summary */}
         {selectedFeatures.length > 0 && (
