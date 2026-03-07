@@ -127,13 +127,6 @@ const SettingsTab = () => {
       { id: "account", label: t("settings.nav.account"), icon: <User className="w-4 h-4" /> },
       { id: "vendor", label: t("settings.nav.vendor"), icon: <Building2 className="w-4 h-4" /> },
       { id: "billing", label: t("settings.nav.billing"), icon: <CreditCard className="w-4 h-4" /> },
-      { id: "team", label: t("settings.nav.team"), icon: <Users className="w-4 h-4" />, minTier: "premium" },
-      {
-        id: "campaigns",
-        label: t("settings.nav.campaigns"),
-        icon: <Megaphone className="w-4 h-4" />,
-        minTier: "premium",
-      },
     ];
 
   const visibleSections = sections.filter((s) => {
@@ -580,55 +573,6 @@ const SettingsTab = () => {
     </div>
   );
 
-  const renderTeamSection = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-foreground mb-4">{t("settings.team.title")}</h3>
-        <p className="text-sm text-muted-foreground mb-4">{t("settings.team.subtitle")}</p>
-
-        <div className="space-y-3 mb-4">
-          <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-sm font-semibold text-primary-foreground">AJ</span>
-              </div>
-              <div>
-                <p className="font-medium text-foreground">{user.fullName}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-              </div>
-            </div>
-            <span className="text-xs font-medium px-2 py-1 bg-primary/10 text-primary rounded-full">
-              {t("settings.team.admin")}
-            </span>
-          </div>
-        </div>
-
-        <Button variant="outline" className="rounded-xl gap-2">
-          <Plus className="w-4 h-4" />
-          {t("settings.team.invite")}
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderCampaignsSection = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-foreground mb-4">{t("settings.campaigns.title")}</h3>
-        <p className="text-sm text-muted-foreground mb-4">{t("settings.campaigns.subtitle")}</p>
-
-        <div className="bg-muted/30 rounded-xl border border-border p-6 text-center">
-          <Megaphone className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground mb-4">{t("settings.campaigns.empty")}</p>
-          <Button className="rounded-full gap-2">
-            <Plus className="w-4 h-4" />
-            {t("settings.campaigns.create")}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-
   const renderContent = () => {
     switch (activeSection) {
       case "account":
@@ -637,10 +581,6 @@ const SettingsTab = () => {
         return renderVendorSection();
       case "billing":
         return renderBillingSection();
-      case "team":
-        return renderTeamSection();
-      case "campaigns":
-        return renderCampaignsSection();
       default:
         return null;
     }
