@@ -99,7 +99,7 @@ const Vendors = () => {
   const hasActiveFilters = selectedTier !== "all" || searchQuery !== "";
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
       <Navbar />
 
       {/* Main Content */}

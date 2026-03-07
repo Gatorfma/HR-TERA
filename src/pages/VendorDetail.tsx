@@ -109,7 +109,7 @@ const VendorDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
       <Navbar />
       
       <main className="pt-24 pb-20">

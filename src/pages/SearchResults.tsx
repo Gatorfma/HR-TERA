@@ -19,7 +19,7 @@ const SearchResults = () => {
   const totalResults = results.products.length + results.vendors.length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
         
         <main className="pt-32 pb-20">

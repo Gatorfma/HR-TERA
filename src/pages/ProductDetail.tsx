@@ -298,7 +298,7 @@ const ProductDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
         <Navbar />
         <div className="flex items-center justify-center pt-40">
           <div className="text-center">
@@ -313,7 +313,7 @@ const ProductDetail = () => {
   // Error state
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
         <Navbar />
         <div className="flex items-center justify-center pt-40">
           <div className="text-center px-4">
@@ -410,7 +410,7 @@ const ProductDetail = () => {
   const vendorMotto = vendorDetails?.company_motto || null;
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden flex flex-col">
       <Navbar />
 
       <main className="pt-32 pb-20">

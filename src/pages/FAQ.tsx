@@ -215,7 +215,7 @@ const FAQ = () => {
         ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       <main className="pt-32 pb-16">

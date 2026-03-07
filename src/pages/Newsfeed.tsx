@@ -86,7 +86,7 @@ const Newsfeed = () => {
   }, {} as Record<string, { month: string; year: number; posts: NewsfeedPost[] }>);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       {/* Hero Section */}

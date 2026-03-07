@@ -305,7 +305,7 @@ const Products = () => {
   const hasActiveFilters = selectedCategory !== "all" || selectedTier !== "all" || selectedCountry !== "all" || selectedLanguage !== "all" || aiOnly || searchQuery !== "";
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
       <Navbar />
 
       {/* Main Content */}
