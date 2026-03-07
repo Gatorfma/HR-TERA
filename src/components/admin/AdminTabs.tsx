@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type AdminTabValue = "analytics" | "users" | "products" | "newsfeed";
 
@@ -8,11 +9,12 @@ interface AdminTabsProps {
 
 const AdminTabs = ({ activeTab }: AdminTabsProps) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const tabs: { value: AdminTabValue; label: string; path: string }[] = [
-    { value: "analytics", label: "Analitik", path: "/admin" },
-    { value: "users", label: "Şirket Ayarları", path: "/admin?tab=users" },
-    { value: "products", label: "Çözüm Ayarları", path: "/admin/products" },
+    { value: "analytics", label: t("admin.analytics"), path: "/admin" },
+    { value: "users", label: t("admin.companySettings"), path: "/admin?tab=users" },
+    { value: "products", label: t("admin.solutionSettings"), path: "/admin/products" },
     { value: "newsfeed", label: "HRTech Radar", path: "/admin/newsfeed" },
   ];
 

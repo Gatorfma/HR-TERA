@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,7 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Save, Loader2, ArrowLeft } from "lucide-react";
+import { Save, Loader2, ArrowLeft, Star } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -23,7 +24,6 @@ import { Tier } from "@/lib/types";
 // New imports from product-form components
 import { useProductForm } from "@/hooks/useProductForm";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { useKeyboardShortcuts, createProductFormShortcuts } from "@/hooks/useKeyboardShortcuts";
 import {
   ProductFormLayout,
   ProductFormMain,
@@ -34,12 +34,8 @@ import {
   MediaSection,
   LinksSection,
   VendorAssignSection,
-  StatusSection,
   FormActions,
   UnsavedChangesDialog,
-  KeyboardShortcutsDialog,
-  ProductPreviewDialog,
-  ProductPreviewCard,
   SkipLinks,
   CompactFormProgress,
 } from "@/components/product-form";
@@ -52,10 +48,6 @@ const ProductCreatePage = () => {
   // Vendor state
   const [selectedVendor, setSelectedVendor] = useState<VendorSearchResult | null>(null);
   const [vendorError, setVendorError] = useState<string | undefined>();
-
-  // UI state
-  const [showPreview, setShowPreview] = useState(false);
-  const [showShortcuts, setShowShortcuts] = useState(false);
 
   // Get effective tier from selected vendor
   const effectiveTier: Tier = selectedVendor?.subscription || "freemium";
@@ -91,20 +83,6 @@ const ProductCreatePage = () => {
   // Unsaved changes warning
   const { showDialog, confirmLeave, cancelLeave, checkUnsavedChanges } = useUnsavedChanges({
     isDirty,
-  });
-
-  // Keyboard shortcuts
-  const { shortcuts } = useKeyboardShortcuts({
-    shortcuts: createProductFormShortcuts({
-      onSave: () => handleSave(),
-      onPreview: () => setShowPreview(true),
-      onCancel: () => {
-        if (showPreview) setShowPreview(false);
-        else if (showShortcuts) setShowShortcuts(false);
-        else navigate("/admin/products");
-      },
-      onShowHelp: () => setShowShortcuts(true),
-    }),
   });
 
   useEffect(() => {
@@ -290,8 +268,38 @@ const ProductCreatePage = () => {
                   mode="create"
                 />
 
-                {/* Status */}
-                <StatusSection form={form} />
+                {/* Rating */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-lg">Rating</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <FormField
+                      control={form.control}
+                      name="rating"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rating (0-5)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min="0"
+                              max="5"
+                              step="0.1"
+                              placeholder="4.5"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Save Card */}
                 <Card>
@@ -306,8 +314,6 @@ const ProductCreatePage = () => {
                     <FormActions
                       onSave={handleSave}
                       onCancel={handleCancel}
-                      onPreview={() => setShowPreview(true)}
-                      onShowShortcuts={() => setShowShortcuts(true)}
                       isSaving={isSaving}
                       isDirty={isDirty}
                       isValid={isValid && !!selectedVendor}
@@ -328,13 +334,6 @@ const ProductCreatePage = () => {
                     100
                   )}
                 />
-
-                {/* Preview Card */}
-                <ProductPreviewCard
-                  values={form.watch()}
-                  tier={effectiveTier}
-                  onClick={() => setShowPreview(true)}
-                />
               </ProductFormSidebar>
             </ProductFormLayout>
           </Form>
@@ -347,19 +346,6 @@ const ProductCreatePage = () => {
           onCancel={cancelLeave}
         />
 
-        <KeyboardShortcutsDialog
-          open={showShortcuts}
-          onOpenChange={setShowShortcuts}
-          shortcuts={shortcuts}
-        />
-
-        <ProductPreviewDialog
-          open={showPreview}
-          onOpenChange={setShowPreview}
-          values={form.getValues()}
-          tier={effectiveTier}
-          companyName={selectedVendor?.company_name || undefined}
-        />
       </TooltipProvider>
     </AdminLayout>
   );

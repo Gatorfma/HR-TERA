@@ -95,7 +95,7 @@ const Newsfeed = () => {
   }, {} as Record<string, { month: string; year: number; posts: NewsfeedPost[] }>);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       {/* Hero Section */}
@@ -193,16 +193,18 @@ const Newsfeed = () => {
                         >
                           <Link to={`/newsfeed/${post.slug}`} className="group block">
                             <div className="bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-200 hover:shadow-lg">
-                              <div className="flex flex-col-reverse md:flex-row relative">
+                              <div className={`flex relative ${post.image ? "flex-col-reverse md:flex-row" : "flex-row"}`}>
                                 {/* Content */}
-                                <div className="flex-1 p-6 md:pr-72 lg:pr-80">
-                                  {/* Mobile: Category badge */}
-                                  <span className="inline-block md:hidden bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                                    {post.category}
-                                  </span>
+                                <div className={`flex-1 p-6 ${post.image ? "md:pr-72 lg:pr-80" : ""}`}>
+                                  {/* Mobile: Category badge (only if has image, otherwise use desktop style) */}
+                                  {post.image && (
+                                    <span className="inline-block md:hidden bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                                      {post.category}
+                                    </span>
+                                  )}
 
-                                  {/* Desktop: Author · Category inline */}
-                                  <p className="hidden md:block text-sm text-muted-foreground mb-3">
+                                  {/* Desktop: Author · Category inline (always show if no image) */}
+                                  <p className={`text-sm text-muted-foreground mb-3 ${post.image ? "hidden md:block" : "block"}`}>
                                     {post.author}
                                     <span className="mx-2">·</span>
                                     <span className="text-primary font-medium">{post.category}</span>
@@ -215,7 +217,7 @@ const Newsfeed = () => {
 
                                   {/* Tags */}
                                   {post.tags && post.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mb-3 md:mb-0">
+                                    <div className={`flex flex-wrap gap-2 ${post.image ? "mb-3 md:mb-0" : "mb-0"}`}>
                                       {post.tags.map((tag) => (
                                         <span
                                           key={tag}
@@ -227,32 +229,36 @@ const Newsfeed = () => {
                                     </div>
                                   )}
 
-                                  {/* Mobile: Author & Date row */}
-                                  <div className="flex md:hidden items-center justify-between mt-4">
-                                    <div className="flex items-center gap-2">
-                                      <User className="w-4 h-4 text-muted-foreground" />
-                                      <span className="text-sm text-foreground font-medium">
-                                        {post.author}
-                                      </span>
+                                  {/* Mobile: Author & Date row (only if has image) */}
+                                  {post.image && (
+                                    <div className="flex md:hidden items-center justify-between mt-4">
+                                      <div className="flex items-center gap-2">
+                                        <User className="w-4 h-4 text-muted-foreground" />
+                                        <span className="text-sm text-foreground font-medium">
+                                          {post.author}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                                        <Calendar className="w-4 h-4" />
+                                        {formatDate(post.created_at)}
+                                      </div>
                                     </div>
-                                    <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                                      <Calendar className="w-4 h-4" />
-                                      {formatDate(post.created_at)}
-                                    </div>
-                                  </div>
+                                  )}
                                 </div>
 
-                                {/* Image */}
-                                <div className="relative md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72">
-                                  <LogoImage
-                                    variant="card"
-                                    src={post.image || ""}
-                                    alt={post.title}
-                                    hoverZoom
-                                    fallbackText={post.title}
-                                    className="aspect-[16/9] md:!aspect-auto h-full w-full rounded-t-2xl md:rounded-tl-none md:rounded-r-2xl [&_img]:rounded-t-2xl md:[&_img]:rounded-tl-none md:[&_img]:rounded-r-2xl"
-                                  />
-                                </div>
+                                {/* Image - only render if post has an image */}
+                                {post.image && (
+                                  <div className="relative md:h-auto md:absolute md:right-0 md:top-0 md:bottom-0 md:w-64 lg:w-72">
+                                    <LogoImage
+                                      variant="card"
+                                      src={post.image}
+                                      alt={post.title}
+                                      hoverZoom
+                                      fallbackText={post.title}
+                                      className="aspect-[16/9] md:!aspect-auto h-full w-full rounded-t-2xl md:rounded-tl-none md:rounded-r-2xl [&_img]:rounded-t-2xl md:[&_img]:rounded-tl-none md:[&_img]:rounded-r-2xl"
+                                    />
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </Link>

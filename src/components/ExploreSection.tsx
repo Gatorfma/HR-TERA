@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ExploreSection = () => {
+  const { t } = useLanguage();
   return (
     <section className="py-20 bg-background">
       <div className="container">
@@ -15,12 +17,10 @@ const ExploreSection = () => {
             className="bg-primary/10 rounded-2xl p-8"
           >
             <h3 className="text-2xl font-heading font-bold text-foreground mb-3">
-              Solutions
+              {t("explore.solutions")}
             </h3>
             <p className="text-muted-foreground mb-6">
-              Our Premium solutions are designed to
-              accelerate your HR transformation process while
-              offering complete flexibility.
+              {t("explore.solutionsDesc")}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -34,7 +34,7 @@ const ExploreSection = () => {
               ))}
             </div>
             <Button variant="outline" className="rounded-full border-border text-foreground hover:bg-muted">
-              Explore all
+              {t("explore.exploreAll")}
               <ArrowUpRight className="w-4 h-4 ml-1" />
             </Button>
           </motion.div>
@@ -48,12 +48,10 @@ const ExploreSection = () => {
             className="bg-muted rounded-2xl p-8"
           >
             <h3 className="text-2xl font-heading font-bold text-foreground mb-3">
-              Vendors
+              {t("explore.vendors")}
             </h3>
             <p className="text-muted-foreground mb-6">
-              Our exclusive vendors are designed to
-              accelerate your HR solutions process while
-              offering complete flexibility.
+              {t("explore.vendorsDesc")}
             </p>
             <div className="grid grid-cols-3 gap-2 mb-6">
               {[7, 8, 9, 10, 11, 12].map((i) => (
@@ -67,7 +65,7 @@ const ExploreSection = () => {
               ))}
             </div>
             <Button variant="outline" className="rounded-full border-border text-foreground hover:bg-card">
-              Explore all
+              {t("explore.exploreAll")}
               <ArrowUpRight className="w-4 h-4 ml-1" />
             </Button>
           </motion.div>

@@ -16,6 +16,7 @@ import { adminCreateVendor, adminSearchUsers } from "@/api/adminUserApi";
 import { UserSearchResult } from "@/lib/admin-types";
 import { Tier } from "@/lib/types";
 import { CountrySelect } from "@/components/ui/country-select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -49,6 +50,7 @@ interface FormData {
 
 const CompanyCreatePage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState<FormData>({
     companyName: "",
     companySize: "",
@@ -106,27 +108,29 @@ const CompanyCreatePage = () => {
     setSelectedUser(user);
     setUserSearchInput("");
     setUserSearchResults([]);
+    setFormData((prev) => ({ ...prev, isVerified: true }));
   };
 
   const handleRemoveUser = () => {
     setSelectedUser(null);
+    setFormData((prev) => ({ ...prev, isVerified: false }));
   };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.companyName.trim()) {
-      newErrors.companyName = "Şirket adı zorunludur";
+      newErrors.companyName = t("admin.companyNameRequired");
     }
 
     // Validate company size format if provided
     if (formData.companySize.trim() && !/^[0-9]+(-[0-9]+)?$/.test(formData.companySize.trim())) {
-      newErrors.companySize = 'Geçersiz format. Örnek: "50", "1-10" veya "50-100"';
+      newErrors.companySize = t("admin.companySizeError");
     }
 
     // Validate website URL if provided
     if (formData.websiteLink.trim() && !/^https?:\/\//.test(formData.websiteLink.trim())) {
-      newErrors.websiteLink = "URL http:// veya https:// ile başlamalı";
+      newErrors.websiteLink = t("admin.urlError");
     }
 
     setErrors(newErrors);
@@ -136,8 +140,8 @@ const CompanyCreatePage = () => {
   const handleSave = async () => {
     if (!validateForm()) {
       toast({
-        title: "Hata",
-        description: "Lütfen zorunlu alanları doldurunuz.",
+        title: t("admin.error"),
+        description: t("admin.fillRequired"),
         variant: "destructive",
       });
       return;
@@ -163,23 +167,23 @@ const CompanyCreatePage = () => {
 
       if (result.success) {
         toast({
-          title: "Şirket başarıyla oluşturuldu",
-          description: `"${formData.companyName}" şirketi eklendi. ID: ${result.data}`,
+          title: t("admin.companyCreated"),
+          description: t("admin.companyAdded").replace("{name}", formData.companyName).replace("{id}", String(result.data)),
         });
 
         // Navigate to edit page
         navigate("/admin/companies/edit");
       } else {
         toast({
-          title: "Hata",
-          description: result.error?.message || "Şirket oluşturulamadı",
+          title: t("admin.error"),
+          description: result.error?.message || t("admin.createFailed"),
           variant: "destructive",
         });
       }
     } catch (err) {
       toast({
-        title: "Hata",
-        description: err instanceof Error ? err.message : "Şirket oluşturulamadı",
+        title: t("admin.error"),
+        description: err instanceof Error ? err.message : t("admin.createFailed"),
         variant: "destructive",
       });
     } finally {
@@ -197,11 +201,11 @@ const CompanyCreatePage = () => {
           className="-ml-2 mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Geri Dön
+          {t("admin.goBack")}
         </Button>
 
-        <h1 className="text-3xl font-bold text-foreground">Yeni Şirket Oluştur</h1>
-        <p className="text-muted-foreground mt-2 mb-8">Yeni bir şirket (vendor) kaydı oluşturun.</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("admin.createNewCompany")}</h1>
+        <p className="text-muted-foreground mt-2 mb-8">{t("admin.createNewCompanyDesc")}</p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column */}
@@ -214,15 +218,15 @@ const CompanyCreatePage = () => {
                     <Building2 className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Şirket Bilgileri</CardTitle>
-                    <CardDescription>Temel şirket bilgileri</CardDescription>
+                    <CardTitle className="text-lg">{t("admin.companyInfo")}</CardTitle>
+                    <CardDescription>{t("admin.basicCompanyInfo")}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Şirket Adı */}
                 <div className="space-y-2">
-                  <Label htmlFor="companyName">Şirket Adı *</Label>
+                  <Label htmlFor="companyName">{t("admin.companyName")} *</Label>
                   <Input
                     id="companyName"
                     value={formData.companyName}
@@ -237,7 +241,7 @@ const CompanyCreatePage = () => {
 
                 {/* Şirket Büyüklüğü */}
                 <div className="space-y-2">
-                  <Label htmlFor="companySize">Şirket Büyüklüğü</Label>
+                  <Label htmlFor="companySize">{t("admin.companySize")}</Label>
                   <Input
                     id="companySize"
                     value={formData.companySize}
@@ -252,23 +256,23 @@ const CompanyCreatePage = () => {
 
                 {/* Merkez */}
                 <div className="space-y-2">
-                  <Label htmlFor="headquarters">Merkez</Label>
+                  <Label htmlFor="headquarters">{t("admin.headquarters")}</Label>
                   <CountrySelect
                     value={formData.headquarters}
                     onChange={(value) => setFormData({ ...formData, headquarters: value })}
-                    placeholder="Ülke seçiniz..."
+                    placeholder={t("admin.selectCountry")}
                   />
                 </div>
 
                 {/* Kuruluş Tarihi */}
                 <div className="space-y-2">
-                  <Label htmlFor="foundedAt">Kuruluş Yılı</Label>
+                  <Label htmlFor="foundedAt">{t("admin.foundedYear")}</Label>
                   <Select
                     value={formData.foundedAt}
                     onValueChange={(value) => setFormData({ ...formData, foundedAt: value })}
                   >
                     <SelectTrigger id="foundedAt" className="w-full">
-                      <SelectValue placeholder="Seçiniz" />
+                      <SelectValue placeholder={t("admin.select")} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
                       {Array.from({ length: new Date().getFullYear() - 1900 + 1 }, (_, i) => new Date().getFullYear() - i).map((year) => (
@@ -282,23 +286,23 @@ const CompanyCreatePage = () => {
 
                 {/* Şirket Mottosu */}
                 <div className="space-y-2">
-                  <Label htmlFor="companyMotto">Şirket Mottosu</Label>
+                  <Label htmlFor="companyMotto">{t("admin.companyMotto")}</Label>
                   <Input
                     id="companyMotto"
                     value={formData.companyMotto}
                     onChange={(e) => setFormData({ ...formData, companyMotto: e.target.value })}
-                    placeholder="Şirket sloganı veya mottosu"
+                    placeholder={t("admin.mottoPlaceholder")}
                   />
                 </div>
 
                 {/* Şirket Açıklaması */}
                 <div className="space-y-2">
-                  <Label htmlFor="companyDesc">Şirket Açıklaması</Label>
+                  <Label htmlFor="companyDesc">{t("admin.companyDescription")}</Label>
                   <Textarea
                     id="companyDesc"
                     value={formData.companyDesc}
                     onChange={(e) => setFormData({ ...formData, companyDesc: e.target.value })}
-                    placeholder="Şirket hakkında detaylı açıklama"
+                    placeholder={t("admin.descriptionPlaceholder")}
                     rows={4}
                   />
                 </div>
@@ -313,8 +317,8 @@ const CompanyCreatePage = () => {
                     <UserPlus className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Kullanıcı Atama</CardTitle>
-                    <CardDescription>Şirkete bir kullanıcı hesabı bağlayın (opsiyonel)</CardDescription>
+                    <CardTitle className="text-lg">{t("admin.userAssignment")}</CardTitle>
+                    <CardDescription>{t("admin.userAssignmentDesc")}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -349,11 +353,11 @@ const CompanyCreatePage = () => {
                   <>
                     {/* User search */}
                     <div className="space-y-2">
-                      <Label>Kullanıcı Ara</Label>
+                      <Label>{t("admin.searchUser")}</Label>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                         <Input
-                          placeholder="E-posta ile ara..."
+                          placeholder={t("admin.searchByEmail")}
                           value={userSearchInput}
                           onChange={(e) => setUserSearchInput(e.target.value)}
                           onFocus={() => setUserSearchOpen(true)}
@@ -398,21 +402,21 @@ const CompanyCreatePage = () => {
                                           )}
                                           {user.assigned_vendor_name && (
                                             <span className="text-xs text-amber-600 truncate ml-1">
-                                              • Mevcut: {user.assigned_vendor_name}
+                                              • {t("admin.currentVendor")} {user.assigned_vendor_name}
                                             </span>
                                           )}
                                         </div>
                                       </div>
                                     </div>
                                     {!user.assigned_vendor_id && (
-                                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">Seç</span>
+                                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{t("admin.selectUser")}</span>
                                     )}
                                   </button>
                                 ))}
                               </div>
                             ) : (
                               <div className="p-4 text-center text-muted-foreground text-sm">
-                                Kullanıcı bulunamadı
+                                {t("admin.noUsersFound")}
                               </div>
                             )}
                           </div>
@@ -435,8 +439,8 @@ const CompanyCreatePage = () => {
                     <LinkIcon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Bağlantılar & Medya</CardTitle>
-                    <CardDescription>Website, sosyal medya ve logo</CardDescription>
+                    <CardTitle className="text-lg">{t("admin.linksAndMedia")}</CardTitle>
+                    <CardDescription>{t("admin.linksAndMediaDesc")}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -498,8 +502,8 @@ const CompanyCreatePage = () => {
                     <Badge className="h-5 w-5 text-primary p-0 flex items-center justify-center">T</Badge>
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Tier & Doğrulama</CardTitle>
-                    <CardDescription>Abonelik seviyesi ve doğrulama durumu</CardDescription>
+                    <CardTitle className="text-lg">{t("admin.tierAndVerification")}</CardTitle>
+                    <CardDescription>{t("admin.tierAndVerificationDesc")}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -524,10 +528,11 @@ const CompanyCreatePage = () => {
 
                 {/* Verification */}
                 <div className="space-y-2">
-                  <Label>Doğrulama Durumu</Label>
+                  <Label>{t("admin.verificationStatus")}</Label>
                   <Select
                     value={formData.isVerified ? "verified" : "unverified"}
                     onValueChange={(value) => setFormData({ ...formData, isVerified: value === "verified" })}
+                    disabled
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -536,13 +541,13 @@ const CompanyCreatePage = () => {
                       <SelectItem value="verified">
                         <span className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                          Doğrulanmış
+                          {t("admin.verified")}
                         </span>
                       </SelectItem>
                       <SelectItem value="unverified">
                         <span className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                          Doğrulanmamış
+                          {t("admin.unverified")}
                         </span>
                       </SelectItem>
                     </SelectContent>
@@ -561,8 +566,8 @@ const CompanyCreatePage = () => {
                 <Save className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-lg">Kaydet</CardTitle>
-                <CardDescription>Şirketi veritabanına ekle</CardDescription>
+                <CardTitle className="text-lg">{t("admin.save")}</CardTitle>
+                <CardDescription>{t("admin.addToDatabase")}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -570,17 +575,17 @@ const CompanyCreatePage = () => {
             <div className="space-y-3 text-sm text-muted-foreground mb-6">
               <p className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                Şirket kaydedildikten sonra "Şirket Düzenleme" sayfasından düzenleyebilirsiniz.
+                {t("admin.afterSaveNote")}
               </p>
-              <p>• vendor_id otomatik olarak oluşturulacaktır.</p>
+              <p>• {t("admin.autoVendorId")}</p>
               {selectedUser && (
-                <p>• Kullanıcı "{selectedUser.email}" bu şirkete bağlanacak.</p>
+                <p>• {t("admin.userWillBeLinked").replace("{email}", selectedUser.email)}</p>
               )}
             </div>
 
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => navigate("/admin?tab=users")}>
-                İptal
+                {t("admin.cancel")}
               </Button>
               <Button
                 onClick={handleSave}
@@ -592,7 +597,7 @@ const CompanyCreatePage = () => {
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                Kaydet
+                {t("admin.save")}
               </Button>
             </div>
           </CardContent>

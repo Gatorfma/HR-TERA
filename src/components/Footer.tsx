@@ -49,7 +49,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-secondary py-16">
+    <footer className="mt-auto bg-secondary py-16">
       <div className="container">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Logo & Newsletter */}

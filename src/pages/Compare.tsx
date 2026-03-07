@@ -125,7 +125,7 @@ const Compare = () => {
   const slotCount = Math.max(2, Math.min(products.length + 1, MAX_PRODUCTS));
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
       <Navbar />
 
       <main className="pt-32 pb-20">

@@ -120,7 +120,7 @@ const NewsfeedPost = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pt-64">
+      <div className="min-h-screen bg-background pt-64 flex flex-col">
         <Navbar />
         <div className="container py-32 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -132,7 +132,7 @@ const NewsfeedPost = () => {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-background pt-32">
+      <div className="min-h-screen bg-background pt-32 flex flex-col">
         <Navbar />
         <div className="container py-32 text-center">
           <h1 className="text-3xl font-heading font-bold text-foreground mb-4">
@@ -153,7 +153,7 @@ const NewsfeedPost = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       {/* Back Button */}

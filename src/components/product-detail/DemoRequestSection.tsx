@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DemoRequestSectionProps {
   productName: string;
@@ -12,6 +13,7 @@ interface DemoRequestSectionProps {
 
 const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -29,8 +31,8 @@ const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast({
-      title: "Demo request submitted!",
-      description: "We'll be in touch within 24 hours to schedule your demo.",
+      title: t("demo.submitted"),
+      description: t("demo.submittedDesc"),
     });
 
     setFormData({ name: "", email: "", company: "", role: "", message: "" });
@@ -50,10 +52,10 @@ const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
           </div>
           <div>
             <h2 className="text-2xl font-heading font-bold text-foreground">
-              Request a Demo
+              {t("demo.requestTitle")}
             </h2>
             <p className="text-muted-foreground">
-              See {productName} in action
+              {t("demo.seeInAction").replace("{productName}", productName)}
             </p>
           </div>
         </div>
@@ -61,7 +63,7 @@ const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <Input
-              placeholder="Your name"
+              placeholder={t("demo.yourName")}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
@@ -69,7 +71,7 @@ const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
             />
             <Input
               type="email"
-              placeholder="Work email"
+              placeholder={t("demo.workEmail")}
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
@@ -78,21 +80,21 @@ const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <Input
-              placeholder="Company"
+              placeholder={t("demo.company")}
               value={formData.company}
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
               required
               className="bg-background"
             />
             <Input
-              placeholder="Your role"
+              placeholder={t("demo.yourRole")}
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               className="bg-background"
             />
           </div>
           <Textarea
-            placeholder="Tell us about your needs (optional)"
+            placeholder={t("demo.needsOptional")}
             value={formData.message}
             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
             rows={3}
@@ -105,11 +107,11 @@ const DemoRequestSection = ({ productName }: DemoRequestSectionProps) => {
             size="lg"
           >
             {isSubmitting ? (
-              "Submitting..."
+              t("demo.submitting")
             ) : (
               <>
                 <Send className="w-4 h-4 mr-2" />
-                Request Demo
+                {t("demo.requestDemo")}
               </>
             )}
           </Button>

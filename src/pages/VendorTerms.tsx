@@ -6,7 +6,7 @@ const VendorTerms = () => {
   const { language } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       <main className="pt-32 pb-16">
@@ -35,8 +35,8 @@ const VendorTerms = () => {
               </h2>
               <p>
                 {language === "tr"
-                  ? "Platformda Free, Pro ve Premium olmak üzere farklı görünürlük seviyeleri sunulur. Ücretli paketler (Pro/Premium) ek bir hizmet sözleşmesine tabidir."
-                  : "The platform offers different visibility levels: Free, Pro, and Premium. Paid packages (Pro/Premium) are subject to an additional service agreement."}
+                  ? "Platformda Free, Plus ve Premium olmak üzere farklı görünürlük seviyeleri sunulur. Ücretli paketler (Plus/Premium) ek bir hizmet sözleşmesine tabidir."
+                  : "The platform offers different visibility levels: Free, Plus, and Premium. Paid packages (Plus/Premium) are subject to an additional service agreement."}
               </p>
             </div>
 

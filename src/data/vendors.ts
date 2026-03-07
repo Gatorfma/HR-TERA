@@ -51,7 +51,7 @@ export interface Vendor {
   categories?: string[];
   vendorType: string;
   addedDate: string;
-  isPro: boolean;
+  isPlus: boolean;
   vendorTier: Tier;
   rating: number;
   status: "Top Rated" | "New" | "Verified" | "Featured";
@@ -99,7 +99,7 @@ export const vendors: Vendor[] = [
     categories: ["Recruitment", "AI Solutions", "HR Tech"],
     vendorType: "Design Agencies",
     addedDate: "Oct 24, 2024",
-    isPro: true,
+    isPlus: true,
     vendorTier: "premium",
     rating: 4.9,
     status: "Top Rated",
@@ -190,7 +190,7 @@ export const vendors: Vendor[] = [
     categories: ["Onboarding", "Team Building", "Training"],
     vendorType: "Development Studios",
     addedDate: "Oct 24, 2024",
-    isPro: true,
+    isPlus: true,
     vendorTier: "premium",
     rating: 4.8,
     status: "Featured",
@@ -267,7 +267,7 @@ export const vendors: Vendor[] = [
     categories: ["Payroll", "Benefits", "Compliance"],
     vendorType: "Freelancers",
     addedDate: "Oct 24, 2024",
-    isPro: true,
+    isPlus: true,
     vendorTier: "premium",
     rating: 4.7,
     status: "Verified",
@@ -335,7 +335,7 @@ export const vendors: Vendor[] = [
     categories: ["Compliance", "Analytics", "Policy Management"],
     vendorType: "Marketing Partners",
     addedDate: "Oct 24, 2024",
-    isPro: true,
+    isPlus: true,
     vendorTier: "plus",
     rating: 4.6,
     status: "Top Rated",
@@ -389,7 +389,7 @@ export const vendors: Vendor[] = [
     category: "Integration",
     vendorType: "Integration Partners",
     addedDate: "Nov 15, 2024",
-    isPro: false,
+    isPlus: false,
     vendorTier: "freemium",
     rating: 4.5,
     status: "New",
@@ -423,7 +423,7 @@ export const vendors: Vendor[] = [
     categories: ["Support", "Maintenance", "Consulting"],
     vendorType: "Support & Maintenance",
     addedDate: "Dec 1, 2024",
-    isPro: true,
+    isPlus: true,
     vendorTier: "premium",
     rating: 4.8,
     status: "Verified",

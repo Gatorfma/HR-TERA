@@ -71,7 +71,7 @@ const FAQ = () => {
               {
                 question: "Birden fazla çözüm ekleyebilir miyim?",
                 answer:
-                  "Evet. Üyelik paketine bağlı olarak birden fazla çözüm ve kategori listeleyebilirsiniz. Pro ve Premium üyelikte daha geniş görünürlük ve öne çıkarılma avantajı sunulur.",
+                  "Evet. Üyelik paketine bağlı olarak birden fazla çözüm ve kategori listeleyebilirsiniz. Plus ve Premium üyelikte daha geniş görünürlük ve öne çıkarılma avantajı sunulur.",
               },
               {
                 question: "Ücretsiz (Free) üyelik neleri kapsar?",
@@ -80,9 +80,9 @@ const FAQ = () => {
               },
               {
                 question:
-                  "Pro ve Premium üyelik arasındaki fark nedir?",
+                  "Plus ve Premium üyelik arasındaki fark nedir?",
                 answer:
-                  "Pro Üyelik: 3 kategoriye kadar listeleme, detaylı ürün sayfası, görsel ve video ekleme, öncelikli destek sunar. Premium Üyelik: 3+ kategori, öne çıkarılma (featured), lead yönlendirme (toplantı/demo isteği), görüntülenme ve tıklama raporları, sponsorlu görünürlük gibi avantajlar sunar. Premium üyelik, aktif satış yönlendirmesi üretmek isteyen çözüm sağlayıcılar için tasarlanmıştır.",
+                  "Plus Üyelik: 3 kategoriye kadar listeleme, detaylı ürün sayfası, görsel ve video ekleme, öncelikli destek sunar. Premium Üyelik: 3+ kategori, öne çıkarılma (featured), lead yönlendirme (toplantı/demo isteği), görüntülenme ve tıklama raporları, sponsorlu görünürlük gibi avantajlar sunar. Premium üyelik, aktif satış yönlendirmesi üretmek isteyen çözüm sağlayıcılar için tasarlanmıştır.",
               },
               {
                 question: "Lead yönlendirme nasıl çalışır?",
@@ -92,7 +92,7 @@ const FAQ = () => {
               {
                 question: "Hangi üyelik bana uygun?",
                 answer:
-                  "Marka bilinirliği için Free, pazarda görünürlük ve içerik gücü için Pro, aktif satış yönlendirmesi için Premium üyelik uygundur.",
+                  "Marka bilinirliği için Free, pazarda görünürlük ve içerik gücü için Plus, aktif satış yönlendirmesi için Premium üyelik uygundur.",
               },
             ],
           },
@@ -113,7 +113,7 @@ const FAQ = () => {
               {
                 question: "Üyeliğimi yükseltebilir miyim?",
                 answer:
-                  "Evet. Dilediğiniz zaman Free → Pro → Premium geçişi yapabilirsiniz.",
+                  "Evet. Dilediğiniz zaman Free → Plus → Premium geçişi yapabilirsiniz.",
               },
             ],
           },
@@ -166,7 +166,7 @@ const FAQ = () => {
               {
                 question: "Can I add multiple solutions?",
                 answer:
-                  "Yes. Depending on your membership plan, you can list multiple solutions and categories. Pro and Premium memberships offer wider visibility and featuring advantages.",
+                  "Yes. Depending on your membership plan, you can list multiple solutions and categories. Plus and Premium memberships offer wider visibility and featuring advantages.",
               },
               {
                 question: "What does the Free membership include?",
@@ -175,9 +175,9 @@ const FAQ = () => {
               },
               {
                 question:
-                  "What is the difference between Pro and Premium membership?",
+                  "What is the difference between Plus and Premium membership?",
                 answer:
-                  "Pro Membership: listing in up to 3 categories, detailed product page, image and video uploads, priority support. Premium Membership: 3+ categories, featured placement, lead forwarding (meeting/demo requests), view and click reports, and sponsored visibility. Premium membership is designed for solution providers who want to generate active sales referrals.",
+                  "Plus Membership: listing in up to 3 categories, detailed product page, image and video uploads, priority support. Premium Membership: 3+ categories, featured placement, lead forwarding (meeting/demo requests), view and click reports, and sponsored visibility. Premium membership is designed for solution providers who want to generate active sales referrals.",
               },
               {
                 question: "How does lead forwarding work?",
@@ -187,7 +187,7 @@ const FAQ = () => {
               {
                 question: "Which membership is right for me?",
                 answer:
-                  "Free for brand awareness, Pro for market visibility and content power, Premium for active sales referrals.",
+                  "Free for brand awareness, Plus for market visibility and content power, Premium for active sales referrals.",
               },
             ],
           },
@@ -208,14 +208,14 @@ const FAQ = () => {
               {
                 question: "Can I upgrade my membership?",
                 answer:
-                  "Yes. You can upgrade from Free → Pro → Premium at any time.",
+                  "Yes. You can upgrade from Free → Plus → Premium at any time.",
               },
             ],
           },
         ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
       <main className="pt-32 pb-16">

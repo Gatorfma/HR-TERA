@@ -49,14 +49,14 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     e.preventDefault();
     
     if (!email || !password) {
-      toast.error("Please enter your email and password");
+      toast.error(t("auth.enterEmailPassword"));
       return;
     }
 
     setIsLoading(true);
     try {
       const loggedInUser = await login(email, password);
-      toast.success("Welcome back!");
+      toast.success(t("auth.welcomeBack"));
       onOpenChange(false);
       
       // Redirect admins to admin panel, others to profile
@@ -66,7 +66,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
         navigate("/profile");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Login failed. Please try again.";
+      const message = error instanceof Error ? error.message : t("auth.loginFailed");
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -78,7 +78,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     try {
       await signInWithGoogle();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Google sign-in failed. Please try again.";
+      const message = error instanceof Error ? error.message : t("auth.googleSignInFailed");
       toast.error(message);
       setIsGoogleLoading(false);
     }
@@ -100,23 +100,23 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     }
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error(t("auth.passwordMismatch"));
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("auth.passwordMinLength"));
       return;
     }
 
     setIsLoading(true);
     try {
       await signup(email, password, fullName, company || undefined, role || undefined, normalizedPhone || undefined);
-      toast.success("Account created successfully! Please check your email to verify.");
+      toast.success(t("auth.accountCreated"));
       onOpenChange(false);
       navigate("/profile");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Signup failed. Please try again.";
+      const message = error instanceof Error ? error.message : t("auth.signupFailed");
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -131,7 +131,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           {/* Visually hidden title for screen readers */}
           <VisuallyHidden>
             <DialogTitle>
-              {activeTab === "login" ? "Login to HRTera" : "Sign up for HRTera"}
+              {activeTab === "login" ? t("auth.loginTitle") : t("auth.signupTitle")}
             </DialogTitle>
           </VisuallyHidden>
           

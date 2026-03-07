@@ -323,18 +323,6 @@ const MyProductsTab = () => {
                         <MessageSquare className="w-3.5 h-3.5" />
                         {product.reviewCount} yorum
                       </span>
-                      {isPremium && (
-                        <>
-                          <span className="flex items-center gap-1">
-                            <FileText className="w-3.5 h-3.5" />
-                            {product.useCases?.length || 0} case study
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <LinkIcon className="w-3.5 h-3.5" />
-                            {product.featuredContent?.length || 0} öne çıkan
-                          </span>
-                        </>
-                      )}
                     </div>
                   )}
                 </div>
@@ -412,29 +400,25 @@ const MyProductsTab = () => {
       )}
 
       {/* No results for filter */}
-      {!loading && !error && products.length > 0 && filteredProducts.length === 0 && (
+      {!loading && !error && products.length > 0 && filteredProducts.length === 0 && (filter !== "pending" || ownershipRequests.length === 0) && (
         <div className="text-center py-8">
           <p className="text-muted-foreground">Bu filtreye uygun çözüm bulunamadı</p>
         </div>
       )}
 
-      {/* Ownership requests section */}
-      <div className="bg-muted/30 rounded-xl border border-border p-4">
-        <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-          <FileCheck className="w-5 h-5 text-muted-foreground" />
-          Talep Başvuruları
-        </h3>
-        {ownershipRequests.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Bekleyen başvuru yok. Çözümler sayfasından sahipsiz çözümleri talep edebilirsiniz.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {ownershipRequests.map((req) => (
-              <div
-                key={req.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3"
-              >
+      {/* Ownership requests shown inside İnceleniyor tab */}
+      {!loading && !error && filter === "pending" && ownershipRequests.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+            <FileCheck className="w-4 h-4" />
+            Talep Başvuruları
+          </h4>
+          {ownershipRequests.map((req) => (
+            <div
+              key={req.id}
+              className="bg-card rounded-xl border border-border p-4 hover:border-primary/30 transition-colors"
+            >
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
                     {req.claimed_vendor_name || req.claimed_vendor_id}
@@ -467,10 +451,10 @@ const MyProductsTab = () => {
                   )}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
