@@ -161,6 +161,18 @@ export const submitOwnershipRequest = async ({ claimedVendorId, message = null }
     return data ?? null;
 };
 
+export const getMyOwnershipRequests = async () => {
+    const { data, error } = await supabase.rpc("get_my_ownership_requests");
+    if (error) throw error;
+    return data ?? [];
+};
+
+export const getMyProductAnalytics = async () => {
+    const { data, error } = await supabase.rpc("get_my_product_analytics");
+    if (error) throw error;
+    return data ?? [];
+};
+
 export const updateMyVendorProfile = async ({
     companyName = null,
     websiteLink = null,

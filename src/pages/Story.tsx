@@ -10,92 +10,127 @@ const Story = () => {
         <div className="container max-w-4xl">
           <header className="mb-10">
             <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
-              Hikayemiz...
+              Hikayemiz…
             </h1>
+            <p className="text-lg text-muted-foreground mt-2">
+              25 yılda bir fikrin olgunlaşması ve HRTera.co’nun doğuşu.
+            </p>
           </header>
 
-					<section className="space-y-6 text-muted-foreground">
-						<p>
-							Her şey 2000 yılında başladı…
-						</p>
+          <section className="space-y-8 text-muted-foreground">
+            <div>
+              <h2 className="text-xl font-heading font-semibold text-foreground mb-3">
+                2000: Bir topluluğun ilk tohumu
+              </h2>
+              <p className="mb-4">
+                Her şey 2000 yılında başladı.
+              </p>
+              <p className="mb-4">
+                O dönemde e-postalarla üye olabildiğiniz e-group’lar vardı. Ben de YahooGroups’ta{" "}
+                <strong>“RecruitmenTurkey”</strong> adlı bir grup kurdum. Bana yakın arkadaşlarım
+                “Arti” dedikleri için R ve T harflerinden uydurmuştum bu adı. Sadece insan
+                kaynaklarının paylaşıldığı bu grup, en yoğun döneminde yaklaşık{" "}
+                <strong>23.000 üyesiyle</strong> aylık 1.500 e-postalık bir iletişim platformuna
+                dönüştü. Biraz eski İKcıların çoğu bu adı hatırlar.
+              </p>
+              <p className="mb-4">
+                Neredeyse eş zamanlı olarak <strong>recruitmenturkey.com</strong>’u da kurdum.
+                Türkiye’deki ilk İK blog içeriklerini burada oluşturdum. İş arayanlara yardımcı
+                olmak için o dönemde faaliyette olan danışmanlık firmalarının ve şirketlerin
+                kurumsal İK iletişim bilgilerini paylaştım. Evet, faks numarası dahil.
+              </p>
+              <p className="mb-4 italic">
+                Siteyi hayata geçiren <strong>Devrim Aydoğdu</strong>’ya burada bir kez daha
+                teşekkür ederim.
+              </p>
+              <p>
+                Ne yazık ki 2020 sonunda YahooGroups tamamen kapandı ve RecruitmenTurkey’in
+                bu mecradaki hikayesi sona erdi.
+              </p>
+            </div>
 
-						<p>
-							O dönem e-postalarla üye olabildiğiniz groups’lar vardı. Ben de YahooGroups’ta{" "}
-							<strong>“RecruitmenTurkey”</strong>{" "}
-							adlı bir grup kurdum. Bana yakın arkadaşlarım “Arti” dedikleri için, R ve T
-							harflerinden uydurdum RecruitmenTurkey adını. Sadece insan kaynakları
-							içeriklerinin paylaşıldığı bu grup, en yoğun döneminde,{" "}
-							<strong>yaklaşık 23.000 üyesiyle</strong>, aylık 1500 e-postalık bir iletişim
-							platformu halinde geldi. Biraz eski İKcıların çoğu hatırlar bu adı.
-						</p>
+            <div>
+              <h2 className="text-xl font-heading font-semibold text-foreground mb-3">
+                2004–2006: Pazaryeri fikrinin ilk denemesi
+              </h2>
+              <p className="mb-4">
+                Site ve e-topluluk büyüdükçe, İKcılara yönelik bir pazaryeri fikri zihnimde
+                şekillenmeye başladı. Amacım buydu: İK’da satın alınan tüm hizmet ve ürünleri
+                tek bir çatı altında toplamak, karşılaştırmak, kolaylaştırmak.
+              </p>
+              <p>
+                2004–2006 yıllarında ilk kez denedim bunu. O dönemin internet kullanım oranları
+                düşünüldüğünde fena sayılmazdı, ama ilerletemedim. Zaman henüz gelmemişti.
+              </p>
+            </div>
 
-						<p>
-							Neredeyse eş zamanlı{" "}
-							<strong>recruitmenturkey.com</strong>’u kurdum. İlk İK blog içeriğini burada
-							oluşturdum. İş arayanlara yardımcı olma amacıyla, o dönem için faaliyette
-							olan danışmanlık firmaları, şirketlerin kurumsal İK e-posta ve faks
-							bilgilerini paylaştım. Evet, faks numarası bilgilerini :)
-						</p>
+            <div>
+              <h2 className="text-xl font-heading font-semibold text-foreground mb-3">
+                Sonraki yıllar: Teknoloji, insan ve denemeler
+              </h2>
+              <p className="mb-4">
+                Takip eden yıllarda farklı girişimler içinde yer aldım, farklı teknolojilere
+                dokundum. Chatbotları İK’da ilk büyük firmalarla ben görüştüm. İş görüşmelerinde
+                adayın yüz ifadelerini analiz eden sistemleri, İK analitiği çözümlerini yakından
+                tanıdım; kimi zaman ürün geliştirme süreçlerinde bizzat yer aldım.
+              </p>
+              <p className="mb-4">
+                Çalışan Deneyimi ve Çalışan Bağlılığı odağında meslektaşlarımla yaptığım her
+                görüşmede teknoloji ihtiyacı giderek daha fazla öne çıkıyordu. Bu alanda
+                güvendiğim iş ortaklarıyla, İK’nın dijital dönüşümüne giden adımların atılmasına
+                katkı sağladım.
+              </p>
+              <p className="italic">
+                1991’de hazırlık sınıfında başlayan arkadaşlığımız bugün de sürüyor. Tüm dijital
+                projelerimde fikirsel desteğini hiç esirgemeyen İTÜ Endüstri’den sınıf arkadaşım{" "}
+                <strong>Doğan</strong>’a tekrar teşekkür ederim.
+              </p>
+            </div>
 
-						<p>
-							<em>
-								Siteyi yapan{" "}
-								<strong><em>Devrim Aydoğdu</em></strong>’ya buradan tekrar teşekkür ederim.
-							</em>
-						</p>
+            <div>
+              <h2 className="text-xl font-heading font-semibold text-foreground mb-3">
+                2026: Zaman geldi.
+              </h2>
+              <p className="mb-4">
+                25 yıl boyunca İK’nın içinde oldum. Yazılım seçerken çaresiz kalan
+                meslektaşlarımı gördüm. Yüzlerce çözüm arasında kaybolup kalan satın alma
+                süreçlerine tanıklık ettim. Doğru araçla karşılaşamadığı için dijital dönüşümde
+                geride kalan ekipleri izledim.
+              </p>
+              <p className="mb-4">
+                Bu fikri iki kez daha önce denedim. Şimdi altyapı hazır, ekosistem olgunlaştı,
+                İK profesyonelleri gerçek bir karar merkezi istiyor.
+              </p>
+            </div>
 
-						<p>
-							Ne yazık ki 2020 sonunda tamamen kapatıldı YahooGroups ve RecruitmenTurkey’in
-							bu mecradaki hikayesi bitti.
-						</p>
+            <div>
+              <p className="text-lg font-semibold text-foreground mb-4">
+                Karşınızda HRTera.co —
+              </p>
+              <p className="mb-4">
+                Türkiye’deki ve global İK teknoloji çözümlerini keşfedebileceğiniz,
+                karşılaştırabileceğiniz ve en doğru kararı verebileceğiniz platform.
+              </p>
+            </div>
 
-						<p>
-							Site ve e-topluluk büyüdükçe, İKcılara yönelik bir pazaryeri fikri geldi
-							aklıma. Amacım, İK’da satın alınan tüm hizmet ve çözümleri tanıtmaktı. 2 kez
-							bunu denedim. 2004-2006 yıllarında, o dönemki internet kullanım oranlarına
-							göre fena da değildi ama ilerlemedi.
-						</p>
-
-						<p>
-							Daha sonraki yıllarda farklı girişimlerim oldu, farklı girişimlerde yer
-							aldım. Chatbotu İK’da ilk ben görüştüm büyük firmalarla. İş görüşmelerinde
-							adayın yüz ifadelerini analiz eden, İK Analitiğinde çözüm geliştiren çözümlere
-							bulaştım.
-						</p>
-
-						<p>
-							<em>
-								1991 yılında, hazırlık sınıfında tanıştığım, fikirsel desteğini hiç
-								esirgemeyen İTÜ Endüstri’den sınıf arkadaşım{" "}
-								<strong><em>Doğan</em></strong>’a buradan tekrar teşekkür ederim.
-							</em>
-						</p>
-
-						<p>
-							Çalışan Deneyimi ve Çalışan Bağlılığı odağında İKcı meslektaşlarımla da
-							görüşmelerde, özellikle teknoloji tarafında gereksinimleri, son 10 yılda
-							daha fazla konuşmaya başladık. Bu alanda da bizzat tanıdığım, güvendiğim iş
-							ortaklarıyla, İK’nın dijitalleşmesine giden adımların atılmasına yardımcı
-							oldum.
-						</p>
-
-						<p>
-							Ve artık İnsan Kaynakları alanındaki tüm teknolojik çözüm sunanları sizlere
-							tanıtıyorum.
-						</p>
-
-						<p>
-							<strong>Karşınızda HRTera.co …</strong>
-						</p>
-
-						<p>
-							<strong>
-								İKcı meslektaşlarımı, satınalmacıları, tüm üst yönetimi ve sektöre
-								teknolojik çözüm sunan tüm iş ortaklarımı, birlikte büyütmeye davet
-								ediyorum.
-							</strong>
-						</p>
-					</section>
+            <div>
+              <h2 className="text-xl font-heading font-semibold text-foreground mb-3">
+                Birlikte büyüyelim.
+              </h2>
+              <p className="mb-6">
+                <strong>
+                  İKcı meslektaşlarımı, satın alma profesyonellerini, üst yönetimi ve sektöre
+                  teknolojik çözüm sunan tüm iş ortaklarımı — birlikte büyümeye, birlikte
+                  büyütmeye davet ediyorum.
+                </strong>
+              </p>
+              <div className="pt-4 border-t border-border">
+                <p className="text-sm">13 Mart 2026</p>
+                <p className="font-semibold text-foreground">Artemiz Güler</p>
+                <p className="text-sm">Kurucu, HRTera.co</p>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
 
