@@ -118,7 +118,8 @@ as $$
       else 3
     end,
     p.rating desc nulls last,
-    p.created_at desc
+    p.created_at desc,
+    p.product_id
   limit greatest(n, 0)
   offset greatest((page - 1) * n, 0);
 $$;

@@ -789,7 +789,7 @@ const tr: Record<string, string> = {
     "Çözüm listeleme, abonelik veya pazaryeri hakkında bir sorunuz mu var? Bize bir mesaj gönderin, doğru ekibe yönlendirelim.",
   "contact.fullName": "Ad Soyad",
   "contact.fullNamePlaceholder": "Adınız",
-  "contact.workEmail": "İş e-postası",
+  "contact.workEmail": "E-posta",
   "contact.workEmailPlaceholder": "siz@sirket.com",
   "contact.company": "Şirket",
   "contact.companyPlaceholder": "Şirket adı",

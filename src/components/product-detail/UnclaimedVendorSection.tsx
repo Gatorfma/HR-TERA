@@ -48,11 +48,6 @@ const UnclaimedVendorSection = ({ claimedVendorId, onSuccess }: UnclaimedVendorS
   }, [user?.vendorId]);
 
   const openAuthModal = () => {
-    toast({
-      title: t("common.error"),
-      description: t("ownership.loginRequired"),
-      variant: "destructive",
-    });
     window.dispatchEvent(new CustomEvent("open-auth-modal"));
   };
 
