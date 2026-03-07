@@ -100,8 +100,27 @@ const FALLBACK_PLANS: PricingPlan[] = [
 
 const PricingSection = () => {
   const [isYearly, setIsYearly] = useState(false);
-  const [plans, setPlans] = useState<PricingPlan[]>(FALLBACK_PLANS);
   const { t, language } = useLanguage();
+
+  const localizedFallbackPlans: PricingPlan[] = [
+    {
+      ...FALLBACK_PLANS[0],
+      name: t("pricing.basicName"),
+      description: t("pricing.basicDesc"),
+    },
+    {
+      ...FALLBACK_PLANS[1],
+      name: t("pricing.standardName"),
+      description: t("pricing.standardDesc"),
+    },
+    {
+      ...FALLBACK_PLANS[2],
+      name: t("pricing.enterpriseName"),
+      description: t("pricing.enterpriseDesc"),
+    },
+  ];
+
+  const [plans, setPlans] = useState<PricingPlan[]>(localizedFallbackPlans);
 
   const toNumber = (value: number | string | null | undefined) => {
     if (value === null || value === undefined) return 0;
@@ -153,6 +172,7 @@ const PricingSection = () => {
         if (error) {
           console.error("[PricingSection] Failed to load tier config:", error);
         }
+        setPlans(localizedFallbackPlans);
         return;
       }
 

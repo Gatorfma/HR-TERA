@@ -145,6 +145,8 @@ const UserSettingsTab = () => {
       });
       setUserSearchInput("");
       setUserSearchResults([]);
+      // Auto-verify when a user is connected
+      await handleUpdateVerification(true);
     } else {
       toast({
         title: "Hata",
@@ -166,6 +168,8 @@ const UserSettingsTab = () => {
         title: "Kullanıcı kaldırıldı",
         description: "Kullanıcı şirket'ten başarıyla kaldırıldı.",
       });
+      // Auto-unverify when user is disconnected
+      await handleUpdateVerification(false);
     } else {
       toast({
         title: "Hata",
@@ -463,7 +467,7 @@ const UserSettingsTab = () => {
                       <Select
                         value={selectedVendor.is_verified ? "verified" : "unverified"}
                         onValueChange={(value) => handleUpdateVerification(value === "verified")}
-                        disabled={isUpdatingVerification}
+                        disabled
                       >
                         <SelectTrigger className="w-[180px] h-10">
                           <SelectValue />
